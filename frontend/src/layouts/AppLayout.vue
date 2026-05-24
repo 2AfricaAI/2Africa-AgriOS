@@ -27,9 +27,9 @@
             <span>主数据</span>
           </template>
           <el-menu-item index="/master/crops">作物</el-menu-item>
-          <el-menu-item index="/master/varieties" disabled>品种 (待开发)</el-menu-item>
-          <el-menu-item index="/master/packaging-specs" disabled>包装规格 (待开发)</el-menu-item>
-          <el-menu-item index="/master/warehouses" disabled>仓库库位 (待开发)</el-menu-item>
+          <el-menu-item index="/master/varieties">品种</el-menu-item>
+          <el-menu-item index="/master/packaging-specs">包装规格</el-menu-item>
+          <el-menu-item index="/master/warehouses">仓库库位</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
