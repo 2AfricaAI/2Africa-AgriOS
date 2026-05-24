@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.albertsfarm.production.mapper.PlotMapper">
+
+  <resultMap id="PlotVOMap" type="com.albertsfarm.production.mapper.PlotMapper$PlotVO">
+    <id     property="id"          column="id"/>
+    <result property="code"        column="code"/>
+    <result property="name"        column="name"/>
+    <result property="areaMu"      column="area_mu"/>
+    <result property="ownerId"     column="owner_id"/>
+    <result property="ownerName"   column="owner_name"/>
+    <result property="status"      column="status"/>
+    <result property="currentCropName" column="current_crop_name"/>
+    <result property="updatedAt"   column="updated_at"/>
+  </resultMap>
+
+  <select id="pageWithOwner" resultMap="PlotVOMap">
+    SELECT
+      p.id, p.code, p.name, p.area_mu, p.owner_id,
+      s.name AS owner_name,
+      p.status, p.updated_at,
+      (SELECT c.name
+         FROM planting_plan pp
+         JOIN crop c ON pp.crop_id = c.id
+        WHERE pp.plot_id = p.id
+          AND pp.status IN ('in_progress','harvested')
+          AND pp.deleted_at IS NULL
+        ORDER BY pp.plan_start_date DESC
+        LIMIT 1) AS current_crop_name
+    FROM plot p
+    LEFT JOIN staff s ON p.owner_id = s.id
+    WHERE p.deleted_at IS NULL
+    <if test="q.code != null and q.code != ''">
+      AND p.code LIKE CONCAT('%', #{q.code}, '%')
+    </if>
+    <if test="q.name != null and q.name != ''">
+      AND p.name LIKE CONCAT('%', #{q.name}, '%')
+    </if>
+    <if test="q.ownerId != null">
+      AND p.owner_id = #{q.ownerId}
+    </if>
+    <if test="q.status != null and q.status != ''">
+      AND p.status = #{q.status}
+    </if>
+    ORDER BY p.updated_at DESC, p.id DESC
+  </select>
+
+  <select id="statsLast30Days" resultType="com.albertsfarm.production.mapper.PlotMapper$PlotStatVO">
+    SELECT
+      (SELECT COUNT(*) FROM activity
+        WHERE plot_id = #{plotId} AND occur_date >= CURDATE() - INTERVAL 30 DAY) AS activity_count,
+      IFNULL((SELECT SUM(qty_kg) FROM harvest_record
+        WHERE plot_id = #{plotId} AND harvest_date >= CURDATE() - INTERVAL 30 DAY), 0) AS total_harvest_kg,
+      (SELECT COUNT(*) FROM batch
+        WHERE plot_id = #{plotId} AND harvest_date >= CURDATE() - INTERVAL 30 DAY
+          AND deleted_at IS NULL) AS batch_count
+  </select>
+</mapper>

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Albert's Farm · PC 端高保真视觉稿 V1.0</title>
+<style>
+  :root {
+    --brand-50: #E8F5E9; --brand-100: #C8E6C9; --brand-300: #66BB6A;
+    --brand-500: #2E7D32; --brand-600: #1B5E20; --brand-700: #0F4A14;
+    --accent-500: #FF8F00; --accent-300: #FFB74D;
+    --ink-900: #1A1A1A; --ink-700: #3C4043; --ink-500: #5F6368;
+    --ink-400: #80868B; --ink-300: #9AA0A6;
+    --bg-0: #fff; --bg-50: #F8F9FA; --bg-100: #F1F3F4;
+    --success: #00C853; --warning: #FFB300; --danger: #E53935; --info: #1976D2;
+    --shadow-1: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-2: 0 4px 16px rgba(0,0,0,.06);
+    --shadow-3: 0 12px 32px rgba(0,0,0,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #eef2f6; color: var(--ink-900);
+    padding: 40px;
+  }
+  h1.page-title {
+    font-size: 28px; font-weight: 700; margin-bottom: 4px;
+    background: linear-gradient(90deg, var(--brand-500), var(--accent-500));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .page-sub { color: var(--ink-500); font-size: 14px; margin-bottom: 32px; }
+  .section-title {
+    font-size: 16px; font-weight: 600; margin: 36px 0 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::before {
+    content: ''; width: 4px; height: 16px; background: var(--brand-500); border-radius: 2px;
+  }
+
+  /* ============ 浏览器外框 ============ */
+  .browser {
+    background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow-3); margin-bottom: 28px;
+  }
+  .browser-bar {
+    background: #F0F0F0; padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .browser-bar .dots { display: flex; gap: 6px; }
+  .browser-bar .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+  }
+  .browser-bar .url {
+    background: #fff; padding: 4px 14px; border-radius: 12px;
+    font-size: 12px; color: var(--ink-500); flex: 1; max-width: 500px;
+    margin-left: 8px;
+  }
+
+  /* ============ 后台框架 ============ */
+  .app {
+    display: flex; height: 760px; background: var(--bg-50);
+  }
+  .sidebar {
+    width: 220px; background: #fff; border-right: 1px solid var(--bg-100);
+    padding: 20px 0; flex-shrink: 0;
+  }
+  .logo {
+    padding: 0 24px 24px; border-bottom: 1px solid var(--bg-100);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px; background: var(--brand-500); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #fff;
+  }
+  .logo-text {
+    font-size: 16px; font-weight: 700; color: var(--ink-900);
+  }
+  .logo-sub { font-size: 11px; color: var(--ink-500); margin-top: 2px; }
+  .menu-section {
+    padding: 8px 12px 4px 24px; font-size: 11px; color: var(--ink-400);
+    letter-spacing: 1px; font-weight: 600; margin-top: 8px;
+  }
+  .menu-item {
+    padding: 10px 24px; font-size: 13.5px; color: var(--ink-700);
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+  .menu-item:hover { background: var(--bg-50); }
+  .menu-item.active {
+    background: var(--brand-50); color: var(--brand-700); font-weight: 600;
+    border-left-color: var(--brand-500);
+  }
+  .menu-item .icon { font-size: 17px; }
+  .badge {
+    background: var(--accent-500); color: #fff; padding: 1px 7px;
+    border-radius: 10px; font-size: 10px; margin-left: auto;
+  }
+  /* ============ 主区域 ============ */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar {
+    height: 60px; background: #fff; border-bottom: 1px solid var(--bg-100);
+    padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .crumb { font-size: 13px; color: var(--ink-500); }
+  .crumb .now { color: var(--ink-900); font-weight: 600; }
+  .top-actions { display: flex; align-items: center; gap: 20px; }
+  .search {
+    background: var(--bg-50); padding: 7px 14px; border-radius: 20px;
+    font-size: 12px; color: var(--ink-400); width: 260px;
+  }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px; background: var(--bg-50);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-700); position: relative;
+  }
+  .icon-btn .dot-r {
+    position: absolute; top: 8px; right: 8px;
+    width: 8px; height: 8px; background: var(--accent-500); border-radius: 50%;
+  }
+  .user {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 13px;
+  }
+  .user-info { font-size: 13px; line-height: 1.2; }
+  .user-info .n { font-weight: 600; color: var(--ink-900); }
+  .user-info .r { font-size: 11px; color: var(--ink-500); }
+  .content {
+    flex: 1; overflow-y: auto; padding: 24px 28px;
+  }
+  /* ============ 卡片样式 ============ */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;
+  }
+  .stat {
+    background: #fff; border-radius: 14px; padding: 20px;
+    box-shadow: var(--shadow-1); position: relative; overflow: hidden;
+  }
+  .stat::before {
+    content: ''; position: absolute; top: -20px; right: -20px;
+    width: 80px; height: 80px; border-radius: 50%; opacity: .08;
+  }
+  .stat.c1::before { background: var(--brand-500); }
+  .stat.c2::before { background: var(--accent-500); }
+  .stat.c3::before { background: var(--info); }
+  .stat.c4::before { background: var(--success); }
+  .stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 12px;
+  }
+  .stat.c1 .stat-icon { background: var(--brand-50); color: var(--brand-500); }
+  .stat.c2 .stat-icon { background: #FFF3E0; color: var(--accent-500); }
+  .stat.c3 .stat-icon { background: #E3F2FD; color: var(--info); }
+  .stat.c4 .stat-icon { background: #E8F5E9; color: var(--success); }
+  .stat-label { font-size: 12px; color: var(--ink-500); }
+  .stat-value {
+    font-size: 28px; font-weight: 800; color: var(--ink-900);
+    margin-top: 4px; font-variant-numeric: tabular-nums;
+  }
+  .stat-unit { font-size: 13px; color: var(--ink-400); margin-left: 4px; font-weight: 500; }
+  .stat-trend { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .stat-trend.up { color: var(--success); }
+  .stat-trend.dn { color: var(--danger); }
+  /* ============ 双栏 ============ */
+  .two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .card {
+    background: #fff; border-radius: 14px; padding: 20px;
+    box-shadow: var(--shadow-1);
+  }
+  .card-h {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .card-h .ti {
+    font-size: 15px; font-weight: 600;
+  }
+  .card-h .more { font-size: 12px; color: var(--brand-500); cursor: pointer; }
+
+  /* ============ 库存图表 ============ */
+  .chart-bar {
+    display: flex; align-items: end; gap: 16px; height: 180px;
+    margin-bottom: 20px; padding: 16px 0;
+  }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .bar-stack {
+    width: 32px; border-radius: 6px 6px 0 0; display: flex;
+    flex-direction: column-reverse;
+  }
+  .bar-piece { width: 100%; }
+  .bar-1 { background: var(--brand-500); }
+  .bar-2 { background: var(--accent-500); }
+  .bar-3 { background: var(--brand-300); }
+  .bar-label { font-size: 11px; color: var(--ink-500); }
+  .chart-legend { display: flex; gap: 16px; font-size: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ============ 列表 ============ */
+  table.data { width: 100%; border-collapse: collapse; }
+  table.data th, table.data td {
+    padding: 10px 8px; font-size: 13px; text-align: left;
+    border-bottom: 1px solid var(--bg-100);
+  }
+  table.data th { color: var(--ink-500); font-weight: 600; font-size: 12px; background: var(--bg-50); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .tag-g { background: var(--brand-50); color: var(--brand-700); }
+  .tag-o { background: #FFF3E0; color: #E65100; }
+  .tag-b { background: #E3F2FD; color: var(--info); }
+  .tag-r { background: #FFEBEE; color: var(--danger); }
+
+  /* ============ 待办 ============ */
+  .todo {
+    display: flex; align-items: center; gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid var(--bg-100);
+  }
+  .todo:last-child { border: 0; }
+  .todo-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .t1 { background: var(--brand-50); color: var(--brand-500); }
+  .t2 { background: #FFF3E0; color: var(--accent-500); }
+  .t3 { background: #FFEBEE; color: var(--danger); }
+  .t4 { background: #E3F2FD; color: var(--info); }
+  .todo-text { flex: 1; }
+  .todo-t1 { font-size: 13px; font-weight: 500; }
+  .todo-t2 { font-size: 11px; color: var(--ink-500); margin-top: 2px; }
+  .todo-cnt {
+    background: var(--bg-50); color: var(--ink-700); padding: 2px 8px;
+    border-radius: 10px; font-size: 11px; font-weight: 600;
+  }
+
+  /* ============ 追溯页 ============ */
+  .trace-page { padding: 0; }
+  .trace-h {
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+    padding: 28px; color: #fff; border-radius: 14px;
+    margin-bottom: 20px; position: relative; overflow: hidden;
+  }
+  .trace-h::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+  .trace-h .code {
+    font-size: 12px; opacity: .8; font-family: monospace;
+  }
+  .trace-h .title { font-size: 24px; font-weight: 700; margin-top: 4px; }
+  .trace-h .meta { font-size: 13px; opacity: .9; margin-top: 8px; }
+  .trace-flow {
+    display: flex; align-items: stretch; gap: 0; flex-wrap: wrap;
+    background: #fff; padding: 24px; border-radius: 14px;
+    box-shadow: var(--shadow-1); margin-bottom: 20px;
+  }
+  .trace-node {
+    flex: 1; min-width: 130px; padding: 14px 12px;
+    background: var(--brand-50); border-radius: 10px;
+    text-align: center; position: relative;
+  }
+  .trace-node.now { background: var(--accent-500); color: #fff; }
+  .trace-node .ic {
+    font-size: 24px; margin-bottom: 6px;
+  }
+  .trace-node .n {
+    font-size: 12px; font-weight: 600;
+  }
+  .trace-node .v {
+    font-size: 10px; opacity: .7; margin-top: 2px;
+  }
+  .trace-arrow {
+    display: flex; align-items: center; padding: 0 6px;
+    color: var(--brand-300); font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Albert's Farm · PC 后台高保真视觉稿</h1>
+<div class="page-sub">V1.0 · 设计师交付 · Dashboard / 列表 / 追溯三大核心场景</div>
+
+<!-- ====================== Dashboard ====================== -->
+<div class="section-title">场景 A · 运营驾驶舱 Dashboard</div>
+
+<div class="browser">
+  <div class="browser-bar">
+    <div class="dots">
+      <div class="dot" style="background:#FF5F57"></div>
+      <div class="dot" style="background:#FEBC2E"></div>
+      <div class="dot" style="background:#28C840"></div>
+    </div>
+    <div class="url">🔒 admin.albertsfarm.com/dashboard</div>
+  </div>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">🌱</div>
+        <div>
+          <div class="logo-text">Albert's Farm</div>
+          <div class="logo-sub">Agri OS v1.0</div>
+        </div>
+      </div>
+      <div class="menu-section">运营</div>
+      <div class="menu-item active"><span class="icon">📊</span>驾驶舱</div>
+      <div class="menu-section">生产</div>
+      <div class="menu-item"><span class="icon">🌾</span>地块管理</div>
+      <div class="menu-item"><span class="icon">📅</span>种植计划</div>
+      <div class="menu-item"><span class="icon">✏️</span>农事记录<span class="badge">5</span></div>
+      <div class="menu-section">采收 · 批次</div>
+      <div class="menu-item"><span class="icon">🧺</span>采收记录</div>
+      <div class="menu-item"><span class="icon">🔖</span>批次管理</div>
+      <div class="menu-section">包装 · 库存</div>
+      <div class="menu-item"><span class="icon">📦</span>分级包装</div>
+      <div class="menu-item"><span class="icon">🏬</span>库存管理</div>
+      <div class="menu-section">销售</div>
+      <div class="menu-item"><span class="icon">📋</span>销售订单<span class="badge">3</span></div>
+      <div class="menu-item"><span class="icon">🚚</span>出库管理</div>
+    </div>
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div class="crumb">运营 / <span class="now">驾驶舱</span></div>
+        <div class="top-actions">
+          <div class="search">🔍 搜索批次号、订单号...</div>
+          <div class="icon-btn">🔔<div class="dot-r"></div></div>
+          <div class="user">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <div class="n">Albert</div>
+              <div class="r">农场经理</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="content">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:20px;font-weight:700">早上好，Albert 👋</div>
+            <div style="font-size:13px;color:var(--ink-500);margin-top:2px">2026 年 5 月 23 日 星期六 · 晴 26°C</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="background:#fff;padding:7px 14px;border-radius:8px;font-size:12px;border:1px solid var(--bg-100);cursor:pointer">本日</div>
+            <div style="background:var(--brand-500);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer">本周</div>
+            <div style="background:#fff;padding:7px 14px;border-radius:8px;font-size:12px;border:1px solid var(--bg-100);cursor:pointer">本月</div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat c1">
+            <div class="stat-icon">🧺</div>
+            <div class="stat-label">今日采收</div>
+            <div class="stat-value">680<span class="stat-unit">kg</span></div>
+            <div class="stat-trend up">↑ 12.5% · vs 昨日</div>
+          </div>
+          <div class="stat c2">
+            <div class="stat-icon">🚚</div>
+            <div class="stat-label">今日出库</div>
+            <div class="stat-value">520<span class="stat-unit">kg</span></div>
+            <div class="stat-trend up">↑ 8.3% · vs 昨日</div>
+          </div>
+          <div class="stat c3">
+            <div class="stat-icon">🏬</div>
+            <div class="stat-label">当前库存</div>
+            <div class="stat-value">3,240<span class="stat-unit">kg</span></div>
+            <div class="stat-trend dn">⚠ 6 SKU 临期</div>
+          </div>
+          <div class="stat c4">
+            <div class="stat-icon">💰</div>
+            <div class="stat-label">今日订单</div>
+            <div class="stat-value">¥12,460</div>
+            <div class="stat-trend up">↑ 4 单 · 18 单</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-h">
+              <div class="ti">采收 vs 出库（近 7 天）</div>
+              <div class="more">查看详细 ›</div>
+            </div>
+            <div class="chart-bar">
+              <div class="bar-col"><div class="bar-stack" style="height:90px"><div class="bar-piece bar-1" style="height:60px"></div><div class="bar-piece bar-2" style="height:30px"></div></div><div class="bar-label">5/17</div></div>
+              <div class="bar-col"><div class="bar-stack" style="height:110px"><div class="bar-piece bar-1" style="height:80px"></div><div class="bar-piece bar-2" style="height:30px"></div></div><div class="bar-label">5/18</div></div>
+              <div class="bar-col"><div class="bar-stack" style="height:100px"><div class="bar-piece bar-1" style="height:70px"></div><div class="bar-piece bar-2" style="height:30px"></div></div><div class="bar-label">5/19</div></div>
+              <div class="bar-col"><div class="bar-stack" style="height:130px"><div class="bar-piece bar-1" style="height:90px"></div><div class="bar-piece bar-2" style="height:40px"></div></div><div class="bar-label">5/20</div></div>
+              <div class="bar-col"><div class="bar-stack" style="height:125px"><div class="bar-piece bar-1" style="height:85px"></div><div class="bar-piece bar-2" style="height:40px"></div></div><div class="bar-label">5/21</div></div>
+              <div class="bar-col"><div class="bar-stack" style="height:115px"><div class="bar-piece bar-1" style="height:75px"></div><div class="bar-piece bar-2" style="height:40px"></div></div><div class="bar-label">5/22</div></div>
+              <div class="bar-col"><div class="bar-stack" style="height:150px"><div class="bar-piece bar-1" style="height:100px"></div><div class="bar-piece bar-2" style="height:50px"></div></div><div class="bar-label" style="color:var(--brand-700);font-weight:600">今日</div></div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--brand-500)"></div>采收 (kg)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-500)"></div>出库 (kg)</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <div class="ti">待办提醒</div>
+              <div class="more">全部 ›</div>
+            </div>
+            <div class="todo">
+              <div class="todo-icon t2">✏️</div>
+              <div class="todo-text">
+                <div class="todo-t1">待审农事记录</div>
+                <div class="todo-t2">5 条等待审核</div>
+              </div>
+              <div class="todo-cnt">5</div>
+            </div>
+            <div class="todo">
+              <div class="todo-icon t4">📦</div>
+              <div class="todo-text">
+                <div class="todo-t1">待出库订单</div>
+                <div class="todo-t2">今日交付 3 单</div>
+              </div>
+              <div class="todo-cnt">3</div>
+            </div>
+            <div class="todo">
+              <div class="todo-icon t3">⚠️</div>
+              <div class="todo-text">
+                <div class="todo-t1">库存临期 SKU</div>
+                <div class="todo-t2">3 天内需出库</div>
+              </div>
+              <div class="todo-cnt">6</div>
+            </div>
+            <div class="todo">
+              <div class="todo-icon t1">🌱</div>
+              <div class="todo-text">
+                <div class="todo-t1">即将采收地块</div>
+                <div class="todo-t2">P-002 / P-003 本周</div>
+              </div>
+              <div class="todo-cnt">2</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <div class="card">
+            <div class="card-h"><div class="ti">库存 Top 5 · 按可售量</div><div class="more">查看库存 ›</div></div>
+            <table class="data">
+              <thead><tr><th>SKU</th><th>批次</th><th>等级</th><th>可售</th><th>锁定</th><th>生产日期</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td>樱桃番茄 250g</td><td>B-20260520-P001-01</td><td>A</td><td style="font-weight:700;color:var(--brand-500)">1,200 件</td><td>400 件</td><td>2026-05-20</td><td><span class="tag tag-g">正常</span></td></tr>
+                <tr><td>水果黄瓜 500g</td><td>B-20260522-P003-01</td><td>A</td><td style="font-weight:700;color:var(--brand-500)">800 件</td><td>120 件</td><td>2026-05-22</td><td><span class="tag tag-g">正常</span></td></tr>
+                <tr><td>奶油生菜 250g</td><td>B-20260523-P002-01</td><td>A</td><td style="font-weight:700;color:var(--brand-500)">650 件</td><td>50 件</td><td>2026-05-23</td><td><span class="tag tag-g">正常</span></td></tr>
+                <tr><td>普罗旺斯番茄 1kg</td><td>B-20260521-P001-02</td><td>A</td><td style="font-weight:700;color:var(--brand-500)">320 件</td><td>180 件</td><td>2026-05-21</td><td><span class="tag tag-g">正常</span></td></tr>
+                <tr><td>奶油草莓 500g</td><td>B-20260519-P004-01</td><td>A</td><td style="font-weight:700;color:var(--accent-500)">240 件</td><td>0 件</td><td>2026-05-19</td><td><span class="tag tag-o">临期</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== 批次追溯 ====================== -->
+<div class="section-title">场景 B · 批次追溯详情（关键页面）</div>
+
+<div class="browser">
+  <div class="browser-bar">
+    <div class="dots">
+      <div class="dot" style="background:#FF5F57"></div>
+      <div class="dot" style="background:#FEBC2E"></div>
+      <div class="dot" style="background:#28C840"></div>
+    </div>
+    <div class="url">🔒 admin.albertsfarm.com/batch/B-20260523-P001-01</div>
+  </div>
+  <div class="app" style="height:auto">
+    <div class="sidebar" style="height:auto">
+      <div class="logo">
+        <div class="logo-icon">🌱</div>
+        <div><div class="logo-text">Albert's Farm</div></div>
+      </div>
+      <div class="menu-section">采收 · 批次</div>
+      <div class="menu-item">🧺 采收记录</div>
+      <div class="menu-item active">🔖 批次管理</div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="crumb">采收 / 批次管理 / <span class="now">批次详情</span></div>
+        <div class="top-actions">
+          <div style="background:var(--brand-500);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer">📋 导出追溯报告</div>
+        </div>
+      </div>
+      <div class="content trace-page">
+        <div class="trace-h">
+          <div class="code">BATCH CODE</div>
+          <div class="title">B-20260523-P001-01</div>
+          <div class="meta">P-001 东大棚 1 号 · 樱桃番茄 · 2026-05-23 采收 · <span style="background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px">380 kg</span></div>
+        </div>
+
+        <div class="trace-flow">
+          <div class="trace-node"><div class="ic">🌾</div><div class="n">地块</div><div class="v">P-001 · 3.5 亩</div></div>
+          <div class="trace-arrow">→</div>
+          <div class="trace-node"><div class="ic">📅</div><div class="n">种植计划</div><div class="v">PL-26-0001</div></div>
+          <div class="trace-arrow">→</div>
+          <div class="trace-node"><div class="ic">✏️</div><div class="n">12 次农事</div><div class="v">3 次施肥 / 2 次打药</div></div>
+          <div class="trace-arrow">→</div>
+          <div class="trace-node"><div class="ic">🧺</div><div class="n">采收</div><div class="v">380 kg · 张三</div></div>
+          <div class="trace-arrow">→</div>
+          <div class="trace-node now"><div class="ic">🔖</div><div class="n">本批次</div><div class="v">B-...-01</div></div>
+          <div class="trace-arrow">→</div>
+          <div class="trace-node"><div class="ic">📦</div><div class="n">2 个 SKU</div><div class="v">1520 件入库</div></div>
+          <div class="trace-arrow">→</div>
+          <div class="trace-node"><div class="ic">🚚</div><div class="n">销售去向</div><div class="v">盒马 / 永辉</div></div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-h"><div class="ti">投入品记录（关联农事）</div></div>
+            <table class="data">
+              <thead><tr><th>日期</th><th>农事</th><th>投入品</th><th>用量</th><th>操作人</th></tr></thead>
+              <tbody>
+                <tr><td>2026-05-22</td><td><span class="tag tag-g">施肥</span></td><td>复合肥</td><td>5 kg</td><td>张三</td></tr>
+                <tr><td>2026-05-15</td><td><span class="tag tag-o">打药</span></td><td>吡虫啉</td><td>0.5 L</td><td>张三</td></tr>
+                <tr><td>2026-05-08</td><td><span class="tag tag-g">施肥</span></td><td>有机肥</td><td>20 kg</td><td>张三</td></tr>
+                <tr><td>2026-04-20</td><td><span class="tag tag-g">施肥</span></td><td>有机肥</td><td>30 kg</td><td>张三</td></tr>
+                <tr><td>2026-03-01</td><td><span class="tag tag-b">播种</span></td><td>樱桃番茄种子</td><td>0.5 kg</td><td>李四</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="ti">基本信息 + QC 状态</div></div>
+            <table class="data">
+              <tbody>
+                <tr><td style="color:var(--ink-500)">批次号</td><td style="font-weight:700">B-20260523-P001-01</td></tr>
+                <tr><td style="color:var(--ink-500)">来源地块</td><td>P-001 东大棚 1 号</td></tr>
+                <tr><td style="color:var(--ink-500)">种植计划</td><td>PL-26-0001</td></tr>
+                <tr><td style="color:var(--ink-500)">作物 / 品种</td><td>番茄 / 樱桃番茄</td></tr>
+                <tr><td style="color:var(--ink-500)">采收日期</td><td>2026-05-23</td></tr>
+                <tr><td style="color:var(--ink-500)">采收数量</td><td>380 kg</td></tr>
+                <tr><td style="color:var(--ink-500)">当前状态</td><td><span class="tag tag-o">待加工</span></td></tr>
+                <tr><td style="color:var(--ink-500)">最后施药距今</td><td><span style="color:var(--success);font-weight:600">8 天 ✓ 安全</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-title">设计交付要点</div>
+<div style="background:#fff;border-radius:14px;padding:24px;box-shadow:var(--shadow-2);font-size:13px;line-height:1.8;color:var(--ink-700)">
+  <strong style="color:var(--brand-500);font-size:14px">布局规范</strong><br>
+  · 顶部导航 60px · 侧边栏 220px · 内容区 24-28px 内边距<br>
+  · 卡片圆角 14px · 阴影 shadow-1（极轻）· 表格行高 40px<br>
+  · 主数据用绿色渐变 / 销售用琥珀色渐变 / 信息用蓝色 / 警告用橙色<br><br>
+
+  <strong style="color:var(--brand-500);font-size:14px">交互原则</strong><br>
+  · 数据可视化优先于纯表格 · 重点指标用大字号 28-32px<br>
+  · 关键动作（导出追溯）放在顶部右侧 · 列表行内不超过 4 个操作<br>
+  · 状态用 Tag 而非纯文字 · 类型 / 等级 / 时间一目了然<br><br>
+
+  <strong style="color:var(--brand-500);font-size:14px">下一步</strong><br>
+  · Figma 重做 component library，导出 design tokens JSON<br>
+  · 与前端约定 Element Plus 主题色变量替换<br>
+  · 补做：登录页 / 数据为空状态 / 错误页 / 引导浮层
+</div>
+
+</body>
+</html>

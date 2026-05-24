@@ -1,0 +1,29 @@
+# ============================================================
+# Albert's Farm - Project Root .gitignore
+# 子目录 backend/ 和 frontend/ 各有自己的 .gitignore,这里只补充根级别
+# ============================================================
+
+# 操作系统垃圾文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# 通用编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 临时文件
+*.bak
+*.tmp
+*.log
+
+# Docker 数据卷如果有人配置成本地路径
+docker-data/
+
+# 环境配置(包含密钥的) - 不要提交
+.env
+.env.local
+.env.*.local

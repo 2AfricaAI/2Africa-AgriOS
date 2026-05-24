@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Albert's Farm · 移动端高保真视觉稿 V1.0</title>
+<style>
+  /* ============ 设计系统 ============ */
+  :root {
+    /* 品牌色：自然绿系 */
+    --brand-50:  #E8F5E9;
+    --brand-100: #C8E6C9;
+    --brand-300: #66BB6A;
+    --brand-500: #2E7D32;   /* 主色：深绿，象征生机 */
+    --brand-600: #1B5E20;
+    --brand-700: #0F4A14;
+    /* 辅色：琥珀，象征成熟收获 */
+    --accent-300: #FFB74D;
+    --accent-500: #FF8F00;
+    --accent-600: #E67E00;
+    /* 文字 */
+    --ink-900: #1A1A1A;
+    --ink-700: #3C4043;
+    --ink-500: #5F6368;
+    --ink-400: #80868B;
+    --ink-300: #9AA0A6;
+    /* 背景 */
+    --bg-0:   #FFFFFF;
+    --bg-50:  #F8F9FA;
+    --bg-100: #F1F3F4;
+    /* 状态 */
+    --success: #00C853;
+    --warning: #FFB300;
+    --danger:  #E53935;
+    --info:    #1976D2;
+    /* 阴影 */
+    --shadow-1: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-2: 0 4px 12px rgba(0,0,0,.06);
+    --shadow-3: 0 8px 24px rgba(0,0,0,.08);
+    /* 圆角 */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-full: 999px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #f6f8fb 0%, #eef2f6 100%);
+    color: var(--ink-900);
+    padding: 40px 24px;
+    min-height: 100vh;
+  }
+  h1.page-title {
+    font-size: 28px; font-weight: 700; margin-bottom: 4px;
+    background: linear-gradient(90deg, var(--brand-500), var(--accent-500));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .page-sub { color: var(--ink-500); font-size: 14px; margin-bottom: 36px; }
+  .section-title {
+    font-size: 18px; font-weight: 600; margin: 48px 0 20px;
+    color: var(--ink-900); display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::before {
+    content: ''; width: 4px; height: 18px; background: var(--brand-500); border-radius: 2px;
+  }
+  /* ============ 设计系统展板 ============ */
+  .ds-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .color-card {
+    background: #fff; border-radius: var(--r-md); padding: 14px;
+    box-shadow: var(--shadow-1);
+  }
+  .color-swatch { height: 56px; border-radius: var(--r-sm); margin-bottom: 8px; }
+  .color-name { font-weight: 600; font-size: 13px; }
+  .color-value { font-size: 11px; color: var(--ink-500); margin-top: 2px; font-family: monospace; }
+  .type-card {
+    background: #fff; border-radius: var(--r-md); padding: 16px;
+    box-shadow: var(--shadow-1);
+  }
+  .type-card .label { font-size: 11px; color: var(--ink-500); margin-bottom: 4px; }
+  /* ============ 手机外框 ============ */
+  .phone-row {
+    display: flex; gap: 28px; overflow-x: auto; padding: 20px 0 40px;
+    scroll-snap-type: x mandatory;
+  }
+  .phone {
+    flex-shrink: 0; width: 320px; scroll-snap-align: center;
+    background: #000; border-radius: 42px; padding: 12px;
+    box-shadow: var(--shadow-3), 0 24px 48px rgba(0,0,0,.12);
+    position: relative;
+  }
+  .phone::before {
+    content: ''; position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    width: 90px; height: 26px; background: #000; border-radius: 14px; z-index: 10;
+  }
+  .screen {
+    background: var(--bg-50); border-radius: 32px; overflow: hidden;
+    height: 644px; position: relative;
+  }
+  .phone-label {
+    text-align: center; margin-top: 12px;
+    font-size: 13px; font-weight: 600; color: var(--ink-700);
+  }
+  .phone-tag {
+    display: inline-block; background: var(--brand-50); color: var(--brand-700);
+    padding: 2px 10px; border-radius: var(--r-full); font-size: 11px; margin-top: 4px;
+  }
+  /* ============ 手机内容通用 ============ */
+  .status-bar {
+    height: 44px; background: transparent; display: flex; justify-content: space-between;
+    align-items: center; padding: 0 24px; font-size: 13px; font-weight: 600;
+    color: var(--ink-900); position: relative; z-index: 1;
+  }
+  .nav {
+    height: 52px; padding: 0 20px; display: flex; align-items: center;
+    justify-content: space-between; background: transparent;
+  }
+  .nav .title { font-size: 17px; font-weight: 600; color: var(--ink-900); }
+  .nav .back { width: 32px; height: 32px; color: var(--ink-700); display: flex;
+    align-items: center; justify-content: center; }
+  .tabbar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 68px;
+    background: #fff; border-top: 1px solid rgba(0,0,0,.06);
+    display: flex; padding: 8px 0 22px;
+  }
+  .tabbar .tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px; font-size: 10px; color: var(--ink-400);
+  }
+  .tabbar .tab.active { color: var(--brand-500); }
+  .tabbar .tab .icon { font-size: 22px; }
+  .body { padding: 8px 20px 80px; overflow-y: auto; height: calc(100% - 96px); }
+
+  /* ============ 屏 1: 登录 ============ */
+  .login-screen {
+    background: linear-gradient(180deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    height: 100%; position: relative; overflow: hidden;
+  }
+  .login-screen::before {
+    content: ''; position: absolute; width: 240px; height: 240px;
+    border-radius: 50%; background: rgba(255,255,255,.06);
+    top: -80px; right: -60px;
+  }
+  .login-screen::after {
+    content: ''; position: absolute; width: 180px; height: 180px;
+    border-radius: 50%; background: rgba(255,255,255,.04);
+    bottom: 100px; left: -40px;
+  }
+  .login-content {
+    position: relative; z-index: 1; padding: 70px 32px 0; color: #fff;
+  }
+  .logo-circle {
+    width: 64px; height: 64px; background: rgba(255,255,255,.15);
+    border-radius: 18px; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px); font-size: 32px; margin-bottom: 24px;
+  }
+  .welcome { font-size: 28px; font-weight: 700; }
+  .welcome-sub { font-size: 14px; opacity: .8; margin-top: 6px; margin-bottom: 40px; }
+  .input-block { margin-bottom: 16px; }
+  .input-block label {
+    display: block; font-size: 12px; color: rgba(255,255,255,.7);
+    margin-bottom: 6px; font-weight: 500;
+  }
+  .input {
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+    color: #fff; padding: 14px 16px; border-radius: var(--r-md);
+    width: 100%; font-size: 15px; outline: none;
+    backdrop-filter: blur(8px);
+  }
+  .input::placeholder { color: rgba(255,255,255,.5); }
+  .btn-primary {
+    width: 100%; padding: 16px; border: none; border-radius: var(--r-md);
+    background: #fff; color: var(--brand-700); font-weight: 700; font-size: 16px;
+    margin-top: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  }
+  .login-other {
+    text-align: center; margin-top: 24px; font-size: 13px;
+    color: rgba(255,255,255,.7);
+  }
+
+  /* ============ 屏 2: 首页 ============ */
+  .home-header {
+    background: linear-gradient(180deg, var(--brand-500), var(--brand-600));
+    padding: 12px 20px 24px; color: #fff; border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px; box-shadow: 0 4px 12px rgba(46,125,50,.2);
+  }
+  .greet { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .greet-text .name { font-size: 18px; font-weight: 700; }
+  .greet-text .sub { font-size: 12px; opacity: .8; margin-top: 2px; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center; font-weight: 600;
+  }
+  .quick-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;
+  }
+  .qs-item {
+    background: rgba(255,255,255,.15); padding: 10px 12px; border-radius: var(--r-md);
+    backdrop-filter: blur(8px);
+  }
+  .qs-item .num { font-size: 22px; font-weight: 700; }
+  .qs-item .lbl { font-size: 11px; opacity: .85; margin-top: 2px; }
+  .quick-actions {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin: -28px 16px 24px; position: relative; z-index: 2;
+    background: #fff; padding: 16px 12px; border-radius: var(--r-md);
+    box-shadow: var(--shadow-2);
+  }
+  .qa {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 6px;
+  }
+  .qa-icon {
+    width: 44px; height: 44px; border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+  }
+  .qa-1 { background: linear-gradient(135deg, #4CAF50, #2E7D32); color: #fff; }
+  .qa-2 { background: linear-gradient(135deg, #FF8F00, #E67E00); color: #fff; }
+  .qa-3 { background: linear-gradient(135deg, #1976D2, #0D47A1); color: #fff; }
+  .qa-label { font-size: 11px; color: var(--ink-700); font-weight: 500; }
+  .task-section { padding: 0 16px; }
+  .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .task-title { font-size: 15px; font-weight: 600; }
+  .task-more { font-size: 12px; color: var(--brand-500); }
+  .task-card {
+    background: #fff; border-radius: var(--r-md); padding: 14px;
+    margin-bottom: 10px; box-shadow: var(--shadow-1); display: flex; gap: 12px;
+  }
+  .task-card .left-dot {
+    width: 4px; background: var(--brand-500); border-radius: 2px; flex-shrink: 0;
+  }
+  .task-card.urgent .left-dot { background: var(--accent-500); }
+  .task-content { flex: 1; }
+  .task-content .t1 { font-size: 14px; font-weight: 600; }
+  .task-content .t2 { font-size: 12px; color: var(--ink-500); margin-top: 2px; }
+  .task-meta {
+    display: flex; gap: 8px; margin-top: 8px; font-size: 11px;
+  }
+  .meta-chip {
+    background: var(--brand-50); color: var(--brand-700); padding: 2px 8px;
+    border-radius: var(--r-full);
+  }
+  .meta-chip.warn { background: #FFF3E0; color: var(--accent-600); }
+
+  /* ============ 屏 3: 农事录入 ============ */
+  .form-screen { background: #fff; height: 100%; }
+  .form-area { padding: 4px 20px 24px; }
+  .form-step {
+    display: flex; gap: 10px; margin-bottom: 24px; padding: 14px;
+    background: var(--brand-50); border-radius: var(--r-md);
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--brand-500);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-text { font-size: 12px; color: var(--brand-700); line-height: 1.5; }
+  .field-group { margin-bottom: 20px; }
+  .field-label {
+    font-size: 13px; color: var(--ink-700); margin-bottom: 8px; font-weight: 500;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .field-label .req { color: var(--danger); }
+  .field-input {
+    background: var(--bg-50); border: 1px solid transparent;
+    padding: 14px 16px; border-radius: var(--r-md); font-size: 15px;
+    width: 100%; outline: none;
+  }
+  .field-input.selected {
+    background: var(--brand-50); border-color: var(--brand-300); color: var(--brand-700);
+    font-weight: 600;
+  }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 10px 16px; background: var(--bg-50); border-radius: var(--r-full);
+    font-size: 13px; color: var(--ink-700); border: 1.5px solid transparent;
+  }
+  .chip.active {
+    background: var(--brand-500); color: #fff; font-weight: 600;
+    border-color: var(--brand-500);
+  }
+  .input-item {
+    background: var(--brand-50); border: 1.5px solid var(--brand-300);
+    border-radius: var(--r-md); padding: 12px 14px; display: flex;
+    justify-content: space-between; align-items: center; margin-bottom: 8px;
+  }
+  .input-item-name { font-size: 14px; font-weight: 600; color: var(--brand-700); }
+  .input-item-meta { font-size: 11px; color: var(--ink-500); margin-top: 2px; }
+  .qty-control {
+    background: #fff; border: 1px solid var(--brand-300); border-radius: var(--r-full);
+    padding: 4px 8px; display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--brand-700);
+  }
+  .qty-btn {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--brand-500);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .photo-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  }
+  .photo-slot {
+    aspect-ratio: 1; background: var(--bg-100); border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: var(--ink-400);
+  }
+  .photo-slot.has {
+    background: linear-gradient(135deg, #C8E6C9 0%, #66BB6A 100%);
+    color: #fff;
+  }
+  .bottom-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 20px 24px;
+    background: #fff; border-top: 1px solid rgba(0,0,0,.06);
+    display: flex; gap: 10px;
+  }
+  .btn-large {
+    flex: 1; padding: 14px; border-radius: var(--r-md); border: none;
+    font-size: 15px; font-weight: 600;
+  }
+  .btn-large.primary { background: var(--brand-500); color: #fff; }
+  .btn-large.ghost { background: var(--bg-50); color: var(--ink-700); }
+
+  /* ============ 屏 4: 采收录入 ============ */
+  .harvest-screen { background: #fff; height: 100%; }
+  .harvest-top {
+    background: linear-gradient(135deg, var(--accent-500), var(--accent-600));
+    padding: 24px 20px 32px; color: #fff;
+    border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+  }
+  .harvest-top .title-l { font-size: 14px; opacity: .9; }
+  .harvest-top .title-xl { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .harvest-top .sub { font-size: 12px; opacity: .85; margin-top: 4px; }
+  .harvest-mid { padding: 20px; }
+  .qty-pad {
+    background: var(--bg-50); border-radius: var(--r-lg); padding: 24px;
+    text-align: center; margin-bottom: 20px;
+  }
+  .qty-label { font-size: 13px; color: var(--ink-500); }
+  .qty-value {
+    font-size: 56px; font-weight: 800; color: var(--brand-500);
+    margin: 12px 0; font-variant-numeric: tabular-nums;
+  }
+  .qty-unit { font-size: 18px; color: var(--ink-500); margin-left: 4px; }
+  .qty-keys {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  .key {
+    background: #fff; padding: 14px; border-radius: var(--r-md);
+    font-size: 20px; font-weight: 600; color: var(--ink-900);
+    box-shadow: var(--shadow-1);
+  }
+  .key.action { background: var(--brand-500); color: #fff; }
+  .batch-preview {
+    background: var(--brand-50); border: 1.5px dashed var(--brand-300);
+    border-radius: var(--r-md); padding: 14px; margin-top: 16px;
+  }
+  .batch-preview .lbl { font-size: 11px; color: var(--brand-700); }
+  .batch-preview .code {
+    font-size: 18px; font-weight: 700; color: var(--brand-700);
+    font-family: 'SF Mono', monospace; margin-top: 4px; letter-spacing: 1px;
+  }
+
+  /* ============ 屏 5: 日报 ============ */
+  .report-screen { background: var(--bg-50); height: 100%; }
+  .report-top {
+    background: #fff; padding: 16px 20px;
+    border-bottom: 1px solid rgba(0,0,0,.04);
+  }
+  .report-date {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .report-date .d { font-size: 16px; font-weight: 600; }
+  .report-date .day { font-size: 12px; color: var(--ink-500); }
+  .progress-ring {
+    width: 56px; height: 56px; position: relative;
+  }
+  .progress-ring svg { transform: rotate(-90deg); }
+  .progress-ring .pct {
+    position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 13px; font-weight: 700;
+    color: var(--brand-500);
+  }
+  .timeline-mob { padding: 20px; }
+  .tl-block { margin-bottom: 18px; }
+  .tl-block .tl-h {
+    display: flex; align-items: center; gap: 8px; font-size: 14px;
+    font-weight: 600; margin-bottom: 12px;
+  }
+  .tl-block .tl-icon {
+    width: 28px; height: 28px; border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .tl-i1 { background: var(--brand-50); color: var(--brand-500); }
+  .tl-i2 { background: #FFF3E0; color: var(--accent-500); }
+  .tl-i3 { background: #E3F2FD; color: var(--info); }
+  .done-item {
+    background: #fff; padding: 12px 14px; border-radius: var(--r-md);
+    margin-bottom: 8px; display: flex; gap: 10px; align-items: center;
+    box-shadow: var(--shadow-1);
+  }
+  .check {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--success); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .done-text { font-size: 13px; }
+  .add-row {
+    background: #fff; padding: 14px; border-radius: var(--r-md);
+    text-align: center; color: var(--brand-500); font-size: 13px;
+    font-weight: 500; border: 1.5px dashed var(--brand-300);
+  }
+  .submit-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 20px 28px;
+    background: #fff;
+  }
+  /* PC 端展示 */
+  .pc-frame {
+    background: #f1f3f4; border-radius: 16px; padding: 28px;
+    box-shadow: var(--shadow-3); margin-top: 20px;
+  }
+  .pc-frame img { width: 100%; }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Albert's Farm · 移动端高保真视觉稿</h1>
+<div class="page-sub">V1.0 · 设计师交付 · 工人小程序 5 个核心屏 + 设计系统 · 左右滑动查看</div>
+
+<!-- ====================== 设计系统 ====================== -->
+<div class="section-title">设计系统 / Design Tokens</div>
+
+<div style="font-size:13px;color:var(--ink-500);margin-bottom:12px">主色板</div>
+<div class="ds-grid">
+  <div class="color-card"><div class="color-swatch" style="background:var(--brand-50)"></div><div class="color-name">Brand 50</div><div class="color-value">#E8F5E9</div></div>
+  <div class="color-card"><div class="color-swatch" style="background:var(--brand-300)"></div><div class="color-name">Brand 300</div><div class="color-value">#66BB6A</div></div>
+  <div class="color-card"><div class="color-swatch" style="background:var(--brand-500)"></div><div class="color-name">Brand 500 · 主色</div><div class="color-value">#2E7D32</div></div>
+  <div class="color-card"><div class="color-swatch" style="background:var(--brand-700)"></div><div class="color-name">Brand 700</div><div class="color-value">#0F4A14</div></div>
+</div>
+
+<div style="font-size:13px;color:var(--ink-500);margin-bottom:12px">辅助色 + 状态</div>
+<div class="ds-grid">
+  <div class="color-card"><div class="color-swatch" style="background:var(--accent-500)"></div><div class="color-name">Accent · 采收</div><div class="color-value">#FF8F00</div></div>
+  <div class="color-card"><div class="color-swatch" style="background:var(--success)"></div><div class="color-name">Success</div><div class="color-value">#00C853</div></div>
+  <div class="color-card"><div class="color-swatch" style="background:var(--warning)"></div><div class="color-name">Warning</div><div class="color-value">#FFB300</div></div>
+  <div class="color-card"><div class="color-swatch" style="background:var(--danger)"></div><div class="color-name">Danger</div><div class="color-value">#E53935</div></div>
+</div>
+
+<div style="font-size:13px;color:var(--ink-500);margin:24px 0 12px">字体层级</div>
+<div class="ds-grid" style="grid-template-columns:repeat(2,1fr)">
+  <div class="type-card">
+    <div class="label">H1 · Page Title · 28/700</div>
+    <div style="font-size:28px;font-weight:700;color:var(--ink-900)">今日采收 380kg</div>
+  </div>
+  <div class="type-card">
+    <div class="label">H2 · Section · 18/600</div>
+    <div style="font-size:18px;font-weight:600;color:var(--ink-900)">我的待办</div>
+  </div>
+  <div class="type-card">
+    <div class="label">Body · 15/400</div>
+    <div style="font-size:15px;color:var(--ink-700)">3 号地块今日施肥已完成</div>
+  </div>
+  <div class="type-card">
+    <div class="label">Caption · 12/500</div>
+    <div style="font-size:12px;color:var(--ink-500)">2026-05-23 09:15 · 张三</div>
+  </div>
+</div>
+
+<div style="font-size:13px;color:var(--ink-500);margin:24px 0 12px">圆角 · 阴影 · 间距</div>
+<div class="ds-grid">
+  <div class="type-card">
+    <div class="label">Radius SM 8 / MD 12 / LG 16</div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div style="width:40px;height:40px;background:var(--brand-100);border-radius:8px"></div>
+      <div style="width:40px;height:40px;background:var(--brand-100);border-radius:12px"></div>
+      <div style="width:40px;height:40px;background:var(--brand-100);border-radius:16px"></div>
+    </div>
+  </div>
+  <div class="type-card">
+    <div class="label">Shadow 1 / 2 / 3</div>
+    <div style="display:flex;gap:14px;margin-top:10px;padding:6px">
+      <div style="width:30px;height:30px;background:#fff;border-radius:6px;box-shadow:var(--shadow-1)"></div>
+      <div style="width:30px;height:30px;background:#fff;border-radius:6px;box-shadow:var(--shadow-2)"></div>
+      <div style="width:30px;height:30px;background:#fff;border-radius:6px;box-shadow:var(--shadow-3)"></div>
+    </div>
+  </div>
+  <div class="type-card">
+    <div class="label">间距 4/8/12/16/20/24/32</div>
+    <div style="display:flex;align-items:end;gap:2px;margin-top:10px">
+      <div style="width:4px;height:24px;background:var(--brand-300)"></div>
+      <div style="width:8px;height:24px;background:var(--brand-300)"></div>
+      <div style="width:12px;height:24px;background:var(--brand-300)"></div>
+      <div style="width:16px;height:24px;background:var(--brand-300)"></div>
+      <div style="width:20px;height:24px;background:var(--brand-300)"></div>
+      <div style="width:24px;height:24px;background:var(--brand-300)"></div>
+      <div style="width:32px;height:24px;background:var(--brand-300)"></div>
+    </div>
+  </div>
+  <div class="type-card">
+    <div class="label">触控目标最小 44×44</div>
+    <button class="btn-primary" style="margin-top:8px;background:var(--brand-500);color:#fff;padding:12px;border-radius:8px;border:0;width:100%">主操作 88px 高</button>
+  </div>
+</div>
+
+<!-- ====================== 5 个移动端屏 ====================== -->
+<div class="section-title">移动端 · 工人小程序（5 屏）</div>
+
+<div class="phone-row">
+
+  <!-- ======= 屏 1: 登录 ======= -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="login-screen">
+        <div class="status-bar" style="color:#fff">
+          <span>9:41</span><span>● ● ● 5G ●●●</span>
+        </div>
+        <div class="login-content">
+          <div class="logo-circle">🌱</div>
+          <div class="welcome">Albert's Farm</div>
+          <div class="welcome-sub">登录到您的农场工作台</div>
+
+          <div class="input-block">
+            <label>手机号</label>
+            <input class="input" placeholder="138 0000 0000" value="138 0023 4567" />
+          </div>
+          <div class="input-block">
+            <label>验证码</label>
+            <input class="input" placeholder="6 位数字" value="••••••" />
+          </div>
+
+          <button class="btn-primary">登 录</button>
+          <div class="login-other">用户名密码登录 · 客服联系</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="phone-label">屏 1 · 登录<br><span class="phone-tag">品牌色全屏沉浸</span></div>
+  </div>
+
+  <!-- ======= 屏 2: 首页 / 我的任务 ======= -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="status-bar"><span>9:42</span><span>● ● ● 5G ●●●</span></div>
+
+      <div class="home-header">
+        <div class="greet">
+          <div class="greet-text">
+            <div class="name">早上好，张三 👋</div>
+            <div class="sub">今天有 3 个待办任务</div>
+          </div>
+          <div class="avatar">张</div>
+        </div>
+        <div class="quick-stats">
+          <div class="qs-item"><div class="num">8</div><div class="lbl">本月农事</div></div>
+          <div class="qs-item"><div class="num">2,140<span style="font-size:12px"> kg</span></div><div class="lbl">本月采收</div></div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <div class="qa"><div class="qa-icon qa-1">✏️</div><div class="qa-label">农事录入</div></div>
+        <div class="qa"><div class="qa-icon qa-2">🧺</div><div class="qa-label">采收登记</div></div>
+        <div class="qa"><div class="qa-icon qa-3">📝</div><div class="qa-label">日报提交</div></div>
+      </div>
+
+      <div class="task-section">
+        <div class="task-header">
+          <div class="task-title">我的任务（3）</div>
+          <div class="task-more">全部 ›</div>
+        </div>
+        <div class="task-card urgent">
+          <div class="left-dot"></div>
+          <div class="task-content">
+            <div class="t1">P-001 东大棚 1 号 · 采收</div>
+            <div class="t2">樱桃番茄 · 第 8 茬 · 预计 380kg</div>
+            <div class="task-meta">
+              <span class="meta-chip warn">紧急</span>
+              <span class="meta-chip">10:00 前</span>
+            </div>
+          </div>
+        </div>
+        <div class="task-card">
+          <div class="left-dot"></div>
+          <div class="task-content">
+            <div class="t1">P-002 东大棚 2 号 · 施肥</div>
+            <div class="t2">奶油生菜 · 复合肥 5kg</div>
+            <div class="task-meta"><span class="meta-chip">14:00</span></div>
+          </div>
+        </div>
+        <div class="task-card">
+          <div class="left-dot" style="background:var(--ink-300)"></div>
+          <div class="task-content">
+            <div class="t1">提交今日日报</div>
+            <div class="t2">下班前完成</div>
+            <div class="task-meta"><span class="meta-chip">17:30 前</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab active"><div class="icon">🏠</div>任务</div>
+        <div class="tab"><div class="icon">📋</div>记录</div>
+        <div class="tab"><div class="icon">📊</div>统计</div>
+        <div class="tab"><div class="icon">👤</div>我的</div>
+      </div>
+    </div></div>
+    <div class="phone-label">屏 2 · 首页 / 我的任务<br><span class="phone-tag">大头图 + 快捷操作</span></div>
+  </div>
+
+  <!-- ======= 屏 3: 农事录入 ======= -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="form-screen">
+        <div class="status-bar"><span>9:43</span><span>● ● ● 5G ●●●</span></div>
+        <div class="nav">
+          <div class="back">‹</div>
+          <div class="title">录入农事</div>
+          <div style="width:32px"></div>
+        </div>
+
+        <div class="form-area">
+          <div class="form-step">
+            <div class="step-num">1</div>
+            <div class="step-text">3 步完成：选地块 → 选类型 + 投入品 → 拍照保存。<br>弱网会自动缓存，恢复后同步。</div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">地块 <span class="req">*</span></div>
+            <div class="field-input selected">P-001 东大棚 1 号</div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">类型 <span class="req">*</span></div>
+            <div class="chip-group">
+              <div class="chip">播种</div>
+              <div class="chip active">施肥</div>
+              <div class="chip">打药</div>
+              <div class="chip">除草</div>
+              <div class="chip">灌溉</div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">投入品</div>
+            <div class="input-item">
+              <div>
+                <div class="input-item-name">复合肥</div>
+                <div class="input-item-meta">库存 240kg · 单价 ¥4.5</div>
+              </div>
+              <div class="qty-control">
+                <span class="qty-btn">−</span>
+                <span>5 kg</span>
+                <span class="qty-btn">+</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">现场照片</div>
+            <div class="photo-grid">
+              <div class="photo-slot has">📷</div>
+              <div class="photo-slot has">📷</div>
+              <div class="photo-slot">+</div>
+              <div class="photo-slot"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="btn-large ghost">存草稿</button>
+          <button class="btn-large primary">提交（待审）</button>
+        </div>
+      </div>
+    </div></div>
+    <div class="phone-label">屏 3 · 农事录入<br><span class="phone-tag">3 步极简 · 大触控目标</span></div>
+  </div>
+
+  <!-- ======= 屏 4: 采收录入 ======= -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="harvest-screen">
+        <div class="status-bar" style="color:#fff"><span>9:44</span><span>● ● ● 5G ●●●</span></div>
+        <div class="nav" style="color:#fff">
+          <div class="back" style="color:#fff">‹</div>
+          <div class="title" style="color:#fff">采收登记</div>
+          <div style="width:32px"></div>
+        </div>
+
+        <div class="harvest-top">
+          <div class="title-l">P-001 东大棚 1 号</div>
+          <div class="title-xl">樱桃番茄</div>
+          <div class="sub">PL-26-0001 · 第 8 次采收</div>
+        </div>
+
+        <div class="harvest-mid">
+          <div class="qty-pad">
+            <div class="qty-label">采收数量</div>
+            <div class="qty-value">380<span class="qty-unit">kg</span></div>
+            <div class="qty-keys">
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">.</div><div class="key">0</div><div class="key action">⌫</div>
+            </div>
+          </div>
+
+          <div class="batch-preview">
+            <div class="lbl">保存后将自动生成批次号</div>
+            <div class="code">B-20260523-P001-01</div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="btn-large ghost">📷 拍照</button>
+          <button class="btn-large primary">保存并生成批次</button>
+        </div>
+      </div>
+    </div></div>
+    <div class="phone-label">屏 4 · 采收录入<br><span class="phone-tag">琥珀色主题 · 大数字键盘</span></div>
+  </div>
+
+  <!-- ======= 屏 5: 日报 ======= -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="report-screen">
+        <div class="status-bar"><span>17:25</span><span>● ● ● 5G ●●●</span></div>
+        <div class="nav">
+          <div class="back">‹</div>
+          <div class="title">今日日报</div>
+          <div style="width:32px"></div>
+        </div>
+
+        <div class="report-top">
+          <div class="report-date">
+            <div>
+              <div class="d">2026 年 5 月 23 日</div>
+              <div class="day">星期六 · 晴 26°C</div>
+            </div>
+            <div class="progress-ring">
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle cx="28" cy="28" r="24" fill="none" stroke="#E8F5E9" stroke-width="4"/>
+                <circle cx="28" cy="28" r="24" fill="none" stroke="#2E7D32" stroke-width="4"
+                        stroke-dasharray="150.8" stroke-dashoffset="30"/>
+              </svg>
+              <div class="pct">80%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-mob">
+          <div class="tl-block">
+            <div class="tl-h"><div class="tl-icon tl-i1">✓</div>今日完成（3 项）</div>
+            <div class="done-item">
+              <div class="check">✓</div>
+              <div class="done-text">P-001 樱桃番茄采收 380kg <br><span style="color:var(--ink-500);font-size:11px">09:15</span></div>
+            </div>
+            <div class="done-item">
+              <div class="check">✓</div>
+              <div class="done-text">P-001 施肥 · 复合肥 5kg <br><span style="color:var(--ink-500);font-size:11px">14:20</span></div>
+            </div>
+            <div class="done-item">
+              <div class="check">✓</div>
+              <div class="done-text">P-002 灌溉 30 分钟 <br><span style="color:var(--ink-500);font-size:11px">16:00</span></div>
+            </div>
+          </div>
+
+          <div class="tl-block">
+            <div class="tl-h"><div class="tl-icon tl-i2">⚠</div>遇到问题</div>
+            <div class="add-row">+ 添加问题描述</div>
+          </div>
+
+          <div class="tl-block">
+            <div class="tl-h"><div class="tl-icon tl-i3">📅</div>明日计划</div>
+            <div class="done-item" style="border-left:3px solid var(--info)">
+              <div class="done-text" style="color:var(--ink-700)">明天 8:00 P-003 黄瓜采收</div>
+            </div>
+            <div class="add-row">+ 添加明日安排</div>
+          </div>
+        </div>
+
+        <div class="submit-bar">
+          <button class="btn-large primary" style="width:100%">提交日报</button>
+        </div>
+      </div>
+    </div></div>
+    <div class="phone-label">屏 5 · 日报<br><span class="phone-tag">完成度环形进度</span></div>
+  </div>
+
+</div>
+
+<!-- ====================== 设计要点说明 ====================== -->
+<div class="section-title">设计交付要点 / Designer's Notes</div>
+
+<div style="background:#fff;border-radius:var(--r-md);padding:24px;box-shadow:var(--shadow-2)">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+
+    <div>
+      <h3 style="color:var(--brand-500);font-size:15px;margin-bottom:10px">🎨 品牌系统</h3>
+      <ul style="padding-left:18px;font-size:13px;color:var(--ink-700);line-height:1.8">
+        <li>主色深绿 #2E7D32（自然 · 生机 · 可信）</li>
+        <li>辅色琥珀 #FF8F00（成熟 · 收获 · 行动）</li>
+        <li>登录页与采收页用品牌色全屏沉浸</li>
+        <li>表单页保持白底，降低视觉负担</li>
+        <li>四色状态语义统一：成功绿 / 警示橙 / 错误红 / 信息蓝</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 style="color:var(--brand-500);font-size:15px;margin-bottom:10px">📱 移动端原则</h3>
+      <ul style="padding-left:18px;font-size:13px;color:var(--ink-700);line-height:1.8">
+        <li>关键按钮 ≥ 88×44 px，户外手指可触</li>
+        <li>录入流程 ≤ 3 步、单屏完成</li>
+        <li>核心操作底部固定（不随滚动消失）</li>
+        <li>大数字键盘（采收屏）替代键盘输入</li>
+        <li>Chip 选择优于下拉，减少操作层级</li>
+        <li>页面切换横向 · 任务流向纵向</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 style="color:var(--brand-500);font-size:15px;margin-bottom:10px">⚡ 性能与可用性</h3>
+      <ul style="padding-left:18px;font-size:13px;color:var(--ink-700);line-height:1.8">
+        <li>离线优先：所有提交先存本地</li>
+        <li>状态可见：上传中 / 待同步 / 已同步</li>
+        <li>无网络也能查看历史记录</li>
+        <li>关键页面骨架屏 < 200ms 显示</li>
+        <li>图片懒加载 + 自动压缩到 200kb</li>
+        <li>支持系统字号缩放</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-title">下一步</div>
+<div style="background:#fff;border-radius:var(--r-md);padding:20px;box-shadow:var(--shadow-2);font-size:13.5px;line-height:1.8;color:var(--ink-700)">
+  ① 本稿可直接用 Figma 重新像素级还原，输出 @2x / @3x 切图<br>
+  ② 设计交付给前端：色板与圆角已抽成 CSS 变量，可直接复制到 uni-app<br>
+  ③ 还需补充：商品图占位、空状态插画、错误页插画、引导页（Onboarding 3 屏）<br>
+  ④ PC 端高保真已在配套文件 <code>design-pc-hifi.html</code> 中
+</div>
+
+</body>
+</html>

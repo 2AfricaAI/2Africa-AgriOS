@@ -1,0 +1,119 @@
+# ============================================================================
+# Albert's Farm Agri OS - Local Dev Environment
+# Usage:
+#   docker compose up -d           # start
+#   docker compose logs -f mysql   # follow logs
+#   docker compose down            # stop & keep volumes
+#   docker compose down -v         # stop & wipe volumes (RESET DB)
+# ============================================================================
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: af-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: alberts_farm
+      MYSQL_USER: alberts
+      MYSQL_PASSWORD: alberts123
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+      - --explicit-defaults-for-timestamp=ON
+      - --max-allowed-packet=64M
+      - --innodb-buffer-pool-size=256M
+    ports:
+      - "3306:3306"
+    volumes:
+      - af_mysql_data:/var/lib/mysql
+      - ../schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: af-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis123 --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - af_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================================
+  # Spring Boot 后端 - 直接用 Dockerfile 构建,无需本地装 JDK/Maven
+  # ============================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: alberts-farm-backend:dev
+    container_name: af-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      TZ: Asia/Shanghai
+      SPRING_PROFILES_ACTIVE: dev
+      # 通过容器名访问 mysql/redis (替代 application-dev.yml 里的 localhost)
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/alberts_farm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+      SPRING_DATASOURCE_USERNAME: alberts
+      SPRING_DATASOURCE_PASSWORD: alberts123
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: redis123
+      REDISSON_ADDRESS: redis://redis:6379
+      REDISSON_PASSWORD: redis123
+      # JWT 密钥(64 字符以上,HS512 安全要求)
+      JWT_SECRET: alberts-farm-dev-secret-CHANGE-IN-PROD-must-be-256-bits-long-1234
+      # 对象存储: 本地开发用 MinIO 顶替阿里云 OSS
+      # 后端代码读取这些变量后,可以无缝切到生产 OSS(只改环境变量,不改代码)
+      OSS_ENDPOINT: http://minio:9000        # 容器内访问 (上传时用)
+      OSS_PUBLIC_ENDPOINT: http://localhost:9000  # 浏览器访问 (预签名 URL 用)
+      OSS_AK: minio
+      OSS_SK: minio123456
+      OSS_BUCKET: alberts-farm
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # 可选：MinIO 替代阿里云 OSS 本地开发
+  minio:
+    image: minio/minio:latest
+    container_name: af-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123456
+      # 开发期允许任意来源跨域(浏览器直传 / 直下),生产改成具体域名
+      MINIO_API_CORS_ALLOW_ORIGIN: "*"
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # 控制台
+    volumes:
+      - af_minio_data:/data
+
+volumes:
+  af_mysql_data:
+  af_redis_data:
+  af_minio_data:

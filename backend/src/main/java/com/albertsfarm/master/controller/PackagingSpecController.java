@@ -1,0 +1,70 @@
+package com.albertsfarm.master.controller;
+
+import com.albertsfarm.common.PageQuery;
+import com.albertsfarm.common.PageResult;
+import com.albertsfarm.common.R;
+import com.albertsfarm.master.dto.PackagingSpecForm;
+import com.albertsfarm.master.entity.PackagingSpec;
+import com.albertsfarm.master.service.PackagingSpecService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@Tag(name = "22 · 主数据-包装规格", description = "包装规格列表 / 详情")
+@RestController
+@RequestMapping("/v1/master/packaging-specs")
+@RequiredArgsConstructor
+public class PackagingSpecController {
+
+    private final PackagingSpecService packagingSpecService;
+
+    @Operation(summary = "包装规格列表(分页 + 过滤)")
+    @GetMapping
+    public R<PageResult<PackagingSpec>> list(
+            @Parameter(description = "名称模糊查询") @RequestParam(required = false) String name,
+            @Parameter(description = "编码模糊查询") @RequestParam(required = false) String code,
+            @Parameter(description = "状态 1=启用 0=停用") @RequestParam(required = false) Integer status,
+            PageQuery pq) {
+        return R.ok(packagingSpecService.page(name, code, status, pq));
+    }
+
+    @Operation(summary = "包装规格详情")
+    @GetMapping("/{id}")
+    public R<PackagingSpec> detail(@PathVariable Long id) {
+        return R.ok(packagingSpecService.detail(id));
+    }
+
+    @Operation(summary = "新建包装规格")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
+    @PostMapping
+    public R<Long> create(@Valid @RequestBody PackagingSpecForm form) {
+        return R.ok(packagingSpecService.create(form));
+    }
+
+    @Operation(summary = "修改包装规格")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
+    @PutMapping("/{id}")
+    public R<Void> update(@PathVariable Long id, @Valid @RequestBody PackagingSpecForm form) {
+        packagingSpecService.update(id, form);
+        return R.ok();
+    }
+
+    @Operation(summary = "启用 / 停用 (status: 1=启用 0=停用)")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
+    @PostMapping("/{id}/status/{status}")
+    public R<Void> changeStatus(@PathVariable Long id, @PathVariable Integer status) {
+        packagingSpecService.changeStatus(id, status);
+        return R.ok();
+    }
+}
