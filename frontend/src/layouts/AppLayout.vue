@@ -4,7 +4,7 @@
     <el-aside :width="collapse ? '64px' : '220px'" class="aside">
       <div class="brand">
         <span class="dot"></span>
-        <span v-if="!collapse" class="brand-text">Albert's Farm</span>
+        <span v-if="!collapse" class="brand-text">2Africa AgriOS</span>
       </div>
 
       <el-menu
@@ -31,6 +31,19 @@
           <el-menu-item index="/master/packaging-specs">包装规格</el-menu-item>
           <el-menu-item index="/master/warehouses">仓库库位</el-menu-item>
         </el-sub-menu>
+
+        <el-sub-menu index="production">
+          <template #title>
+            <el-icon><ProductionIcon /></el-icon>
+            <span>生产</span>
+          </template>
+          <el-menu-item index="/production/planting-plans">种植计划</el-menu-item>
+        </el-sub-menu>
+
+        <el-menu-item index="/demo/files">
+          <el-icon><FolderIcon /></el-icon>
+          <template #title>文件上传演示</template>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -64,6 +77,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   HomeFilled as HomeIcon,
   Goods as GoodsIcon,
+  Folder as FolderIcon,
+  Sunny as ProductionIcon,
   Expand as ExpandIcon,
   Fold as FoldIcon,
 } from '@element-plus/icons-vue'

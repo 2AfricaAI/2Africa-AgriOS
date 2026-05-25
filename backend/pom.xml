@@ -12,11 +12,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.albertsfarm</groupId>
-    <artifactId>alberts-farm-backend</artifactId>
+    <groupId>ai.toafrica</groupId>
+    <artifactId>agrios-backend</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>alberts-farm-backend</name>
-    <description>Albert's Farm Agri OS - Phase 1 MVP Backend</description>
+    <name>agrios-backend</name>
+    <description>2Africa AgriOS - Phase 1 MVP Backend</description>
 
     <properties>
         <java.version>17</java.version>

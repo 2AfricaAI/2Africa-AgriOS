@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.albertsfarm.production.mapper.PlotMapper">
+<mapper namespace="ai.toafrica.agrios.production.mapper.PlotMapper">
 
-  <resultMap id="PlotVOMap" type="com.albertsfarm.production.mapper.PlotMapper$PlotVO">
+  <resultMap id="PlotVOMap" type="ai.toafrica.agrios.production.mapper.PlotMapper$PlotVO">
     <id     property="id"          column="id"/>
     <result property="code"        column="code"/>
     <result property="name"        column="name"/>
@@ -46,7 +46,7 @@
     ORDER BY p.updated_at DESC, p.id DESC
   </select>
 
-  <select id="statsLast30Days" resultType="com.albertsfarm.production.mapper.PlotMapper$PlotStatVO">
+  <select id="statsLast30Days" resultType="ai.toafrica.agrios.production.mapper.PlotMapper$PlotStatVO">
     SELECT
       (SELECT COUNT(*) FROM activity
         WHERE plot_id = #{plotId} AND occur_date >= CURDATE() - INTERVAL 30 DAY) AS activity_count,

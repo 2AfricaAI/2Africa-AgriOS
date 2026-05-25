@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Albert's Farm Agri OS - 登录链路 e2e 冒烟测试
+# 2Africa AgriOS - 登录链路 e2e 冒烟测试
 # 用法: bash smoke-test.sh
 # 依赖: docker compose 已经 up,后端服务已经 mvn spring-boot:run
 # ============================================================================
@@ -17,7 +17,7 @@ pass() { echo -e "${G}[$1/8] ✓ $2${NC}"; PASS=$((PASS+1)); }
 fail() { echo -e "${R}[$1/8] ✗ $2${NC}"; FAIL=$((FAIL+1)); }
 
 echo "════════════════════════════════════════════════════════════"
-echo "  Albert's Farm /v1/auth/login 端到端冒烟测试"
+echo "  2Africa AgriOS /v1/auth/login 端到端冒烟测试"
 echo "════════════════════════════════════════════════════════════"
 
 # ---------- [1] docker services ----------
@@ -91,7 +91,7 @@ else
 fi
 
 # ---------- [8] last_login_at 更新 ----------
-LL=$(docker exec af-mysql mysql -ualberts -palberts123 alberts_farm -sN \
+LL=$(docker exec toafrica-mysql mysql -ualberts -palberts123 toafrica_agrios -sN \
      -e "SELECT last_login_at FROM sys_user WHERE id=1" 2>/dev/null)
 if [ -n "$LL" ] && [ "$LL" != "NULL" ]; then
   pass 8 "sys_user.last_login_at 已更新: $LL"

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Albert's Farm Agri OS - Phase 1 MVP Database Schema
+-- 2Africa AgriOS - Phase 1 MVP Database Schema
 -- MySQL 8.0+ / InnoDB / utf8mb4
 -- Version: V1.0
 -- Date: 2026-05-19
@@ -8,11 +8,11 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP DATABASE IF EXISTS `alberts_farm`;
-CREATE DATABASE `alberts_farm`
+DROP DATABASE IF EXISTS `toafrica_agrios`;
+CREATE DATABASE `toafrica_agrios`
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_unicode_ci;
-USE `alberts_farm`;
+USE `toafrica_agrios`;
 
 -- ============================================================================
 -- 1. SYSTEM / RBAC

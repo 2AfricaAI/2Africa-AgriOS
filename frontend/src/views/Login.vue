@@ -4,7 +4,7 @@
       <template #header>
         <div class="login-header">
           <span class="dot"></span>
-          <span>Albert's Farm Agri OS</span>
+          <span>2Africa AgriOS</span>
         </div>
       </template>
 

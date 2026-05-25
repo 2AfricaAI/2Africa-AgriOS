@@ -2,7 +2,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: alberts-farm-backend
+    name: agrios-backend
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -24,7 +24,7 @@ server:
 # MyBatis-Plus
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
-  type-aliases-package: com.albertsfarm.**.entity
+  type-aliases-package: ai.toafrica.agrios.**.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -36,12 +36,12 @@ mybatis-plus:
       logic-not-delete-value: 'NULL'
 
 # 业务配置
-albertsfarm:
+agrios:
   jwt:
     secret: ${JWT_SECRET:CHANGE_ME_IN_PROD_at_least_64_chars_long_for_HS512_to_be_safe_xx}
     access-token-ttl-minutes: 120
     refresh-token-ttl-days: 7
-    issuer: alberts-farm
+    issuer: 2africa-agrios
   cors:
     allowed-origins: "*"
     allowed-methods: GET,POST,PUT,DELETE,OPTIONS
@@ -66,7 +66,7 @@ albertsfarm:
     public-endpoint: ${OSS_PUBLIC_ENDPOINT:}
     access-key: ${OSS_AK:}
     secret-key: ${OSS_SK:}
-    bucket: ${OSS_BUCKET:alberts-farm}
+    bucket: ${OSS_BUCKET:2africa-agrios}
 
 # Swagger / OpenAPI
 springdoc:
@@ -81,11 +81,11 @@ springdoc:
 logging:
   level:
     root: INFO
-    com.albertsfarm: DEBUG
+    ai.toafrica.agrios: DEBUG
     org.springframework.security: INFO
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   file:
-    name: logs/alberts-farm.log
+    name: logs/2africa-agrios.log
     max-size: 100MB
     max-history: 30

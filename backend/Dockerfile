@@ -1,5 +1,5 @@
 # ============================================================================
-# Multi-stage build for Albert's Farm Backend
+# Multi-stage build for 2Africa AgriOS Backend
 # ============================================================================
 
 FROM maven:3.9-eclipse-temurin-17 AS builder
@@ -62,7 +62,7 @@ WORKDIR /app
 ENV TZ=Asia/Shanghai \
     JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -Dfile.encoding=UTF-8"
 
-COPY --from=builder /build/target/alberts-farm-backend.jar app.jar
+COPY --from=builder /build/target/agrios-backend.jar app.jar
 
 EXPOSE 8080
 

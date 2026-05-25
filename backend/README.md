@@ -1,4 +1,4 @@
-# Albert's Farm Agri OS — Backend
+# 2Africa AgriOS — Backend
 
 > Phase 1 MVP · Spring Boot 3 + MyBatis-Plus + JWT + MySQL 8 + Redis 7
 
@@ -11,8 +11,8 @@ backend/
 ├── pom.xml                     # Maven 依赖
 ├── README.md
 └── src/main/
-    ├── java/com/albertsfarm/
-    │   ├── AlbertsFarmApplication.java
+    ├── java/ai/toafrica/agrios/
+    │   ├── AgriOsApplication.java
     │   ├── common/                    # 统一响应/分页/异常
     │   │   ├── R.java
     │   │   ├── PageQuery.java
@@ -51,7 +51,7 @@ docker compose up -d
 ```
 
 会自动拉起：
-- **MySQL 8** :3306（库 `alberts_farm`，自动加载 `../schema.sql`）
+- **MySQL 8** :3306（库 `toafrica_agrios`，自动加载 `../schema.sql`）
 - **Redis 7** :6379（密码 `redis123`）
 - **MinIO**   :9000 / :9001（OSS 本地替代）
 
@@ -63,7 +63,7 @@ docker compose logs -f mysql
 ### 2. 验证数据库初始化
 
 ```bash
-docker exec -it af-mysql mysql -uroot -proot123456 alberts_farm \
+docker exec -it toafrica-mysql mysql -uroot -proot123456 toafrica_agrios \
   -e "SHOW TABLES;"
 ```
 
@@ -77,11 +77,11 @@ mvn spring-boot:run
 
 # 方式 B：打包后运行
 mvn clean package -DskipTests
-java -jar target/alberts-farm-backend.jar
+java -jar target/agrios-backend.jar
 
 # 方式 C：Docker 容器化
-docker build -t alberts-farm-backend .
-docker run -p 8080:8080 --network host alberts-farm-backend
+docker build -t agrios-backend .
+docker run -p 8080:8080 --network host agrios-backend
 ```
 
 启动成功后访问：
@@ -215,7 +215,7 @@ docs(readme): 补充快速启动指引
 ## 风险点 & 注意事项
 
 1. **schema.sql 路径**：docker-compose 用相对路径 `../schema.sql`，需保持目录结构
-2. **JWT secret**：生产必须替换 `application.yml` 里的 `albertsfarm.jwt.secret`
+2. **JWT secret**：生产必须替换 `application.yml` 里的 `agrios.jwt.secret`
 3. **CORS**：生产环境收紧 `allowed-origins`，不要用通配符
 4. **Redis 密码**：生产替换 `application-dev.yml` 里的密码
 5. **MySQL CHECK 约束**：MySQL 8.0.16+ 强制生效，注意 `area_mu > 0` 等
@@ -233,7 +233,7 @@ docs(readme): 补充快速启动指引
 
 ## 相关文档
 
-- 产品需求：`../Albert's Farm 产品需求文档 PRD V1.0.docx`
-- 技术设计：`../Albert's Farm 技术设计文档 V1.0.docx`
+- 产品需求：`../2Africa AgriOS 产品需求文档 PRD V1.0.docx`
+- 技术设计：`../2Africa AgriOS 技术设计文档 V1.0.docx`
 - 数据库：`../schema.sql`
 - UI 原型：`../prototype.html`

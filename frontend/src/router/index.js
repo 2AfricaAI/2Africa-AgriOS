@@ -44,6 +44,18 @@ const routes = [
         component: () => import('@/views/master/WarehouseList.vue'),
         meta: { title: '仓库库位' },
       },
+      {
+        path: 'production/planting-plans',
+        name: 'planting-plans',
+        component: () => import('@/views/production/PlantingPlanList.vue'),
+        meta: { title: '种植计划' },
+      },
+      {
+        path: 'demo/files',
+        name: 'file-demo',
+        component: () => import('@/views/FileDemo.vue'),
+        meta: { title: '文件上传演示' },
+      },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/' },
@@ -56,7 +68,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
-  document.title = to.meta.title ? `${to.meta.title} · Albert's Farm` : "Albert's Farm"
+  document.title = to.meta.title ? `${to.meta.title} · 2Africa AgriOS` : "2Africa AgriOS"
 
   if (!to.meta.public && !auth.isLoggedIn) {
     return { path: '/login', query: { redirect: to.fullPath } }
