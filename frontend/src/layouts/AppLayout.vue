@@ -39,6 +39,8 @@
           </template>
           <el-menu-item index="/production/planting-plans">种植计划</el-menu-item>
           <el-menu-item index="/production/activities">农事记录</el-menu-item>
+          <el-menu-item index="/production/harvests">采收记录</el-menu-item>
+          <el-menu-item index="/production/batches">批次追溯</el-menu-item>
         </el-sub-menu>
 
         <el-menu-item index="/demo/files">

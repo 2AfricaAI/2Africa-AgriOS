@@ -57,6 +57,18 @@ const routes = [
         meta: { title: '农事记录' },
       },
       {
+        path: 'production/harvests',
+        name: 'harvests',
+        component: () => import('@/views/production/HarvestList.vue'),
+        meta: { title: '采收记录' },
+      },
+      {
+        path: 'production/batches',
+        name: 'batches',
+        component: () => import('@/views/production/BatchList.vue'),
+        meta: { title: '批次追溯' },
+      },
+      {
         path: 'demo/files',
         name: 'file-demo',
         component: () => import('@/views/FileDemo.vue'),
