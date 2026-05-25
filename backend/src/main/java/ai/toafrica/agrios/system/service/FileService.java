@@ -141,6 +141,24 @@ public class FileService {
         return toVO(f);
     }
 
+    /**
+     * 批量取文件元数据 (含 fresh 预签名 URL)
+     * - 给业务表的"文件 IDs JSON 数组"做附加渲染用
+     * - 不存在的 id 静默忽略,不抛异常(业务表里的引用可能已被删)
+     * - 保持原 ids 顺序
+     */
+    public java.util.List<FileVO> getFilesByIds(java.util.List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return java.util.Collections.emptyList();
+        java.util.List<SysFile> list = fileMapper.selectBatchIds(ids);
+        java.util.Map<Long, SysFile> byId = new java.util.HashMap<>();
+        for (SysFile f : list) byId.put(f.getId(), f);
+        return ids.stream()
+                .map(byId::get)
+                .filter(java.util.Objects::nonNull)
+                .map(this::toVO)
+                .toList();
+    }
+
     // ============================================================
     // 内部辅助
     // ============================================================

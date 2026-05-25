@@ -51,6 +51,12 @@ const routes = [
         meta: { title: '种植计划' },
       },
       {
+        path: 'production/activities',
+        name: 'activities',
+        component: () => import('@/views/production/ActivityList.vue'),
+        meta: { title: '农事记录' },
+      },
+      {
         path: 'demo/files',
         name: 'file-demo',
         component: () => import('@/views/FileDemo.vue'),

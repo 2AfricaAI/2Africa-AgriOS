@@ -1,7 +1,7 @@
 <template>
   <el-container class="layout">
     <!-- 左侧栏 -->
-    <el-aside :width="collapse ? '64px' : '220px'" class="aside">
+    <el-aside :width="collapse ? '56px' : '200px'" class="aside">
       <div class="brand">
         <span class="dot"></span>
         <span v-if="!collapse" class="brand-text">2Africa AgriOS</span>
@@ -38,6 +38,7 @@
             <span>生产</span>
           </template>
           <el-menu-item index="/production/planting-plans">种植计划</el-menu-item>
+          <el-menu-item index="/production/activities">农事记录</el-menu-item>
         </el-sub-menu>
 
         <el-menu-item index="/demo/files">
@@ -113,24 +114,26 @@ async function onLogout() {
 }
 
 .brand {
-  height: 56px;
+  height: 48px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 18px;
+  gap: 8px;
+  padding: 0 14px;
   color: #fff;
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.2px;
   border-bottom: 1px solid #1f3a5f;
   white-space: nowrap;
 }
 
 .brand .dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #52c41a;
   flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(82, 196, 26, 0.6);
 }
 
 .menu {
@@ -138,33 +141,32 @@ async function onLogout() {
 }
 
 .menu:not(.el-menu--collapse) {
-  width: 220px;
+  width: 200px;
 }
 
 .topbar {
+  height: 48px !important;
   background: #fff;
   border-bottom: 1px solid #ebeef5;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, .06);
+  box-shadow: 0 1px 2px rgba(0, 21, 41, .04);
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .welcome {
-  font-size: 14px;
+  font-size: 13px;
   color: #1f2329;
 }
 
 .main {
   background: #f0f2f5;
-  padding: 20px;
   overflow: auto;
 }
 </style>

@@ -71,10 +71,9 @@
         <el-table-column label="面积(亩)" width="100" align="right">
           <template #default="{ row }">{{ Number(row.areaMu).toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column label="计划周期" width="200">
+        <el-table-column label="计划周期" width="230">
           <template #default="{ row }">
-            <div>{{ row.planStartDate }}</div>
-            <div class="dim">↓ {{ row.planHarvestDate }}</div>
+            <DateRange :start="row.planStartDate" :end="row.planHarvestDate" />
           </template>
         </el-table-column>
         <el-table-column label="目标产量(kg)" width="120" align="right">
@@ -90,7 +89,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right" align="center">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="onEdit(row)">编辑</el-button>
             <el-dropdown @command="(s) => onChangeStatus(row, s)" style="margin: 0 6px">
@@ -267,6 +266,7 @@ import {
 import { listPlots } from '@/api/plot'
 import { listCrops } from '@/api/crop'
 import { listVarieties } from '@/api/variety'
+import DateRange from '@/components/DateRange.vue'
 
 // ============================================================
 // 状态字典
