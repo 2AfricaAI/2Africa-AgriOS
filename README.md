@@ -238,5 +238,5 @@ Proprietary — © 2026 2Africa.AI. All rights reserved.
 ## 🙏 关于
 
 由 [@2AfricaAI](https://github.com/2AfricaAI) 与 Claude (Anthropic) 协作开发。
-项目从 2026 年 3 月起步，原名 "Albert's Farm"，2026 年 5 月更名为 "2Africa AgriOS"。
+项目从 2026 年 3 月起步，2026 年 5 月更名为 "2Africa AgriOS"。
                      
