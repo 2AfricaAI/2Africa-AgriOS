@@ -64,6 +64,7 @@ export default {
     empty: '暂无数据',
     actions: '操作',
     operate: '操作',
+    more: '更多',
     all: '全部',
     enable: '已启用',
     disable: '已停用',

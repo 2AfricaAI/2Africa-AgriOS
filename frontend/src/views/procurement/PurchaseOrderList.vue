@@ -127,19 +127,10 @@
             <span :class="{ overdue: isOverdue(row) }">{{ row.dueDate || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column :label="t('common.actions')" width="320" fixed="right" align="center">
+        <el-table-column :label="t('common.actions')" width="200" fixed="right" align="center">
           <template #default="{ row }">
             <el-button link type="info" size="small" @click="goDetail(row)">
               {{ t('po.viewDetail') }}
-            </el-button>
-            <el-button link type="primary" size="small" @click="onEdit(row)" :disabled="!isEditable(row.status)">
-              {{ t('common.edit') }}
-            </el-button>
-            <el-button v-if="row.status === 'draft'" link type="success" size="small" @click="onConfirm(row)">
-              {{ t('po.confirm') }}
-            </el-button>
-            <el-button v-if="row.status === 'confirmed' || row.status === 'partial_received'" link type="success" size="small" @click="onReceive(row)">
-              {{ t('po.receive') }}
             </el-button>
             <el-button
               v-if="row.paymentStatus !== 'paid' && row.status !== 'cancelled' && row.status !== 'draft'"
@@ -147,12 +138,30 @@
             >
               💰 {{ t('vpay.record') }}
             </el-button>
-            <el-button v-if="row.status === 'draft' || row.status === 'confirmed'" link type="warning" size="small" @click="onCancel(row)">
-              {{ t('po.cancel') }}
-            </el-button>
-            <el-button v-if="row.status === 'draft' || row.status === 'cancelled'" link type="danger" size="small" @click="onDelete(row)">
-              {{ t('common.delete') }}
-            </el-button>
+            <el-dropdown trigger="click" @command="(cmd) => onActionCommand(cmd, row)">
+              <el-button link type="primary" size="small">
+                {{ t('common.more') }} <el-icon><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="edit" :disabled="!isEditable(row.status)">
+                    {{ t('common.edit') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="row.status === 'draft'" command="confirm">
+                    ✓ {{ t('po.confirm') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="row.status === 'confirmed' || row.status === 'partial_received'" command="receive">
+                    📦 {{ t('po.receive') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="row.status === 'draft' || row.status === 'confirmed'" command="cancel" divided>
+                    ✗ {{ t('po.cancel') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="row.status === 'draft' || row.status === 'cancelled'" command="delete">
+                    {{ t('common.delete') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -303,6 +312,7 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Plus as PlusIcon,
+  ArrowDown,
 } from '@element-plus/icons-vue'
 import {
   listPurchaseOrders,
@@ -321,6 +331,16 @@ const { t } = useI18n()
 const router = useRouter()
 
 function goDetail(row) { router.push(`/procurement/orders/${row.id}`) }
+
+function onActionCommand(cmd, row) {
+  switch (cmd) {
+    case 'edit':    return onEdit(row)
+    case 'confirm': return onConfirm(row)
+    case 'receive': return onReceive(row)
+    case 'cancel':  return onCancel(row)
+    case 'delete':  return onDelete(row)
+  }
+}
 
 // ----- enums -----
 const INPUT_TYPE_OPTIONS = computed(() => [

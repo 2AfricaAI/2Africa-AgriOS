@@ -67,6 +67,7 @@ export default {
     empty: 'No data',
     actions: 'Actions',
     operate: 'Operations',
+    more: 'More',
     all: 'All',
     enable: 'Enabled',
     disable: 'Disabled',
