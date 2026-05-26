@@ -4,75 +4,61 @@
     <div class="hero">
       <div>
         <div class="greeting">{{ greeting }}, {{ auth.nickname || auth.username }} 👋</div>
-        <div class="sub">Welcome to <strong>2Africa AgriOS</strong> · AI Farm Management OS for Africa</div>
+        <div class="sub" v-html="subtitleHtml"></div>
       </div>
-      <el-button :icon="RefreshIcon" plain @click="load">刷新</el-button>
+      <el-button :icon="RefreshIcon" plain @click="load">{{ t('common.refresh') }}</el-button>
     </div>
 
     <!-- KPI 4 卡片 -->
     <div class="kpi-grid">
-      <div class="kpi-card" :class="['c-blue']">
-        <div class="kpi-label">进行中计划</div>
+      <div class="kpi-card c-blue">
+        <div class="kpi-label">{{ t('home.kpiActivePlans') }}</div>
         <div class="kpi-value">{{ data.activePlanCount ?? '-' }}</div>
-        <div class="kpi-foot">已排期 / 种植中</div>
+        <div class="kpi-foot">{{ t('home.kpiActivePlansFoot') }}</div>
       </div>
-      <div class="kpi-card" :class="['c-orange']">
-        <div class="kpi-label">待审核农事</div>
+      <div class="kpi-card c-orange">
+        <div class="kpi-label">{{ t('home.kpiPendingActivities') }}</div>
         <div class="kpi-value">{{ data.pendingActivityCount ?? '-' }}</div>
-        <div class="kpi-foot">需 Manager 审批</div>
+        <div class="kpi-foot">{{ t('home.kpiPendingActivitiesFoot') }}</div>
       </div>
-      <div class="kpi-card" :class="['c-green']">
-        <div class="kpi-label">今日采收 (kg)</div>
+      <div class="kpi-card c-green">
+        <div class="kpi-label">{{ t('home.kpiTodayHarvest') }}</div>
         <div class="kpi-value">{{ formatNum(data.todayHarvestKg) }}</div>
         <div class="kpi-foot">{{ todayDate }}</div>
       </div>
-      <div class="kpi-card" :class="['c-purple']">
-        <div class="kpi-label">待处理批次</div>
+      <div class="kpi-card c-purple">
+        <div class="kpi-label">{{ t('home.kpiPendingBatches') }}</div>
         <div class="kpi-value">{{ data.pendingBatchCount ?? '-' }}</div>
-        <div class="kpi-foot">pending 状态</div>
+        <div class="kpi-foot">{{ t('home.kpiPendingBatchesFoot') }}</div>
       </div>
     </div>
 
-    <!-- 两张图卡 -->
+    <!-- ECharts 图表区 -->
     <div class="charts-row">
       <el-card shadow="never" class="chart-card">
-        <template #header><span>📈 近 7 天采收趋势 (kg)</span></template>
-        <div class="trend-bars">
-          <div
-            v-for="(d, i) in data.harvest7Days || []"
-            :key="i"
-            class="trend-col"
-            :title="`${d.date}: ${formatNum(d.qty)} kg`"
-          >
-            <div class="bar-wrap">
-              <div
-                class="bar"
-                :style="{ height: barHeight(d.qty) + '%' }"
-              ></div>
-            </div>
-            <div class="bar-value">{{ shortNum(d.qty) }}</div>
-            <div class="bar-label">{{ shortDate(d.date) }}</div>
+        <template #header>
+          <div class="chart-hdr">
+            <span>{{ t('home.chartTrendTitle') }}</span>
+            <span class="dim">{{ t('home.chartTrendWeekTotal', { total: formatNum(totalWeek) }) }}</span>
           </div>
-        </div>
-        <div v-if="totalWeek === 0" class="empty">本周还没有采收记录</div>
-        <div v-else class="trend-foot">本周合计: <strong>{{ formatNum(totalWeek) }}</strong> kg</div>
+        </template>
+        <v-chart
+          v-if="trendOption"
+          :option="trendOption"
+          autoresize
+          style="height: 260px"
+        />
       </el-card>
 
       <el-card shadow="never" class="chart-card">
-        <template #header><span>🥑 按作物分布 (累计 kg)</span></template>
-        <div v-if="!data.harvestByCrop || data.harvestByCrop.length === 0" class="empty">还没有采收数据</div>
-        <div v-else class="crop-bars">
-          <div v-for="row in data.harvestByCrop" :key="row.crop_id" class="crop-row">
-            <div class="crop-name">{{ row.crop_name || '(未关联作物)' }}</div>
-            <div class="crop-bar-wrap">
-              <div
-                class="crop-bar"
-                :style="{ width: cropPercent(row.qty) + '%' }"
-              ></div>
-            </div>
-            <div class="crop-qty">{{ formatNum(row.qty) }}</div>
-          </div>
-        </div>
+        <template #header><span>{{ t('home.chartByCropTitle') }}</span></template>
+        <v-chart
+          v-if="cropOption"
+          :option="cropOption"
+          autoresize
+          :style="{ height: cropChartHeight + 'px' }"
+        />
+        <div v-else class="empty">{{ t('home.chartNoHarvestYet') }}</div>
       </el-card>
     </div>
 
@@ -81,54 +67,54 @@
       <el-card shadow="never" class="list-card">
         <template #header>
           <div class="list-hdr">
-            <span>⏳ 待审核农事 (Top 5)</span>
+            <span>{{ t('home.pendingActivitiesTop') }}</span>
             <router-link to="/production/activities">
-              <el-button link size="small" type="primary">前往审核 →</el-button>
+              <el-button link size="small" type="primary">{{ t('home.goReview') }}</el-button>
             </router-link>
           </div>
         </template>
         <el-table v-if="data.pendingActivities?.length" :data="data.pendingActivities" :show-header="true" size="small">
-          <el-table-column label="日期" prop="occur_date" width="100" />
-          <el-table-column label="类型" width="90">
+          <el-table-column :label="t('home.colDate')" prop="occur_date" width="100" />
+          <el-table-column :label="t('home.colType')" width="100">
             <template #default="{ row }">
               <el-tag size="small" :type="actTagType(row.activity_type)">
                 {{ actTypeLabel(row.activity_type) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="计划" prop="plan_code" min-width="120" />
-          <el-table-column label="地块" prop="plot_name" min-width="130" />
-          <el-table-column label="操作人" prop="operator_name" width="100" />
+          <el-table-column :label="t('home.colPlan')" prop="plan_code" min-width="120" />
+          <el-table-column :label="t('home.colPlot')" prop="plot_name" min-width="130" />
+          <el-table-column :label="t('home.colOperator')" prop="operator_name" width="100" />
         </el-table>
-        <div v-else class="empty">暂无待审核农事 🎉</div>
+        <div v-else class="empty">{{ t('home.emptyPendingActivities') }}</div>
       </el-card>
 
       <el-card shadow="never" class="list-card">
         <template #header>
           <div class="list-hdr">
-            <span>🌾 最近采收 (Top 5)</span>
+            <span>{{ t('home.recentHarvestsTop') }}</span>
             <router-link to="/production/harvests">
-              <el-button link size="small" type="primary">查看全部 →</el-button>
+              <el-button link size="small" type="primary">{{ t('home.seeAll') }}</el-button>
             </router-link>
           </div>
         </template>
         <el-table v-if="data.recentHarvests?.length" :data="data.recentHarvests" :show-header="true" size="small">
-          <el-table-column label="日期" prop="harvest_date" width="100" />
-          <el-table-column label="采收单号" prop="code" width="160" />
-          <el-table-column label="作物" prop="crop_name" min-width="100" />
-          <el-table-column label="地块" prop="plot_name" min-width="130" />
-          <el-table-column label="量(kg)" align="right" width="100">
+          <el-table-column :label="t('home.colDate')" prop="harvest_date" width="100" />
+          <el-table-column :label="t('home.colCode')" prop="code" width="160" />
+          <el-table-column :label="t('home.colCrop')" prop="crop_name" min-width="100" />
+          <el-table-column :label="t('home.colPlot')" prop="plot_name" min-width="130" />
+          <el-table-column :label="t('home.colQty')" align="right" width="100">
             <template #default="{ row }">
               <strong>{{ formatNum(row.qty_kg) }}</strong>
             </template>
           </el-table-column>
-          <el-table-column label="批次" prop="batch_code" min-width="180">
+          <el-table-column :label="t('home.colBatch')" prop="batch_code" min-width="180">
             <template #default="{ row }">
               <code class="batch-code">{{ row.batch_code }}</code>
             </template>
           </el-table-column>
         </el-table>
-        <div v-else class="empty">暂无采收记录</div>
+        <div v-else class="empty">{{ t('home.emptyRecentHarvests') }}</div>
       </el-card>
     </div>
   </div>
@@ -136,10 +122,33 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Refresh as RefreshIcon } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { getDashboardSummary } from '@/api/dashboard'
 
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { LineChart, BarChart } from 'echarts/charts'
+import {
+  GridComponent,
+  TooltipComponent,
+  TitleComponent,
+  DataZoomComponent,
+} from 'echarts/components'
+import VChart from 'vue-echarts'
+
+use([
+  CanvasRenderer,
+  LineChart,
+  BarChart,
+  GridComponent,
+  TooltipComponent,
+  TitleComponent,
+  DataZoomComponent,
+])
+
+const { t } = useI18n()
 const auth = useAuthStore()
 const data = ref({})
 const loading = ref(false)
@@ -155,18 +164,19 @@ async function load() {
 
 onMounted(load)
 
-// ============================================================
-// 工具
-// ============================================================
 const todayDate = new Date().toISOString().slice(0, 10)
+
+const subtitleHtml = computed(() =>
+  t('home.subtitle', { brand: `<strong>${t('brand')}</strong>` })
+)
 
 const greeting = computed(() => {
   const h = new Date().getHours()
-  if (h < 6)  return '🌙 夜深了'
-  if (h < 12) return '☀️ 早上好'
-  if (h < 14) return '🍱 中午好'
-  if (h < 18) return '☕ 下午好'
-  return '🌇 晚上好'
+  if (h < 6)  return t('home.greetingNight')
+  if (h < 12) return t('home.greetingMorning')
+  if (h < 14) return t('home.greetingNoon')
+  if (h < 18) return t('home.greetingAfternoon')
+  return t('home.greetingEvening')
 })
 
 function formatNum(v) {
@@ -174,56 +184,133 @@ function formatNum(v) {
   return Number(v).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }
 
-function shortNum(v) {
-  const n = Number(v) || 0
-  if (n === 0) return ''
-  if (n >= 10000) return (n / 1000).toFixed(0) + 'k'
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
-  return n.toFixed(0)
-}
-
-function shortDate(d) {
-  // YYYY-MM-DD → MM/DD
-  return d?.slice(5).replace('-', '/') || ''
-}
-
-const maxWeekQty = computed(() => {
-  const arr = data.value.harvest7Days || []
-  return Math.max(...arr.map(r => Number(r.qty) || 0), 1)
-})
-
 const totalWeek = computed(() => {
   const arr = data.value.harvest7Days || []
   return arr.reduce((s, r) => s + (Number(r.qty) || 0), 0)
 })
 
-function barHeight(v) {
-  const n = Number(v) || 0
-  if (n === 0) return 0
-  return Math.max(4, (n / maxWeekQty.value) * 100)
-}
+const trendOption = computed(() => {
+  const arr = data.value.harvest7Days || []
+  if (arr.length === 0) return null
 
-const maxCropQty = computed(() => {
-  const arr = data.value.harvestByCrop || []
-  return Math.max(...arr.map(r => Number(r.qty) || 0), 1)
+  return {
+    grid: { top: 14, right: 16, bottom: 24, left: 44 },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(0, 21, 41, 0.92)',
+      borderColor: 'transparent',
+      textStyle: { color: '#fff', fontSize: 12 },
+      formatter: (params) => {
+        const p = params[0]
+        return `<div style="font-weight:600;margin-bottom:4px">${p.axisValue}</div>
+                <span style="color:#69c0ff">●</span> ${t('home.colQty')}
+                <strong style="margin-left:8px">${formatNum(p.data)}</strong> kg`
+      },
+    },
+    xAxis: {
+      type: 'category',
+      data: arr.map(r => (r.date || '').slice(5).replace('-', '/')),
+      axisLine: { lineStyle: { color: '#dcdfe6' } },
+      axisLabel: { color: '#909399', fontSize: 11 },
+      axisTick: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#909399', fontSize: 11 },
+      splitLine: { lineStyle: { color: '#f0f2f5', type: 'dashed' } },
+    },
+    series: [{
+      name: t('home.colQty'),
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { color: '#1890ff', width: 2.5 },
+      itemStyle: { color: '#1890ff', borderColor: '#fff', borderWidth: 2 },
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: 'rgba(24, 144, 255, 0.35)' },
+            { offset: 1, color: 'rgba(24, 144, 255, 0.02)' },
+          ],
+        },
+      },
+      data: arr.map(r => Number(r.qty) || 0),
+    }],
+  }
 })
 
-function cropPercent(v) {
-  const n = Number(v) || 0
-  return Math.max(2, (n / maxCropQty.value) * 100)
-}
+const cropChartHeight = computed(() => {
+  const n = (data.value.harvestByCrop || []).length
+  return Math.max(180, n * 36 + 40)
+})
 
-// 活动类型字典
-const ACT_LABEL = {
-  sow: 'Sowing', fertilize: 'Fertilizing', spray: 'Spraying',
-  weed: 'Weeding', water: 'Watering', prune: 'Pruning', other: 'Other'
-}
+const cropOption = computed(() => {
+  const arr = data.value.harvestByCrop || []
+  if (arr.length === 0) return null
+
+  const sorted = [...arr].sort((a, b) => Number(b.qty) - Number(a.qty)).reverse()
+  const names = sorted.map(r => r.crop_name || t('home.unassociated'))
+  const values = sorted.map(r => Number(r.qty) || 0)
+
+  return {
+    grid: { top: 10, right: 60, bottom: 8, left: 100 },
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(0, 21, 41, 0.92)',
+      borderColor: 'transparent',
+      textStyle: { color: '#fff', fontSize: 12 },
+      formatter: (p) => `<div style="font-weight:600;margin-bottom:4px">${p.name}</div>
+                         <span style="color:#95de64">●</span> ${t('home.cumulativeHarvest')}
+                         <strong style="margin-left:8px">${formatNum(p.value)}</strong> kg`,
+    },
+    xAxis: { type: 'value', show: false },
+    yAxis: {
+      type: 'category',
+      data: names,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#1f2329', fontSize: 13 },
+    },
+    series: [{
+      type: 'bar',
+      barWidth: 18,
+      data: values,
+      itemStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 1, y2: 0,
+          colorStops: [
+            { offset: 0, color: '#52c41a' },
+            { offset: 1, color: '#95de64' },
+          ],
+        },
+        borderRadius: [0, 4, 4, 0],
+      },
+      label: {
+        show: true,
+        position: 'right',
+        formatter: (p) => formatNum(p.value),
+        color: '#1f2329',
+        fontSize: 12,
+        fontWeight: 600,
+      },
+    }],
+  }
+})
+
 const ACT_TAG = {
   sow: 'success', fertilize: 'warning', spray: 'danger',
   weed: 'info', water: 'primary', prune: 'info', other: 'info'
 }
-function actTypeLabel(v) { return ACT_LABEL[v] || v }
-function actTagType(v)   { return ACT_TAG[v] || 'info' }
+function actTypeLabel(v) {
+  return t(`actType.${v}`, v)
+}
+function actTagType(v) { return ACT_TAG[v] || 'info' }
 </script>
 
 <style scoped>
@@ -233,16 +320,17 @@ function actTagType(v)   { return ACT_TAG[v] || 'info' }
   gap: 16px;
 }
 
-/* === Hero === */
 .hero {
-  background: linear-gradient(135deg, #001529 0%, #003a8c 60%, #1890ff 100%);
+  background:
+    radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.15), transparent 40%),
+    linear-gradient(135deg, #0f3a26 0%, #1f7a35 55%, #2BA84A 100%);
   color: #fff;
-  padding: 18px 22px;
-  border-radius: 8px;
+  padding: 20px 24px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 16px rgba(0, 21, 41, 0.18);
+  box-shadow: 0 6px 20px rgba(15, 58, 38, 0.22);
 }
 .greeting { font-size: 20px; font-weight: 600; }
 .sub      { font-size: 13px; opacity: .85; margin-top: 4px; }
@@ -252,7 +340,6 @@ function actTagType(v)   { return ACT_TAG[v] || 'info' }
   color: #fff;
 }
 
-/* === KPI cards === */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -277,10 +364,10 @@ function actTagType(v)   { return ACT_TAG[v] || 'info' }
   top: 0; left: 0;
   width: 4px; height: 100%;
 }
-.c-blue::before   { background: #1890ff; }
-.c-orange::before { background: #fa8c16; }
-.c-green::before  { background: #52c41a; }
-.c-purple::before { background: #722ed1; }
+.c-blue::before   { background: var(--brand-blue);  }
+.c-orange::before { background: var(--brand-grain); }
+.c-green::before  { background: var(--brand-green); }
+.c-purple::before { background: var(--brand-soil);  }
 
 .kpi-label { font-size: 12px; color: #909399; }
 .kpi-value {
@@ -292,100 +379,26 @@ function actTagType(v)   { return ACT_TAG[v] || 'info' }
 }
 .kpi-foot { font-size: 11px; color: #909399; }
 
-/* === Charts === */
 .charts-row {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 14px;
 }
-.chart-card { min-height: 240px; }
+.chart-card { min-height: 300px; }
+.chart-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dim { color: #909399; font-size: 12px; }
+
 .empty {
   color: #c0c4cc;
   font-size: 13px;
   text-align: center;
-  padding: 24px 0;
+  padding: 60px 0;
 }
 
-/* 7 天柱图 */
-.trend-bars {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 6px;
-  height: 160px;
-  padding: 0 4px;
-}
-.trend-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-.bar-wrap {
-  width: 100%;
-  height: 110px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.bar {
-  width: 70%;
-  background: linear-gradient(to top, #1890ff, #69c0ff);
-  border-radius: 4px 4px 0 0;
-  min-height: 2px;
-  transition: height .3s;
-}
-.bar-value { font-size: 11px; color: #606266; min-height: 14px; }
-.bar-label { font-size: 11px; color: #909399; }
-.trend-foot {
-  text-align: right;
-  font-size: 12px;
-  color: #606266;
-  margin-top: 8px;
-  padding-right: 8px;
-}
-
-/* 按作物分布水平条 */
-.crop-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 4px 0;
-}
-.crop-row {
-  display: grid;
-  grid-template-columns: 110px 1fr 80px;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-}
-.crop-name {
-  color: #1f2329;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.crop-bar-wrap {
-  height: 14px;
-  background: #f5f7fa;
-  border-radius: 7px;
-  overflow: hidden;
-}
-.crop-bar {
-  height: 100%;
-  background: linear-gradient(to right, #52c41a, #95de64);
-  border-radius: 7px;
-  transition: width .4s;
-}
-.crop-qty {
-  text-align: right;
-  font-weight: 600;
-  color: #1f2329;
-  font-variant-numeric: tabular-nums;
-}
-
-/* === Lists === */
 .lists-row {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
@@ -407,7 +420,6 @@ function actTagType(v)   { return ACT_TAG[v] || 'info' }
   font-size: 11px;
 }
 
-/* === Responsive === */
 @media (max-width: 1100px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .charts-row, .lists-row { grid-template-columns: 1fr; }

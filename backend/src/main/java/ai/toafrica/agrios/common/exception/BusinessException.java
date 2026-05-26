@@ -23,16 +23,16 @@ public class BusinessException extends RuntimeException {
 
     /** 库存不足 */
     public static BusinessException insufficientInventory(Long skuId) {
-        return new BusinessException("SKU#" + skuId + " 库存不足，无法锁定");
+        return new BusinessException("SKU#" + skuId + " has insufficient inventory, cannot lock");
     }
 
     /** 状态机非法跳转 */
     public static BusinessException illegalStateTransition(String from, String to) {
-        return new BusinessException("非法状态流转: " + from + " → " + to);
+        return new BusinessException("Illegal status transition: " + from + " -> " + to);
     }
 
     /** 资源不存在 */
     public static BusinessException notFound(String resource, Object id) {
-        return new BusinessException(R.NOT_FOUND, resource + " 不存在: " + id);
+        return new BusinessException(R.NOT_FOUND, resource + " not found: " + id);
     }
 }

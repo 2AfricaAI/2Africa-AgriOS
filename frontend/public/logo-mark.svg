@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- 圆角矩形底 -->
+  <rect x="2" y="2" width="60" height="60" rx="12"
+        fill="#0f3a26"/>
+
+  <!-- 2 (蓝) + A (绿) 紧凑组合 -->
+  <g font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+     font-weight="800" font-size="40" letter-spacing="-2">
+    <text x="10" y="46" fill="#69c0ff">2</text>
+    <text x="32" y="46" fill="#52c41a">A</text>
+  </g>
+
+  <!-- 右上角小叶子 -->
+  <g transform="translate(48, 10) rotate(-20)">
+    <path d="M0 6 C 2 0, 9 -1, 13 3 C 10 9, 4 10, 0 6 Z"
+          fill="#52c41a" stroke="#fff" stroke-width="0.4"/>
+    <line x1="2" y1="6" x2="11" y2="6" stroke="#fff" stroke-width="0.4"/>
+  </g>
+</svg>

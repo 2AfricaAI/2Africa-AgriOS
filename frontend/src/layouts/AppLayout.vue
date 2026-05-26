@@ -1,51 +1,95 @@
 <template>
   <el-container class="layout">
     <!-- 左侧栏 -->
-    <el-aside :width="collapse ? '56px' : '200px'" class="aside">
-      <div class="brand">
-        <span class="dot"></span>
-        <span v-if="!collapse" class="brand-text">2Africa AgriOS</span>
+    <el-aside :width="collapse ? '56px' : '220px'" class="aside">
+      <div class="brand" :class="{ 'brand-collapsed': collapse }">
+        <img v-if="collapse" src="/logo-mark.svg" class="logo-mark" alt="2A" />
+        <img v-else src="/logo.svg" class="logo-full" alt="2Africa AgriOS" />
       </div>
 
       <el-menu
         :default-active="activeMenu"
         :collapse="collapse"
-        background-color="#001529"
-        text-color="#c5cad1"
+        background-color="#0f3a26"
+        text-color="#b9d1c1"
         active-text-color="#fff"
         router
         class="menu"
       >
         <el-menu-item index="/">
           <el-icon><HomeIcon /></el-icon>
-          <template #title>首页</template>
+          <template #title>{{ t('menu.home') }}</template>
         </el-menu-item>
 
         <el-sub-menu index="master">
           <template #title>
             <el-icon><GoodsIcon /></el-icon>
-            <span>主数据</span>
+            <span>{{ t('menu.masterData') }}</span>
           </template>
-          <el-menu-item index="/master/crops">作物</el-menu-item>
-          <el-menu-item index="/master/varieties">品种</el-menu-item>
-          <el-menu-item index="/master/packaging-specs">包装规格</el-menu-item>
-          <el-menu-item index="/master/warehouses">仓库库位</el-menu-item>
+          <el-menu-item index="/master/crops">{{ t('menu.crops') }}</el-menu-item>
+          <el-menu-item index="/master/varieties">{{ t('menu.varieties') }}</el-menu-item>
+          <el-menu-item index="/master/packaging-specs">{{ t('menu.packagingSpecs') }}</el-menu-item>
+          <el-menu-item index="/master/warehouses">{{ t('menu.warehouses') }}</el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="production">
           <template #title>
             <el-icon><ProductionIcon /></el-icon>
-            <span>生产</span>
+            <span>{{ t('menu.production') }}</span>
           </template>
-          <el-menu-item index="/production/planting-plans">种植计划</el-menu-item>
-          <el-menu-item index="/production/activities">农事记录</el-menu-item>
-          <el-menu-item index="/production/harvests">采收记录</el-menu-item>
-          <el-menu-item index="/production/batches">批次追溯</el-menu-item>
+          <el-menu-item index="/production/planting-plans">{{ t('menu.plantingPlans') }}</el-menu-item>
+          <el-menu-item index="/production/activities">{{ t('menu.activities') }}</el-menu-item>
+          <el-menu-item index="/production/harvests">{{ t('menu.harvests') }}</el-menu-item>
+          <el-menu-item index="/production/batches">{{ t('menu.batches') }}</el-menu-item>
+        </el-sub-menu>
+
+        <el-sub-menu index="packhouse">
+          <template #title>
+            <el-icon><BoxIcon /></el-icon>
+            <span>{{ t('menu.packhouse') }}</span>
+          </template>
+          <el-menu-item index="/packhouse/packings">{{ t('menu.packings') }}</el-menu-item>
+          <el-menu-item index="/packhouse/inventory">{{ t('menu.inventory') }}</el-menu-item>
+        </el-sub-menu>
+
+        <el-sub-menu index="sales">
+          <template #title>
+            <el-icon><SalesIcon /></el-icon>
+            <span>{{ t('menu.sales') }}</span>
+          </template>
+          <el-menu-item index="/sales/customers">{{ t('menu.customers') }}</el-menu-item>
+          <el-menu-item index="/sales/orders">{{ t('menu.orders') }}</el-menu-item>
+        </el-sub-menu>
+
+        <el-sub-menu index="operations">
+          <template #title>
+            <el-icon><OpsIcon /></el-icon>
+            <span>{{ t('menu.operations') }}</span>
+          </template>
+          <el-menu-item index="/operations/action-board">{{ t('menu.actionBoard') }}</el-menu-item>
+        </el-sub-menu>
+
+        <el-sub-menu index="finance">
+          <template #title>
+            <el-icon><FinanceIcon /></el-icon>
+            <span>{{ t('menu.finance') }}</span>
+          </template>
+          <el-menu-item index="/finance/reports">{{ t('menu.reports') }}</el-menu-item>
+          <el-menu-item index="/finance/ar">{{ t('menu.ar') }}</el-menu-item>
+          <el-menu-item index="/finance/monthly">{{ t('menu.monthly') }}</el-menu-item>
+        </el-sub-menu>
+
+        <el-sub-menu index="procurement">
+          <template #title>
+            <el-icon><ProcurementIcon /></el-icon>
+            <span>{{ t('menu.procurement') }}</span>
+          </template>
+          <el-menu-item index="/procurement/suppliers">{{ t('menu.suppliers') }}</el-menu-item>
         </el-sub-menu>
 
         <el-menu-item index="/demo/files">
           <el-icon><FolderIcon /></el-icon>
-          <template #title>文件上传演示</template>
+          <template #title>{{ t('menu.fileDemo') }}</template>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -55,13 +99,35 @@
       <el-header class="topbar">
         <el-button text :icon="collapse ? ExpandIcon : FoldIcon" @click="collapse = !collapse" />
         <div class="topbar-right">
+          <!-- 语言切换 -->
+          <el-dropdown trigger="click" @command="onLocaleChange">
+            <el-button text class="lang-btn">
+              <span class="lang-flag">{{ currentLocaleFlag }}</span>
+              <span class="lang-label">{{ currentLocaleLabel }}</span>
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="loc in SUPPORT_LOCALES"
+                  :key="loc.code"
+                  :command="loc.code"
+                  :disabled="loc.code === locale"
+                >
+                  <span class="lang-flag-item">{{ loc.flag }}</span>
+                  {{ loc.label }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+
           <span class="welcome">
             {{ auth.nickname || auth.username }}
             <el-tag size="small" type="success" effect="dark" round style="margin-left: 8px">
               {{ auth.roles[0] || 'USER' }}
             </el-tag>
           </span>
-          <el-button link type="primary" @click="onLogout">退出登录</el-button>
+          <el-button link type="primary" @click="onLogout">{{ t('common.logout') }}</el-button>
         </div>
       </el-header>
 
@@ -76,18 +142,27 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   HomeFilled as HomeIcon,
   Goods as GoodsIcon,
   Folder as FolderIcon,
   Sunny as ProductionIcon,
+  Box as BoxIcon,
+  Wallet as SalesIcon,
+  Bell as OpsIcon,
+  Money as FinanceIcon,
+  ShoppingCart as ProcurementIcon,
   Expand as ExpandIcon,
   Fold as FoldIcon,
+  ArrowDown,
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { logout } from '@/api/auth'
+import { SUPPORT_LOCALES, persistLocale } from '@/i18n'
 
+const { t, locale } = useI18n()
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
@@ -95,55 +170,81 @@ const router = useRouter()
 const collapse = ref(false)
 const activeMenu = computed(() => route.path)
 
+const currentLocaleLabel = computed(
+  () => SUPPORT_LOCALES.find(l => l.code === locale.value)?.label || locale.value,
+)
+const currentLocaleFlag = computed(
+  () => SUPPORT_LOCALES.find(l => l.code === locale.value)?.flag || '',
+)
+
+function onLocaleChange(code) {
+  if (code === locale.value) return
+  locale.value = code
+  persistLocale(code)
+  document.title = t('brand')
+  ElMessage.success(t('common.languageSwitched'))
+}
+
 async function onLogout() {
-  await ElMessageBox.confirm('确认要退出登录吗?', '提示', { type: 'warning' }).catch(() => null)
+  await ElMessageBox.confirm(t('common.confirmLogout'), t('common.tip'), { type: 'warning' }).catch(() => null)
   try { await logout() } catch {}
   auth.clear()
-  ElMessage.success('已退出登录')
+  ElMessage.success(t('common.logoutSuccess'))
   router.push('/login')
 }
 </script>
 
 <style scoped>
-.layout {
-  height: 100vh;
-}
+.layout { height: 100vh; }
 
 .aside {
-  background: #001529;
+  background: linear-gradient(180deg, #0f3a26 0%, #0a2b1c 100%);
   transition: width .2s;
   overflow: hidden;
 }
 
 .brand {
-  height: 48px;
+  height: 56px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   padding: 0 14px;
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.2px;
-  border-bottom: 1px solid #1f3a5f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
   white-space: nowrap;
 }
 
-.brand .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #52c41a;
-  flex-shrink: 0;
-  box-shadow: 0 0 6px rgba(82, 196, 26, 0.6);
+.brand-collapsed { padding: 0 4px; }
+
+.logo-full {
+  width: 100%;
+  max-width: 180px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  /* 把白底替换成透明 - logo 自身设计就靠色块,直接显示 */
+  background: #fff;
+  border-radius: 4px;
+  padding: 4px 6px;
 }
 
-.menu {
-  border-right: none;
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
-.menu:not(.el-menu--collapse) {
-  width: 200px;
+.menu { border-right: none; }
+.menu:not(.el-menu--collapse) { width: 220px; }
+
+/* 菜单 hover / active 适配深绿背景 */
+:deep(.el-menu-item:hover),
+:deep(.el-sub-menu__title:hover) {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+:deep(.el-menu-item.is-active) {
+  background-color: var(--brand-green) !important;
+  color: #fff !important;
 }
 
 .topbar {
@@ -161,6 +262,19 @@ async function onLogout() {
   align-items: center;
   gap: 12px;
 }
+
+.lang-btn { font-size: 13px; padding: 0 8px; }
+.lang-label { margin: 0 4px; }
+.lang-flag,
+.lang-flag-item {
+  display: inline-block;
+  min-width: 22px;
+  font-weight: 700;
+  color: #1677ff;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+}
+.lang-flag-item { margin-right: 6px; }
 
 .welcome {
   font-size: 13px;

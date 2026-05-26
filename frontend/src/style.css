@@ -35,15 +35,47 @@ body {
 }
 
 /* ============================================================================
- * Element Plus 字号变量(13px 工业标准)
+ * 品牌 Token - 2Africa AgriOS 视觉系统
+ *   - 主色: 非洲绿 (#2BA84A) 取自 logo 中 "Africa Agri" 字样
+ *   - 辅助色: 品牌蓝 (#1677ff) 取自 logo 中 "2" 与 "OS"
+ *   - 深色调: 深绿土壤 (#0f3a26) 用作侧栏背景
+ *   - 强调色: 麦穗金 (#fa8c16) 用作 warning / 收成
  * ============================================================================ */
 :root {
+  /* ---- 字号(13px 工业标准) ---- */
   --el-font-size-extra-small: 11px;
   --el-font-size-small: 12px;
   --el-font-size-base: 13px;
   --el-font-size-medium: 14px;
   --el-font-size-large: 16px;
   --el-font-size-extra-large: 18px;
+
+  /* ---- 品牌色 ---- */
+  --brand-green:       #2BA84A;
+  --brand-green-dark:  #1f7a35;
+  --brand-green-deep:  #0f3a26;
+  --brand-green-soft:  #e7f7ec;
+  --brand-blue:        #1677ff;
+  --brand-blue-soft:   #e6f4ff;
+  --brand-leaf:        #52c41a;
+  --brand-soil:        #8c5a2b;
+  --brand-grain:       #fa8c16;
+
+  /* ---- Element Plus 主色覆盖 ---- */
+  --el-color-primary:                      #2BA84A;
+  --el-color-primary-light-3:              #5dc375;
+  --el-color-primary-light-5:              #8fd9a3;
+  --el-color-primary-light-7:              #c1eece;
+  --el-color-primary-light-8:              #d8f4e0;
+  --el-color-primary-light-9:              #ecf9ef;
+  --el-color-primary-dark-2:               #228740;
+
+  --el-color-success:                      #2BA84A;
+  --el-color-success-light-3:              #5dc375;
+  --el-color-success-light-5:              #8fd9a3;
+  --el-color-success-light-7:              #c1eece;
+  --el-color-success-light-9:              #ecf9ef;
+  --el-color-success-dark-2:               #228740;
 }
 
 /* ============================================================================

@@ -45,27 +45,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateKeyException.class)
     public R<Void> handleDuplicate(DuplicateKeyException e) {
         log.warn("[唯一键冲突] {}", e.getMessage());
-        return R.fail(R.BUSINESS_ERROR, "数据已存在（唯一性冲突）");
+        return R.fail(R.BUSINESS_ERROR, "Data already exists (unique constraint violation)");
     }
 
     /** 认证失败 */
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<R<Void>> handleAuth(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(R.fail(R.UNAUTHORIZED, "未认证或 Token 已过期"));
+                .body(R.fail(R.UNAUTHORIZED, "Not authenticated or token expired"));
     }
 
     /** 权限不足 */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<R<Void>> handleForbidden(AccessDeniedException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(R.fail(R.FORBIDDEN, "权限不足"));
+                .body(R.fail(R.FORBIDDEN, "Insufficient permissions"));
     }
 
     /** 其他未捕获异常 */
     @ExceptionHandler(Exception.class)
     public R<Void> handleUnknown(Exception e, HttpServletRequest req) {
         log.error("[系统异常] {} {}", req.getMethod(), req.getRequestURI(), e);
-        return R.fail(R.FAIL, "系统繁忙，请稍后重试");
+        return R.fail(R.FAIL, "System busy, please try again later");
     }
 }

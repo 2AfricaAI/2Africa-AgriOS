@@ -3,8 +3,8 @@
     <el-card class="login-card" shadow="always">
       <template #header>
         <div class="login-header">
-          <span class="dot"></span>
-          <span>2Africa AgriOS</span>
+          <img src="/logo.svg" alt="2Africa AgriOS" class="login-logo" />
+          <span class="lang-mini" @click="toggleLang">{{ otherLocaleFlag }}</span>
         </div>
       </template>
 
@@ -16,7 +16,7 @@
         label-position="top"
         @keyup.enter="onSubmit"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item :label="t('auth.username')" prop="username">
           <el-input
             v-model="form.username"
             placeholder="admin"
@@ -25,11 +25,11 @@
           />
         </el-form-item>
 
-        <el-form-item label="密码" prop="password">
+        <el-form-item :label="t('auth.password')" prop="password">
           <el-input
             v-model="form.password"
             type="password"
-            placeholder="请输入密码"
+            :placeholder="t('auth.passwordPlaceholder')"
             :prefix-icon="LockIcon"
             show-password
             autocomplete="current-password"
@@ -42,26 +42,29 @@
           class="submit-btn"
           @click="onSubmit"
         >
-          登 录
+          {{ t('auth.login') }}
         </el-button>
       </el-form>
 
-      <p class="hint">默认账号: admin / Admin@123456</p>
+      <p class="hint">Default: admin / Admin@123456</p>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { User as UserIcon, Lock as LockIcon } from '@element-plus/icons-vue'
 import { login } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
+import { SUPPORT_LOCALES, persistLocale } from '@/i18n'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
+const { t, locale } = useI18n()
 
 const formRef = ref(null)
 const loading = ref(false)
@@ -71,9 +74,20 @@ const form = reactive({
   password: 'Admin@123456',
 })
 
-const rules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+const rules = computed(() => ({
+  username: [{ required: true, message: t('auth.usernameRequired'), trigger: 'blur' }],
+  password: [{ required: true, message: t('auth.passwordRequired'), trigger: 'blur' }],
+}))
+
+const otherLocaleFlag = computed(() => {
+  const other = SUPPORT_LOCALES.find(l => l.code !== locale.value)
+  return other ? other.flag : ''
+})
+function toggleLang() {
+  const next = SUPPORT_LOCALES.find(l => l.code !== locale.value)
+  if (!next) return
+  locale.value = next.code
+  persistLocale(next.code)
 }
 
 async function onSubmit() {
@@ -85,11 +99,11 @@ async function onSubmit() {
   try {
     const data = await login(form.username, form.password)
     auth.setLogin(data)
-    ElMessage.success(`欢迎回来,${data.nickname || data.username}`)
+    ElMessage.success(t('home.welcomeBack', { name: data.nickname || data.username }))
     const redirect = route.query.redirect || '/'
     router.push(redirect)
   } catch (e) {
-    // 错误已在 axios 拦截器里 ElMessage 提示了, 这里只防止 loading 一直转
+    // axios 拦截器已经 ElMessage
   } finally {
     loading.value = false
   }
@@ -102,30 +116,41 @@ async function onSubmit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+  background:
+    radial-gradient(ellipse at top left, rgba(82, 196, 26, 0.25), transparent 55%),
+    radial-gradient(ellipse at bottom right, rgba(22, 119, 255, 0.15), transparent 50%),
+    linear-gradient(135deg, #f3faf4 0%, #e3f5e8 50%, #c8e6c9 100%);
   padding: 20px;
 }
 
 .login-card {
   width: 100%;
-  max-width: 400px;
-  border-radius: 12px;
+  max-width: 420px;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(15, 58, 38, 0.12);
+  border: 1px solid #e7f7ec;
 }
 
 .login-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 17px;
-  font-weight: 600;
-  color: #1f2329;
+  justify-content: space-between;
 }
 
-.login-header .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #52c41a;
+.login-logo {
+  height: 36px;
+  max-width: 240px;
+  object-fit: contain;
+}
+
+.lang-mini {
+  margin-left: auto;
+  cursor: pointer;
+  color: #1677ff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  user-select: none;
 }
 
 .submit-btn {
