@@ -37,6 +37,7 @@
             <el-icon><ProductionIcon /></el-icon>
             <span>{{ t('menu.production') }}</span>
           </template>
+          <el-menu-item index="/production/plots">{{ t('menu.plots') }}</el-menu-item>
           <el-menu-item index="/production/planting-plans">{{ t('menu.plantingPlans') }}</el-menu-item>
           <el-menu-item index="/production/activities">{{ t('menu.activities') }}</el-menu-item>
           <el-menu-item index="/production/harvests">{{ t('menu.harvests') }}</el-menu-item>
@@ -85,6 +86,8 @@
             <span>{{ t('menu.procurement') }}</span>
           </template>
           <el-menu-item index="/procurement/suppliers">{{ t('menu.suppliers') }}</el-menu-item>
+          <el-menu-item index="/procurement/orders">{{ t('menu.purchaseOrders') }}</el-menu-item>
+          <el-menu-item index="/procurement/ap">{{ t('menu.ap') }}</el-menu-item>
         </el-sub-menu>
 
         <el-menu-item index="/demo/files">

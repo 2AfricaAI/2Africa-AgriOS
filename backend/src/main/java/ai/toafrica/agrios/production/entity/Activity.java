@@ -42,14 +42,20 @@ public class Activity {
 
     /** 人工成本 (V2.0 Phase 2 P&L) */
     private BigDecimal laborCost;
+    /** 关联 PO 行 (Sprint 17.7) */
+    private Long laborPoItemId;
     /** 水费 */
     private BigDecimal waterCost;
+    private Long waterPoItemId;
     /** 电费 */
     private BigDecimal electricityCost;
+    private Long electricityPoItemId;
     /** 肥料成本 */
     private BigDecimal fertilizerCost;
+    private Long fertilizerPoItemId;
     /** 其他成本 */
     private BigDecimal otherCost;
+    private Long otherPoItemId;
     /** 所有成本字段共用的货币 (与 activity_input.currency 独立) */
     private String costCurrency;
 

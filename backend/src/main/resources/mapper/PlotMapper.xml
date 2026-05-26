@@ -12,6 +12,7 @@
     <result property="ownerName"   column="owner_name"/>
     <result property="status"      column="status"/>
     <result property="currentCropName" column="current_crop_name"/>
+    <result property="allowedCropsJson" column="allowed_crops_json"/>
     <result property="updatedAt"   column="updated_at"/>
   </resultMap>
 
@@ -20,6 +21,7 @@
       p.id, p.code, p.name, p.area_mu, p.owner_id,
       s.name AS owner_name,
       p.status, p.updated_at,
+      CAST(p.allowed_crops AS CHAR) AS allowed_crops_json,
       (SELECT c.name
          FROM planting_plan pp
          JOIN crop c ON pp.crop_id = c.id

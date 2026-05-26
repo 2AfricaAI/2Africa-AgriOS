@@ -197,33 +197,43 @@
           <el-input v-model="form.remark" type="textarea" :rows="2" maxlength="500" show-word-limit />
         </el-form-item>
 
-        <!-- Sprint 11 - 成本字段 (V2.0 Phase 2 P&L) -->
+        <!-- Sprint 11 + 17.7 - 成本字段 + PO 关联 -->
         <el-divider content-position="left">
-          <span class="cost-divider">💰 {{ t('activity.costsBlock') }}</span>
+          <span class="cost-divider">💰 {{ t('activity.costsBlock') }} <span class="dim small" style="font-weight: normal">— {{ t('activity.poLinkHint') }}</span></span>
         </el-divider>
 
-        <div class="cost-row">
-          <el-form-item :label="t('activity.laborCost')" class="cost-field">
-            <el-input-number v-model="form.laborCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
-          </el-form-item>
-          <el-form-item :label="t('activity.fertilizerCost')" class="cost-field">
-            <el-input-number v-model="form.fertilizerCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
-          </el-form-item>
+        <div class="cost-row" v-for="cfg in COST_FIELDS" :key="cfg.amountKey">
+          <div class="cost-field cost-cell">
+            <div class="cost-label">{{ t(cfg.labelKey) }}</div>
+            <div class="cost-controls">
+              <el-input-number v-model="form[cfg.amountKey]" :min="0" :precision="2" :controls="false" size="small" style="flex: 0 0 130px" />
+              <el-select
+                v-model="form[cfg.poItemKey]"
+                clearable filterable size="small"
+                :placeholder="t('activity.poLinkPick')"
+                style="flex: 1; min-width: 0"
+                @change="(v) => onPickPoItem(cfg, v)"
+                @visible-change="(open) => open && ensurePoOptionsLoaded(cfg.inputType)"
+              >
+                <el-option
+                  v-for="o in poOptionsByType[cfg.inputType] || []"
+                  :key="o.id"
+                  :value="o.id"
+                  :label="`${o.po_code} · ${o.description}`"
+                >
+                  <div class="po-opt">
+                    <code class="po-opt-code">{{ o.po_code }}</code>
+                    <span class="po-opt-desc">{{ o.description }}</span>
+                    <span class="po-opt-meta">{{ fmtMoney(o.unit_price) }} × {{ fmtNumber(o.quantity) }}{{ o.unit }} = <strong>{{ fmtMoney(o.amount) }}</strong></span>
+                  </div>
+                </el-option>
+              </el-select>
+            </div>
+          </div>
         </div>
         <div class="cost-row">
-          <el-form-item :label="t('activity.waterCost')" class="cost-field">
-            <el-input-number v-model="form.waterCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
-          </el-form-item>
-          <el-form-item :label="t('activity.electricityCost')" class="cost-field">
-            <el-input-number v-model="form.electricityCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
-          </el-form-item>
-        </div>
-        <div class="cost-row">
-          <el-form-item :label="t('activity.otherCost')" class="cost-field">
-            <el-input-number v-model="form.otherCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
-          </el-form-item>
           <el-form-item :label="t('order.currency')" class="cost-field">
-            <el-select v-model="form.costCurrency" style="width: 100%">
+            <el-select v-model="form.costCurrency" style="width: 100%" size="small">
               <el-option label="KES" value="KES" />
               <el-option label="USD" value="USD" />
               <el-option label="EUR" value="EUR" />
@@ -267,6 +277,7 @@ import {
   deleteActivity,
 } from '@/api/activity'
 import { listPlantingPlans } from '@/api/plantingPlan'
+import { listAvailablePoItems } from '@/api/purchaseOrder'
 import FileUploader from '@/components/FileUploader.vue'
 
 const { t } = useI18n()
@@ -390,7 +401,57 @@ const emptyForm = () => ({
   fertilizerCost: 0,
   otherCost: 0,
   costCurrency: 'KES',
+  // Sprint 17.7 - 关联 PO 行
+  laborPoItemId: null,
+  waterPoItemId: null,
+  electricityPoItemId: null,
+  fertilizerPoItemId: null,
+  otherPoItemId: null,
 })
+
+// ============================================================
+// Sprint 17.7 - cost ↔ PO 关联配置
+// ============================================================
+const COST_FIELDS = computed(() => [
+  { amountKey: 'fertilizerCost',  poItemKey: 'fertilizerPoItemId',  inputType: 'fertilizer',  labelKey: 'activity.fertilizerCost' },
+  { amountKey: 'laborCost',       poItemKey: 'laborPoItemId',       inputType: 'labor',       labelKey: 'activity.laborCost' },
+  { amountKey: 'waterCost',       poItemKey: 'waterPoItemId',       inputType: 'water',       labelKey: 'activity.waterCost' },
+  { amountKey: 'electricityCost', poItemKey: 'electricityPoItemId', inputType: 'electricity', labelKey: 'activity.electricityCost' },
+  { amountKey: 'otherCost',       poItemKey: 'otherPoItemId',       inputType: 'other',       labelKey: 'activity.otherCost' },
+])
+
+const poOptionsByType = reactive({}) // { fertilizer: [...], labor: [...], ... }
+const poOptionsLoading = reactive({})
+
+async function ensurePoOptionsLoaded(inputType) {
+  if (poOptionsByType[inputType] || poOptionsLoading[inputType]) return
+  poOptionsLoading[inputType] = true
+  try {
+    poOptionsByType[inputType] = await listAvailablePoItems(inputType)
+  } catch {
+    poOptionsByType[inputType] = []
+  } finally {
+    poOptionsLoading[inputType] = false
+  }
+}
+
+/** 用户选了一条 PO 行 → 自动填入 amount 字段 */
+function onPickPoItem(cfg, poItemId) {
+  if (poItemId == null) return
+  const opt = (poOptionsByType[cfg.inputType] || []).find(o => o.id === poItemId)
+  if (opt) {
+    form[cfg.amountKey] = Number(opt.amount) || 0
+  }
+}
+
+function fmtMoney(v) {
+  if (v == null) return '0.00'
+  return Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+function fmtNumber(v) {
+  if (v == null) return '0'
+  return Number(v).toLocaleString(undefined, { maximumFractionDigits: 3 })
+}
 const form = reactive(emptyForm())
 
 const rules = computed(() => ({
@@ -408,7 +469,7 @@ function onCreate() {
 
 function onEdit(row) {
   editing.value = row.id
-  Object.assign(form, {
+  Object.assign(form, emptyForm(), {
     planId: row.planId,
     activityType: row.activityType,
     occurDate: row.occurDate,
@@ -420,9 +481,19 @@ function onEdit(row) {
     fertilizerCost: Number(row.fertilizerCost) || 0,
     otherCost: Number(row.otherCost) || 0,
     costCurrency: row.costCurrency || 'KES',
+    // Sprint 17.7 关联 PO 行
+    laborPoItemId:       row.laborPoItemId       ?? null,
+    waterPoItemId:       row.waterPoItemId       ?? null,
+    electricityPoItemId: row.electricityPoItemId ?? null,
+    fertilizerPoItemId:  row.fertilizerPoItemId  ?? null,
+    otherPoItemId:       row.otherPoItemId       ?? null,
   })
   // 后端返回的 photos 是 FileVO[],可以直接给 FileUploader
   photos.value = row.photos || []
+  // 异步预加载已关联的 PO 行 (这样下拉显示已选项)
+  for (const cfg of COST_FIELDS.value) {
+    if (form[cfg.poItemKey]) ensurePoOptionsLoaded(cfg.inputType)
+  }
   dialogVisible.value = true
 }
 
@@ -496,8 +567,27 @@ async function onDelete(row) {
 
 <style scoped>
 .cost-divider { font-size: 13px; color: #1f7a35; font-weight: 600; }
-.cost-row { display: flex; gap: 14px; }
+.cost-row { display: flex; gap: 14px; margin-bottom: 10px; }
 .cost-row .cost-field { flex: 1; }
+
+/* Sprint 17.7 - 复合 cost 控件 */
+.cost-cell { display: flex; flex-direction: column; gap: 4px; }
+.cost-label { font-size: 12px; color: #606266; font-weight: 600; padding-left: 2px; }
+.cost-controls { display: flex; gap: 8px; align-items: center; }
+
+.po-opt { display: flex; gap: 8px; align-items: center; line-height: 1.2; }
+.po-opt-code {
+  font-family: 'Consolas', monospace;
+  background: #fff5e6;
+  color: #fa8c16;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.po-opt-desc { flex: 1; font-size: 13px; color: #1f2329; }
+.po-opt-meta { font-size: 11px; color: #909399; }
+.small { font-size: 11px; }
 
 .page { display: flex; flex-direction: column; gap: 16px; }
 .filter-card :deep(.el-card__body),

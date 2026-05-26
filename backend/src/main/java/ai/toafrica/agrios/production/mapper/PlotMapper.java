@@ -31,6 +31,8 @@ public interface PlotMapper extends BaseMapper<Plot> {
         private String ownerName;
         private String status;
         private String currentCropName;
+        /** 可种作物 JSON 数组 e.g. "[1,2,3]" - 前端解析为 number[] 后映射为作物名 */
+        private String allowedCropsJson;
         private java.time.LocalDateTime updatedAt;
     }
 

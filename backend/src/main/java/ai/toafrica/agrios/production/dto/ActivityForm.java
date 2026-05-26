@@ -78,4 +78,11 @@ public class ActivityForm {
     @Pattern(regexp = "^(KES|USD|EUR)?$", message = "costCurrency must be KES / USD / EUR")
     @Schema(description = "成本货币", example = "KES")
     private String costCurrency;
+
+    // ====== Sprint 17.7 - Activity ↔ PO 行 ======
+    @Schema(description = "关联人工 PO 行 (可选)")    private Long laborPoItemId;
+    @Schema(description = "关联水费 PO 行 (可选)")    private Long waterPoItemId;
+    @Schema(description = "关联电费 PO 行 (可选)")    private Long electricityPoItemId;
+    @Schema(description = "关联肥料 PO 行 (可选)")    private Long fertilizerPoItemId;
+    @Schema(description = "关联其他 PO 行 (可选)")    private Long otherPoItemId;
 }

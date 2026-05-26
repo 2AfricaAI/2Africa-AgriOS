@@ -43,6 +43,13 @@ public class ActivityVO {
     private BigDecimal otherCost;
     private String costCurrency;
 
+    /** Sprint 17.7 - 关联 PO 行 (用于编辑回填) */
+    private Long laborPoItemId;
+    private Long waterPoItemId;
+    private Long electricityPoItemId;
+    private Long fertilizerPoItemId;
+    private Long otherPoItemId;
+
     private String auditStatus;
     private Long auditorId;
     private String auditorName;

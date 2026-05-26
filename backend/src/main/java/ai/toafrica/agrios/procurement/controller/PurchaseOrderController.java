@@ -4,6 +4,7 @@ import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
 import ai.toafrica.agrios.procurement.dto.PurchaseOrderForm;
+import ai.toafrica.agrios.procurement.mapper.PurchaseOrderItemMapper;
 import ai.toafrica.agrios.procurement.service.PurchaseOrderService;
 import ai.toafrica.agrios.procurement.vo.PurchaseOrderDetailVO;
 import ai.toafrica.agrios.procurement.vo.PurchaseOrderVO;
@@ -16,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @Tag(name = "61 · Procurement-PurchaseOrder", description = "Purchase orders (Sprint 17)")
 @RestController
@@ -24,6 +27,7 @@ import java.time.LocalDate;
 public class PurchaseOrderController {
 
     private final PurchaseOrderService service;
+    private final PurchaseOrderItemMapper itemMapper;
 
     @Operation(summary = "List purchase orders (paginated)")
     @GetMapping
@@ -88,5 +92,11 @@ public class PurchaseOrderController {
     public R<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return R.ok();
+    }
+
+    @Operation(summary = "Available PO items by input type (Sprint 17.7) - for Activity → PO linking")
+    @GetMapping("/items/available")
+    public R<List<Map<String, Object>>> availableItems(@RequestParam String inputType) {
+        return R.ok(itemMapper.findAvailableByInputType(inputType));
     }
 }

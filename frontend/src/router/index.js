@@ -46,6 +46,12 @@ const routes = [
         meta: { titleKey: 'menu.warehouses' },
       },
       {
+        path: 'production/plots',
+        name: 'plots',
+        component: () => import('@/views/production/PlotList.vue'),
+        meta: { titleKey: 'menu.plots' },
+      },
+      {
         path: 'production/planting-plans',
         name: 'planting-plans',
         component: () => import('@/views/production/PlantingPlanList.vue'),
@@ -134,6 +140,24 @@ const routes = [
         name: 'suppliers',
         component: () => import('@/views/procurement/SupplierList.vue'),
         meta: { titleKey: 'menu.suppliers' },
+      },
+      {
+        path: 'procurement/orders',
+        name: 'purchase-orders',
+        component: () => import('@/views/procurement/PurchaseOrderList.vue'),
+        meta: { titleKey: 'menu.purchaseOrders' },
+      },
+      {
+        path: 'procurement/orders/:id',
+        name: 'purchase-order-detail',
+        component: () => import('@/views/procurement/PurchaseOrderDetail.vue'),
+        meta: { titleKey: 'menu.purchaseOrders' },
+      },
+      {
+        path: 'procurement/ap',
+        name: 'accounts-payable',
+        component: () => import('@/views/procurement/AccountsPayable.vue'),
+        meta: { titleKey: 'menu.ap' },
       },
       {
         path: 'demo/files',
