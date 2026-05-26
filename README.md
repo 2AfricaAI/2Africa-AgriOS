@@ -80,7 +80,7 @@ Phase 3  采购 + 应付 + 现金流 + 移动 (规划)
 ### 1. 克隆 + 初始化
 
 ```bash
-git clone https://github.com/wmxeisoo2008-eng/2Africa-AgriOS.git
+git clone https://github.com/2AfricaAI/2Africa-AgriOS.git
 cd 2Africa-AgriOS
 ```
 
@@ -237,5 +237,6 @@ Proprietary — © 2026 2Africa.AI. All rights reserved.
 
 ## 🙏 关于
 
-由 [@wmxeisoo2008-eng](https://github.com/wmxeisoo2008-eng) 与 Claude (Anthropic) 协作开发。
+由 [@2AfricaAI](https://github.com/2AfricaAI) 与 Claude (Anthropic) 协作开发。
 项目从 2026 年 3 月起步，原名 "Albert's Farm"，2026 年 5 月更名为 "2Africa AgriOS"。
+                     
