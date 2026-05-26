@@ -136,6 +136,12 @@ const routes = [
         meta: { titleKey: 'menu.monthly' },
       },
       {
+        path: 'finance/cash-flow',
+        name: 'finance-cash-flow',
+        component: () => import('@/views/finance/CashFlowForecast.vue'),
+        meta: { titleKey: 'menu.cashFlow' },
+      },
+      {
         path: 'procurement/suppliers',
         name: 'suppliers',
         component: () => import('@/views/procurement/SupplierList.vue'),

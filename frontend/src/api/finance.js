@@ -56,6 +56,13 @@ export function downloadStatementPdf(customerId, params) {
   })
 }
 
+// ===== Sprint 18 - Cash Flow Forecast =====
+export function getCashFlowForecast(openingBalance) {
+  return request.get(`${BASE}/cash-flow/forecast`, {
+    params: { openingBalance: openingBalance || 0 },
+  })
+}
+
 // ===== Sprint 16 - Collection Logs (催收跟催记录) =====
 const COL_BASE = '/v1/finance/collections'
 export function listCollections(params)        { return request.get(COL_BASE, { params }) }

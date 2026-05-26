@@ -77,6 +77,7 @@
           </template>
           <el-menu-item index="/finance/reports">{{ t('menu.reports') }}</el-menu-item>
           <el-menu-item index="/finance/ar">{{ t('menu.ar') }}</el-menu-item>
+          <el-menu-item index="/finance/cash-flow">{{ t('menu.cashFlow') }}</el-menu-item>
           <el-menu-item index="/finance/monthly">{{ t('menu.monthly') }}</el-menu-item>
         </el-sub-menu>
 
