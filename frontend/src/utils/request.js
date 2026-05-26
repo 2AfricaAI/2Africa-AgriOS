@@ -24,9 +24,24 @@ request.interceptors.request.use((config) => {
 // 后端约定: HTTP 200 + body code=200 才算成功; code!=200 是业务错误
 // ============================================================
 request.interceptors.response.use(
-  (response) => {
+  async (response) => {
     const data = response.data
-    // 二进制/文件流之类直接放行
+    // 二进制/文件流 (responseType: blob/arraybuffer/stream) - 直接放行
+    if (response.config?.responseType === 'blob' ||
+        response.config?.responseType === 'arraybuffer' ||
+        response.config?.responseType === 'stream') {
+      // 兜底: 如果 server 返回了 JSON 错误信封 (而非 PDF), 在这里转抛
+      if (data instanceof Blob && data.type === 'application/json') {
+        try {
+          const text = await data.text()
+          const json = JSON.parse(text)
+          ElMessage.error(json.msg || `下载失败 (code=${json.code})`)
+          return Promise.reject(new Error(json.msg || `code=${json.code}`))
+        } catch {/* 解析失败就当 PDF 处理 */}
+      }
+      return data
+    }
+    // 旧逻辑保底
     if (!data || typeof data !== 'object' || data.code === undefined) {
       return data
     }
@@ -38,9 +53,14 @@ request.interceptors.response.use(
     ElMessage.error(data.msg || `请求失败 (code=${data.code})`)
     return Promise.reject(new Error(data.msg || `code=${data.code}`))
   },
-  (error) => {
+  async (error) => {
     const status = error.response?.status
-    const body = error.response?.data
+    let body = error.response?.data
+
+    // 如果是 responseType=blob 的错误响应, body 是 Blob, 需要先解
+    if (body instanceof Blob) {
+      try { body = JSON.parse(await body.text()) } catch { body = null }
+    }
 
     if (status === 401 || status === 403) {
       // token 失效 / 权限不足
