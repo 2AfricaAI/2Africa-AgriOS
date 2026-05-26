@@ -35,7 +35,7 @@ public class LocationWarehouseService {
 
     public LocationWarehouse detail(Long id) {
         LocationWarehouse w = warehouseMapper.selectById(id);
-        if (w == null) throw new BusinessException(R.NOT_FOUND, "仓库/库位不存在");
+        if (w == null) throw new BusinessException(R.NOT_FOUND, "Warehouse/location not found");
         return w;
     }
 
@@ -43,7 +43,7 @@ public class LocationWarehouseService {
     public Long create(WarehouseForm form) {
         validateParentId(form.getParentId(), null);
         if (existsByCode(form.getCode(), null)) {
-            throw new BusinessException("库位编码已存在: " + form.getCode());
+            throw new BusinessException("Location code already exists: " + form.getCode());
         }
         LocationWarehouse w = new LocationWarehouse();
         BeanUtils.copyProperties(form, w);
@@ -56,10 +56,10 @@ public class LocationWarehouseService {
     /** 修改 */
     public void update(Long id, WarehouseForm form) {
         LocationWarehouse w = warehouseMapper.selectById(id);
-        if (w == null) throw new BusinessException(R.NOT_FOUND, "仓库/库位不存在");
+        if (w == null) throw new BusinessException(R.NOT_FOUND, "Warehouse/location not found");
         validateParentId(form.getParentId(), id);
         if (existsByCode(form.getCode(), id)) {
-            throw new BusinessException("库位编码已被占用: " + form.getCode());
+            throw new BusinessException("Location code is already in use: " + form.getCode());
         }
         BeanUtils.copyProperties(form, w);
         if (w.getParentId() == null) w.setParentId(0L);
@@ -69,10 +69,10 @@ public class LocationWarehouseService {
     /** 状态切换 */
     public void changeStatus(Long id, Integer status) {
         if (status == null || (status != 0 && status != 1)) {
-            throw new BusinessException("status 只能是 0 或 1");
+            throw new BusinessException("status must be 0 or 1");
         }
         LocationWarehouse w = warehouseMapper.selectById(id);
-        if (w == null) throw new BusinessException(R.NOT_FOUND, "仓库/库位不存在");
+        if (w == null) throw new BusinessException(R.NOT_FOUND, "Warehouse/location not found");
         w.setStatus(status);
         warehouseMapper.updateById(w);
     }
@@ -81,10 +81,10 @@ public class LocationWarehouseService {
     private void validateParentId(Long parentId, Long selfId) {
         if (parentId == null || parentId == 0L) return;
         if (selfId != null && parentId.equals(selfId)) {
-            throw new BusinessException("父节点不能是自己");
+            throw new BusinessException("Parent node cannot be itself");
         }
         if (warehouseMapper.selectById(parentId) == null) {
-            throw new BusinessException("父节点不存在: id=" + parentId);
+            throw new BusinessException("Parent node not found: id=" + parentId);
         }
     }
 

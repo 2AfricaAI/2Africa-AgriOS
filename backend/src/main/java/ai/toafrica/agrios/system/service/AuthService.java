@@ -40,17 +40,17 @@ public class AuthService {
         String failStr = redis.opsForValue().get(failKey);
         int failCount = failStr == null ? 0 : Integer.parseInt(failStr);
         if (failCount >= FAIL_LIMIT) {
-            throw new BusinessException("登录失败次数过多，账号已锁定 15 分钟");
+            throw new BusinessException("Too many failed login attempts, account locked for 15 minutes");
         }
 
         SysUser user = userMapper.findByUsername(dto.getUsername());
         if (user == null || !passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             redis.opsForValue().increment(failKey);
             redis.expire(failKey, FAIL_TTL);
-            throw new BusinessException("用户名或密码错误");
+            throw new BusinessException("Invalid username or password");
         }
         if (!"active".equals(user.getStatus())) {
-            throw new BusinessException("账号已停用，请联系管理员");
+            throw new BusinessException("Account is disabled, please contact administrator");
         }
         redis.delete(failKey);
 

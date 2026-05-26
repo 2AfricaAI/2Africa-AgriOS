@@ -23,7 +23,7 @@ public class WarehouseForm {
     private String name;
 
     @NotBlank
-    @Pattern(regexp = "normal|cold|quarantine", message = "type 必须是 normal/cold/quarantine")
+    @Pattern(regexp = "normal|cold|quarantine", message = "type must be normal/cold/quarantine")
     @Schema(description = "类型", example = "normal", allowableValues = {"normal", "cold", "quarantine"})
     private String type;
 

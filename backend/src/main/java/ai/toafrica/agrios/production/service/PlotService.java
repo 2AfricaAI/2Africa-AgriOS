@@ -36,7 +36,7 @@ public class PlotService {
     public Plot detail(Long id) {
         Plot p = plotMapper.selectById(id);
         if (p == null || p.getDeletedAt() != null) {
-            throw BusinessException.notFound("地块", id);
+            throw BusinessException.notFound("Plot", id);
         }
         return p;
     }
@@ -53,7 +53,7 @@ public class PlotService {
         QueryWrapper<Plot> w = new QueryWrapper<>();
         w.eq("code", dto.getCode()).isNull("deleted_at");
         if (plotMapper.selectCount(w) > 0) {
-            throw new BusinessException("地块编号 " + dto.getCode() + " 已存在");
+            throw new BusinessException("Plot code " + dto.getCode() + " already exists");
         }
         Plot p = new Plot();
         BeanUtils.copyProperties(dto, p);
@@ -71,7 +71,7 @@ public class PlotService {
     public void update(Long id, PlotDTO dto) {
         Plot exist = detail(id);
         if (!exist.getCode().equals(dto.getCode())) {
-            throw new BusinessException("地块编号一经创建不可修改");
+            throw new BusinessException("Plot code cannot be changed once created");
         }
         BeanUtils.copyProperties(dto, exist, "id", "code", "createdAt", "createdBy", "deletedAt");
         exist.setUpdatedBy(SecurityUtil.currentUserId());
@@ -85,7 +85,7 @@ public class PlotService {
         Plot p = detail(id);
         // 业务规则：有进行中计划不允许删除（这里简化为检查 status，完整版应查 planting_plan 表）
         if ("active".equals(p.getStatus())) {
-            throw new BusinessException("启用中的地块不能删除，请先停用");
+            throw new BusinessException("Cannot delete an active plot, please disable it first");
         }
         plotMapper.deleteById(id);  // 触发逻辑删除
         log.info("[删除地块] id={}", id);
@@ -95,7 +95,7 @@ public class PlotService {
     @Transactional
     public void toggleStatus(Long id, String status) {
         if (!ALLOWED_STATUS.contains(status)) {
-            throw new BusinessException("非法状态值：" + status);
+            throw new BusinessException("Invalid status value: " + status);
         }
         Plot p = detail(id);
         p.setStatus(status);

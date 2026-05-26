@@ -32,14 +32,14 @@ public class PackagingSpecService {
 
     public PackagingSpec detail(Long id) {
         PackagingSpec s = packagingSpecMapper.selectById(id);
-        if (s == null) throw new BusinessException(R.NOT_FOUND, "包装规格不存在");
+        if (s == null) throw new BusinessException(R.NOT_FOUND, "Packaging spec not found");
         return s;
     }
 
     /** 创建 */
     public Long create(PackagingSpecForm form) {
         if (existsByCode(form.getCode(), null)) {
-            throw new BusinessException("包装规格编码已存在: " + form.getCode());
+            throw new BusinessException("Packaging spec code already exists: " + form.getCode());
         }
         PackagingSpec s = new PackagingSpec();
         BeanUtils.copyProperties(form, s);
@@ -51,9 +51,9 @@ public class PackagingSpecService {
     /** 修改 */
     public void update(Long id, PackagingSpecForm form) {
         PackagingSpec s = packagingSpecMapper.selectById(id);
-        if (s == null) throw new BusinessException(R.NOT_FOUND, "包装规格不存在");
+        if (s == null) throw new BusinessException(R.NOT_FOUND, "Packaging spec not found");
         if (existsByCode(form.getCode(), id)) {
-            throw new BusinessException("包装规格编码已被占用: " + form.getCode());
+            throw new BusinessException("Packaging spec code is already in use: " + form.getCode());
         }
         BeanUtils.copyProperties(form, s);
         packagingSpecMapper.updateById(s);
@@ -62,10 +62,10 @@ public class PackagingSpecService {
     /** 状态切换 */
     public void changeStatus(Long id, Integer status) {
         if (status == null || (status != 0 && status != 1)) {
-            throw new BusinessException("status 只能是 0 或 1");
+            throw new BusinessException("status must be 0 or 1");
         }
         PackagingSpec s = packagingSpecMapper.selectById(id);
-        if (s == null) throw new BusinessException(R.NOT_FOUND, "包装规格不存在");
+        if (s == null) throw new BusinessException(R.NOT_FOUND, "Packaging spec not found");
         s.setStatus(status);
         packagingSpecMapper.updateById(s);
     }

@@ -58,7 +58,7 @@ public class PlantingPlanService {
         Page<PlantingPlanVO> p = new Page<>(1, 1);
         var page = plantingPlanMapper.pageWithJoin(p, q);
         if (page.getRecords().isEmpty()) {
-            throw new BusinessException(R.NOT_FOUND, "种植计划不存在");
+            throw new BusinessException(R.NOT_FOUND, "Planting plan not found");
         }
         return page.getRecords().get(0);
     }
@@ -83,7 +83,7 @@ public class PlantingPlanService {
     // ============================================================
     public void update(Long id, PlantingPlanForm form) {
         PlantingPlan p = plantingPlanMapper.selectById(id);
-        if (p == null) throw new BusinessException(R.NOT_FOUND, "种植计划不存在");
+        if (p == null) throw new BusinessException(R.NOT_FOUND, "Planting plan not found");
         validateForm(form, id);
 
         BeanUtils.copyProperties(form, p);
@@ -95,10 +95,10 @@ public class PlantingPlanService {
     // ============================================================
     public void changeStatus(Long id, String status) {
         if (status == null || !ALL_STATUS.contains(status)) {
-            throw new BusinessException("status 必须是: " + ALL_STATUS);
+            throw new BusinessException("status must be: " + ALL_STATUS);
         }
         PlantingPlan p = plantingPlanMapper.selectById(id);
-        if (p == null) throw new BusinessException(R.NOT_FOUND, "种植计划不存在");
+        if (p == null) throw new BusinessException(R.NOT_FOUND, "Planting plan not found");
         p.setStatus(status);
         plantingPlanMapper.updateById(p);
     }
@@ -121,29 +121,29 @@ public class PlantingPlanService {
                 .eq(PlantingPlan::getCode, form.getCode());
         if (excludeId != null) q.ne(PlantingPlan::getId, excludeId);
         if (plantingPlanMapper.exists(q)) {
-            throw new BusinessException("计划编码已存在: " + form.getCode());
+            throw new BusinessException("Plan code already exists: " + form.getCode());
         }
 
         // 2. 引用合法性
         if (plotMapper.selectById(form.getPlotId()) == null) {
-            throw new BusinessException("地块不存在: id=" + form.getPlotId());
+            throw new BusinessException("Plot not found: id=" + form.getPlotId());
         }
         if (cropMapper.selectById(form.getCropId()) == null) {
-            throw new BusinessException("作物不存在: id=" + form.getCropId());
+            throw new BusinessException("Crop not found: id=" + form.getCropId());
         }
         if (form.getVarietyId() != null) {
             var v = varietyMapper.selectById(form.getVarietyId());
             if (v == null) {
-                throw new BusinessException("品种不存在: id=" + form.getVarietyId());
+                throw new BusinessException("Variety not found: id=" + form.getVarietyId());
             }
             if (!v.getCropId().equals(form.getCropId())) {
-                throw new BusinessException("品种与作物不匹配 (该品种属于另一种作物)");
+                throw new BusinessException("Variety does not match the crop (it belongs to a different crop)");
             }
         }
 
         // 3. 日期顺序
         if (form.getPlanHarvestDate().isBefore(form.getPlanStartDate())) {
-            throw new BusinessException("计划采收日期不能早于计划起始日期");
+            throw new BusinessException("Planned harvest date cannot be earlier than planned start date");
         }
     }
 }

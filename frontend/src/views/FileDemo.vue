@@ -4,20 +4,18 @@
     <el-card shadow="never">
       <template #header>
         <div class="hdr">
-          <span>📁 文件上传演示</span>
-          <el-tag size="small" type="info">基于 /v1/files 真实接口</el-tag>
+          <span>{{ t('file.demoIntroHeader') }}</span>
+          <el-tag size="small" type="info">{{ t('file.demoIntroTag') }}</el-tag>
         </div>
       </template>
       <p class="intro">
-        这是一个可复用的 <code>&lt;FileUploader&gt;</code> 组件,
-        未来给作物/品种/活动/客户等加图片字段时直接 v-model 接上即可。
-        上传走后端代传到 MinIO,下载走预签名 URL。
+        {{ t('file.demoIntro') }}
       </p>
     </el-card>
 
     <!-- 多文件 - 图片 (典型用法 1) -->
     <el-card shadow="never">
-      <template #header>多图片上传 (biz-type: demo_gallery, 最多 6 张, 单张 ≤ 5MB)</template>
+      <template #header>{{ t('file.demoGalleryHeader') }}</template>
       <FileUploader
         v-model="gallery"
         biz-type="demo_gallery"
@@ -30,7 +28,7 @@
 
     <!-- 单文件 - 任意类型 (典型用法 2) -->
     <el-card shadow="never">
-      <template #header>单文件上传 (任意类型, 最大 10MB)</template>
+      <template #header>{{ t('file.demoSingleHeader') }}</template>
       <FileUploader
         v-model="singleFile"
         biz-type="demo_attach"
@@ -42,7 +40,7 @@
 
     <!-- v-model 实时打印 (调试用) -->
     <el-card shadow="never">
-      <template #header>组件 v-model 实时值 (这就是你拿去存数据库的)</template>
+      <template #header>{{ t('file.demoModelHeader') }}</template>
       <pre class="dump">{{ JSON.stringify({ gallery, singleFile }, null, 2) }}</pre>
     </el-card>
   </div>
@@ -51,13 +49,16 @@
 <script setup>
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import FileUploader from '@/components/FileUploader.vue'
+
+const { t } = useI18n()
 
 const gallery = ref([])
 const singleFile = ref([])
 
 function onUploadSuccess(file) {
-  ElMessage.success(`「${file.originalName}」上传成功 (id=${file.id})`)
+  ElMessage.success(t('file.uploadSuccessTpl', { name: file.originalName, id: file.id }))
 }
 </script>
 

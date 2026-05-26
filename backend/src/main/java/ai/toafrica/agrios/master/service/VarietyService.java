@@ -35,7 +35,7 @@ public class VarietyService {
 
     public Variety detail(Long id) {
         Variety v = varietyMapper.selectById(id);
-        if (v == null) throw new BusinessException(R.NOT_FOUND, "品种不存在");
+        if (v == null) throw new BusinessException(R.NOT_FOUND, "Variety not found");
         return v;
     }
 
@@ -43,7 +43,7 @@ public class VarietyService {
     public Long create(VarietyForm form) {
         validateCropExists(form.getCropId());
         if (existsByCropAndCode(form.getCropId(), form.getCode(), null)) {
-            throw new BusinessException("该作物下品种编码已存在: " + form.getCode());
+            throw new BusinessException("Variety code already exists for this crop: " + form.getCode());
         }
         Variety v = new Variety();
         BeanUtils.copyProperties(form, v);
@@ -55,10 +55,10 @@ public class VarietyService {
     /** 修改 */
     public void update(Long id, VarietyForm form) {
         Variety v = varietyMapper.selectById(id);
-        if (v == null) throw new BusinessException(R.NOT_FOUND, "品种不存在");
+        if (v == null) throw new BusinessException(R.NOT_FOUND, "Variety not found");
         validateCropExists(form.getCropId());
         if (existsByCropAndCode(form.getCropId(), form.getCode(), id)) {
-            throw new BusinessException("该作物下品种编码已被占用: " + form.getCode());
+            throw new BusinessException("Variety code is already in use for this crop: " + form.getCode());
         }
         BeanUtils.copyProperties(form, v);
         varietyMapper.updateById(v);
@@ -67,17 +67,17 @@ public class VarietyService {
     /** 状态切换 */
     public void changeStatus(Long id, Integer status) {
         if (status == null || (status != 0 && status != 1)) {
-            throw new BusinessException("status 只能是 0 或 1");
+            throw new BusinessException("status must be 0 or 1");
         }
         Variety v = varietyMapper.selectById(id);
-        if (v == null) throw new BusinessException(R.NOT_FOUND, "品种不存在");
+        if (v == null) throw new BusinessException(R.NOT_FOUND, "Variety not found");
         v.setStatus(status);
         varietyMapper.updateById(v);
     }
 
     private void validateCropExists(Long cropId) {
         if (cropMapper.selectById(cropId) == null) {
-            throw new BusinessException("作物不存在: id=" + cropId);
+            throw new BusinessException("Crop not found: id=" + cropId);
         }
     }
 

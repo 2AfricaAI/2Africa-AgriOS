@@ -3,21 +3,21 @@
     <!-- 过滤器 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="query" @submit.prevent>
-        <el-form-item label="编码">
-          <el-input v-model="query.code" placeholder="模糊查询" clearable style="width: 160px" />
+        <el-form-item :label="t('spec.code')">
+          <el-input v-model="query.code" :placeholder="t('crop.fuzzy')" clearable style="width: 160px" />
         </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="query.name" placeholder="模糊查询" clearable style="width: 160px" />
+        <el-form-item :label="t('spec.name')">
+          <el-input v-model="query.name" :placeholder="t('crop.fuzzy')" clearable style="width: 160px" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.status" placeholder="全部" clearable style="width: 120px">
-            <el-option label="启用" :value="1" />
-            <el-option label="停用" :value="0" />
+        <el-form-item :label="t('common.status')">
+          <el-select v-model="query.status" :placeholder="t('common.all')" clearable style="width: 120px">
+            <el-option :label="t('common.enable')" :value="1" />
+            <el-option :label="t('common.disable')" :value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">查询</el-button>
-          <el-button :icon="RefreshIcon" @click="onReset">重置</el-button>
+          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">{{ t('common.search') }}</el-button>
+          <el-button :icon="RefreshIcon" @click="onReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -25,38 +25,38 @@
     <!-- 工具栏 + 表格 -->
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
-        <el-button type="primary" :icon="PlusIcon" @click="onCreate">新建包装规格</el-button>
+        <el-button type="primary" :icon="PlusIcon" @click="onCreate">{{ t('spec.new') }}</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
         <el-table-column prop="id" label="ID" width="70" align="center" />
-        <el-table-column prop="code" label="编码" width="120" />
-        <el-table-column prop="name" label="名称" min-width="160" />
-        <el-table-column prop="unitNetKg" label="净重(kg)" width="110" align="right">
+        <el-table-column prop="code" :label="t('spec.code')" width="120" />
+        <el-table-column prop="name" :label="t('spec.name')" min-width="160" />
+        <el-table-column prop="unitNetKg" :label="t('spec.netKgShort')" width="110" align="right">
           <template #default="{ row }">{{ formatKg(row.unitNetKg) }}</template>
         </el-table-column>
-        <el-table-column prop="unitGrossKg" label="毛重(kg)" width="110" align="right">
+        <el-table-column prop="unitGrossKg" :label="t('spec.grossKgShort')" width="110" align="right">
           <template #default="{ row }">{{ formatKg(row.unitGrossKg) }}</template>
         </el-table-column>
-        <el-table-column prop="material" label="材质" min-width="120" />
-        <el-table-column label="状态" width="90" align="center">
+        <el-table-column prop="material" :label="t('spec.material')" min-width="120" />
+        <el-table-column :label="t('common.status')" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
-              {{ row.status === 1 ? '启用' : '停用' }}
+              {{ row.status === 1 ? t('common.enable') : t('common.disable') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="170" />
-        <el-table-column label="操作" width="120" fixed="right" align="center">
+        <el-table-column prop="createdAt" :label="t('common.createdAt')" width="170" />
+        <el-table-column :label="t('common.actions')" width="120" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="onEdit(row)">编辑</el-button>
+            <el-button link type="primary" size="small" @click="onEdit(row)">{{ t('common.edit') }}</el-button>
             <el-button
               link
               :type="row.status === 1 ? 'warning' : 'success'"
               size="small"
               @click="onToggleStatus(row)"
             >
-              {{ row.status === 1 ? '停用' : '启用' }}
+              {{ row.status === 1 ? t('common.actionDisable') : t('common.actionEnable') }}
             </el-button>
           </template>
         </el-table-column>
@@ -78,19 +78,19 @@
     <!-- 新建/编辑对话框 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="editing ? '编辑包装规格' : '新建包装规格'"
+      :title="editing ? t('spec.editTitle') : t('spec.createTitle')"
       width="500"
       destroy-on-close
       @closed="onDialogClosed"
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
-        <el-form-item label="编码" prop="code">
-          <el-input v-model="form.code" placeholder="例: SP-2KG" maxlength="32" />
+        <el-form-item :label="t('spec.code')" prop="code">
+          <el-input v-model="form.code" :placeholder="t('spec.placeholderCode')" maxlength="32" />
         </el-form-item>
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="form.name" placeholder="例: 2kg 礼盒" maxlength="64" />
+        <el-form-item :label="t('spec.name')" prop="name">
+          <el-input v-model="form.name" :placeholder="t('spec.placeholderName')" maxlength="64" />
         </el-form-item>
-        <el-form-item label="净重(kg)" prop="unitNetKg">
+        <el-form-item :label="t('spec.netKgShort')" prop="unitNetKg">
           <el-input-number
             v-model="form.unitNetKg"
             :min="0.001"
@@ -100,7 +100,7 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="毛重(kg)">
+        <el-form-item :label="t('spec.grossKgShort')">
           <el-input-number
             v-model="form.unitGrossKg"
             :min="0"
@@ -110,20 +110,21 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="材质">
-          <el-input v-model="form.material" placeholder="例: PET 盒 / 纸盒+衬" maxlength="64" />
+        <el-form-item :label="t('spec.material')">
+          <el-input v-model="form.material" :placeholder="t('spec.placeholderMaterial')" maxlength="64" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="onSubmit">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="onSubmit">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search as SearchIcon,
@@ -136,6 +137,8 @@ import {
   updatePackagingSpec,
   changePackagingSpecStatus,
 } from '@/api/packagingSpec'
+
+const { t } = useI18n()
 
 // ============================================================
 // 列表
@@ -198,19 +201,19 @@ const emptyForm = () => ({
 })
 const form = reactive(emptyForm())
 
-const rules = {
+const rules = computed(() => ({
   code: [
-    { required: true, message: '请输入编码', trigger: 'blur' },
-    { max: 32, message: '编码长度 ≤ 32', trigger: 'blur' },
+    { required: true, message: t('valid.required', { field: t('spec.code') }), trigger: 'blur' },
+    { max: 32, message: t('valid.maxLen', { field: t('spec.code'), n: 32 }), trigger: 'blur' },
   ],
   name: [
-    { required: true, message: '请输入名称', trigger: 'blur' },
-    { max: 64, message: '名称长度 ≤ 64', trigger: 'blur' },
+    { required: true, message: t('valid.required', { field: t('spec.name') }), trigger: 'blur' },
+    { max: 64, message: t('valid.maxLen', { field: t('spec.name'), n: 64 }), trigger: 'blur' },
   ],
   unitNetKg: [
-    { required: true, message: '请输入净重', trigger: 'change' },
+    { required: true, message: t('spec.placeholderNetKg'), trigger: 'change' },
   ],
-}
+}))
 
 function onCreate() {
   editing.value = null
@@ -245,10 +248,10 @@ async function onSubmit() {
   try {
     if (editing.value) {
       await updatePackagingSpec(editing.value, form)
-      ElMessage.success('修改成功')
+      ElMessage.success(t('common.updateSuccess'))
     } else {
       await createPackagingSpec(form)
-      ElMessage.success('创建成功')
+      ElMessage.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
     reload()
@@ -264,13 +267,15 @@ async function onSubmit() {
 // ============================================================
 async function onToggleStatus(row) {
   const next = row.status === 1 ? 0 : 1
-  const action = next === 1 ? '启用' : '停用'
-  await ElMessageBox.confirm(`确认${action}包装规格「${row.name}」?`, '提示', {
-    type: 'warning',
-  }).catch(() => Promise.reject('cancel'))
+  const action = next === 1 ? t('common.actionEnable') : t('common.actionDisable')
+  await ElMessageBox.confirm(
+    t('spec.confirmToggle', { action, name: row.name }),
+    t('common.tip'),
+    { type: 'warning' },
+  ).catch(() => Promise.reject('cancel'))
   try {
     await changePackagingSpecStatus(row.id, next)
-    ElMessage.success(`${action}成功`)
+    ElMessage.success(t('common.operationSuccess'))
     reload()
   } catch (e) {
     if (e === 'cancel') return

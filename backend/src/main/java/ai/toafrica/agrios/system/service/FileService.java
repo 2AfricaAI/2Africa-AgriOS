@@ -47,13 +47,13 @@ public class FileService {
      */
     public FileVO upload(MultipartFile file, String bizType) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException("文件为空");
+            throw new BusinessException("File is empty");
         }
 
         // 1) 大小校验
         long maxBytes = uploadCfg.getMaxSizeMb() * 1024L * 1024L;
         if (file.getSize() > maxBytes) {
-            throw new BusinessException("文件超过 " + uploadCfg.getMaxSizeMb() + " MB 限制");
+            throw new BusinessException("File exceeds " + uploadCfg.getMaxSizeMb() + " MB limit");
         }
 
         // 2) MIME 白名单
@@ -61,7 +61,7 @@ public class FileService {
         List<String> whitelist = uploadCfg.getAllowedMimeTypes();
         if (whitelist != null && !whitelist.isEmpty()
                 && (mime == null || !whitelist.contains(mime))) {
-            throw new BusinessException("不支持的文件类型: " + mime);
+            throw new BusinessException("Unsupported file type: " + mime);
         }
 
         // 3) 生成对象 key: {bizType}/{yyyy}/{MM}/{uuid}.{ext}
@@ -85,7 +85,7 @@ public class FileService {
                     .build());
         } catch (Exception e) {
             log.error("[上传失败] key={}", objectKey, e);
-            throw new BusinessException("上传失败: " + e.getMessage());
+            throw new BusinessException("Upload failed: " + e.getMessage());
         }
 
         // 5) 落表
@@ -110,7 +110,7 @@ public class FileService {
     public String presignedDownloadUrl(Long fileId) {
         SysFile f = fileMapper.selectById(fileId);
         if (f == null) {
-            throw new BusinessException(R.NOT_FOUND, "文件不存在");
+            throw new BusinessException(R.NOT_FOUND, "File not found");
         }
         return generatePresignedUrl(f.getObjectKey());
     }
@@ -136,7 +136,7 @@ public class FileService {
     public FileVO get(Long fileId) {
         SysFile f = fileMapper.selectById(fileId);
         if (f == null) {
-            throw new BusinessException(R.NOT_FOUND, "文件不存在");
+            throw new BusinessException(R.NOT_FOUND, "File not found");
         }
         return toVO(f);
     }
@@ -186,7 +186,7 @@ public class FileService {
                     .build());
         } catch (Exception e) {
             log.error("[生成预签名URL失败] key={}", objectKey, e);
-            throw new BusinessException("生成下载链接失败");
+            throw new BusinessException("Failed to generate download URL");
         }
     }
 

@@ -17,18 +17,18 @@ public class PlotDTO {
     @Schema(description = "地块 ID（编辑时必填）")
     private Long id;
 
-    @NotBlank(message = "地块编号不能为空")
+    @NotBlank(message = "Plot code is required")
     @Size(max = 32)
     @Schema(description = "地块编号 P-NNN", example = "P-006")
     private String code;
 
-    @NotBlank(message = "地块名称不能为空")
+    @NotBlank(message = "Plot name is required")
     @Size(max = 64)
     @Schema(description = "地块名称")
     private String name;
 
-    @NotNull(message = "面积必填")
-    @DecimalMin(value = "0.01", message = "面积必须大于 0")
+    @NotNull(message = "Area is required")
+    @DecimalMin(value = "0.01", message = "Area must be greater than 0")
     @Schema(description = "面积（亩）", example = "3.5")
     private BigDecimal areaMu;
 
@@ -41,7 +41,7 @@ public class PlotDTO {
     @Schema(description = "灌溉方式 drip/spray/furrow")
     private String irrigation;
 
-    @NotNull(message = "负责人必填")
+    @NotNull(message = "Owner is required")
     @Schema(description = "负责人 staff_id")
     private Long ownerId;
 

@@ -16,7 +16,7 @@
           <template #error>
             <div class="thumb-error">
               <el-icon><PictureIcon /></el-icon>
-              <span>加载失败</span>
+              <span>{{ t('file.loadFailed') }}</span>
             </div>
           </template>
         </el-image>
@@ -39,13 +39,13 @@
         <!-- 上传失败遮罩 -->
         <div v-else-if="f._status === 'error'" class="error-mask">
           <el-icon :size="20"><WarningIcon /></el-icon>
-          <span>失败</span>
-          <el-button size="small" type="primary" @click="retry(i)">重试</el-button>
+          <span>{{ t('file.failed') }}</span>
+          <el-button size="small" type="primary" @click="retry(i)">{{ t('file.retry') }}</el-button>
         </div>
 
         <!-- 文件名 / 大小 -->
         <div class="meta">
-          <div class="name" :title="f.originalName">{{ f.originalName || '上传中...' }}</div>
+          <div class="name" :title="f.originalName">{{ f.originalName || t('file.uploading') }}</div>
           <div class="size">{{ humanSize(f.sizeBytes) }}</div>
         </div>
 
@@ -75,10 +75,10 @@
     >
       <el-icon :size="48" class="dropzone-icon"><UploadIcon /></el-icon>
       <div class="dropzone-text">
-        拖拽文件到这里,或<em>点击选择</em>
+        {{ t('file.dropOr') }}<em>{{ t('file.clickToSelect') }}</em>
       </div>
       <div class="dropzone-hint">
-        最多 {{ limit }} 个 · 单个 ≤ {{ maxSizeMb }} MB · {{ accept || '任意类型' }}
+        {{ t('file.limitHint', { limit, size: maxSizeMb, accept: accept || t('file.anyType') }) }}
       </div>
     </el-upload>
   </div>
@@ -87,6 +87,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import {
   UploadFilled as UploadIcon,
   Document as DocumentIcon,
@@ -95,6 +96,8 @@ import {
   WarningFilled as WarningIcon,
 } from '@element-plus/icons-vue'
 import { uploadFile, deleteFile } from '@/api/file'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: { type: Array, default: () => [] },
@@ -144,11 +147,11 @@ function imagePreviewIndex(f) {
 function onBeforeUpload(file) {
   const sizeMb = file.size / 1024 / 1024
   if (sizeMb > props.maxSizeMb) {
-    ElMessage.warning(`文件超过 ${props.maxSizeMb} MB`)
+    ElMessage.warning(t('file.sizeExceed', { n: props.maxSizeMb }))
     return false
   }
   if (files.value.length >= props.limit) {
-    ElMessage.warning(`最多上传 ${props.limit} 个文件`)
+    ElMessage.warning(t('file.maxFiles', { n: props.limit }))
     return false
   }
   return true
@@ -215,7 +218,7 @@ async function onDelete(i) {
   }
   files.value.splice(i, 1)
   emitChange()
-  ElMessage.success('已删除')
+  ElMessage.success(t('file.deleted'))
 }
 </script>
 

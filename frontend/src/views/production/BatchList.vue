@@ -2,11 +2,11 @@
   <div class="page">
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="query" @submit.prevent>
-        <el-form-item label="编码">
-          <el-input v-model="query.code" placeholder="例: B-20260901" clearable style="width: 220px" />
+        <el-form-item :label="t('batch.code')">
+          <el-input v-model="query.code" :placeholder="t('batch.codePlaceholder')" clearable style="width: 220px" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.status" placeholder="全部" clearable style="width: 130px">
+        <el-form-item :label="t('common.status')">
+          <el-select v-model="query.status" :placeholder="t('common.all')" clearable style="width: 130px">
             <el-option
               v-for="s in STATUS_OPTIONS"
               :key="s.value"
@@ -15,48 +15,50 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="日期范围">
+        <el-form-item :label="t('batch.harvestDate')">
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="→"
-            start-placeholder="起始"
-            end-placeholder="止"
+            :range-separator="t('date.rangeSep')"
+            :start-placeholder="t('date.start')"
+            :end-placeholder="t('date.end')"
             value-format="YYYY-MM-DD"
             style="width: 240px"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">查询</el-button>
-          <el-button :icon="RefreshIcon" @click="onReset">重置</el-button>
+          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">{{ t('common.search') }}</el-button>
+          <el-button :icon="RefreshIcon" @click="onReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <el-card shadow="never" class="table-card">
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
-        <el-table-column label="批次号" min-width="180">
+        <el-table-column :label="t('batch.code')" min-width="200">
           <template #default="{ row }">
-            <code class="batch-code">{{ row.code }}</code>
+            <router-link :to="`/production/batches/${row.id}`" class="link-batch">
+              <code class="batch-code">{{ row.code }}</code>
+            </router-link>
             <div v-if="row.parentBatchCode" class="dim" style="margin-top: 2px">
-              ← 拆自 {{ row.parentBatchCode }}
+              {{ t('batch.splitFrom', { code: row.parentBatchCode }) }}
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="harvestDate" label="采收日期" width="110" />
-        <el-table-column label="关联" min-width="200">
+        <el-table-column prop="harvestDate" :label="t('batch.harvestDate')" width="110" />
+        <el-table-column :label="t('batch.relation')" min-width="200">
           <template #default="{ row }">
             <div class="dim" style="margin-bottom: 2px">{{ row.planCode }}</div>
             <el-tag size="small">{{ row.plotName }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="作物 / 品种" min-width="160">
+        <el-table-column :label="t('batch.cropVariety')" min-width="160">
           <template #default="{ row }">
             <el-tag size="small" type="primary">{{ row.cropName }}</el-tag>
             <span v-if="row.varietyName" class="dim" style="margin-left: 4px">{{ row.varietyName }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="剩余量 / 总量 (kg)" min-width="220">
+        <el-table-column :label="t('batch.qtyRemainTotal')" min-width="220">
           <template #default="{ row }">
             <div style="display: flex; align-items: center; gap: 8px">
               <el-progress
@@ -73,23 +75,26 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="110" align="center">
+        <el-table-column :label="t('common.status')" width="110" align="center">
           <template #default="{ row }">
             <el-tag :type="statusTag(row.status)" size="small" effect="dark">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="源采收单" width="160">
+        <el-table-column :label="t('batch.source')" width="160">
           <template #default="{ row }">
             <code class="batch-code">{{ row.harvestRecordCode }}</code>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right" align="center">
+        <el-table-column :label="t('common.actions')" width="180" fixed="right" align="center">
           <template #default="{ row }">
+            <el-button link type="primary" size="small" @click="goDetail(row)">
+              {{ t('common.view') }}
+            </el-button>
             <el-dropdown @command="(s) => onChangeStatus(row, s)">
               <el-button link type="primary" size="small">
-                改状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                {{ t('batch.changeStatus') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -124,7 +129,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   Search as SearchIcon,
@@ -133,16 +140,23 @@ import {
 } from '@element-plus/icons-vue'
 import { listBatches, changeBatchStatus } from '@/api/batch'
 
-const STATUS_OPTIONS = [
-  { value: 'pending',    label: '待处理', tag: 'info' },
-  { value: 'processing', label: '加工中', tag: 'warning' },
-  { value: 'packed',     label: '已包装', tag: 'primary' },
-  { value: 'sold_out',   label: '已售罄', tag: 'success' },
-  { value: 'lost',       label: '损耗',   tag: 'danger' },
-]
-const STATUS_MAP = Object.fromEntries(STATUS_OPTIONS.map(s => [s.value, s]))
-function statusLabel(v) { return STATUS_MAP[v]?.label || v }
-function statusTag(v)   { return STATUS_MAP[v]?.tag || 'info' }
+const { t } = useI18n()
+
+const router = useRouter()
+function goDetail(row) {
+  router.push(`/production/batches/${row.id}`)
+}
+
+const STATUS_OPTIONS = computed(() => [
+  { value: 'pending',    label: t('status.pending'),    tag: 'info' },
+  { value: 'processing', label: t('status.processing'), tag: 'warning' },
+  { value: 'packed',     label: t('status.packed'),     tag: 'primary' },
+  { value: 'sold_out',   label: t('status.sold_out'),   tag: 'success' },
+  { value: 'lost',       label: t('status.lost'),       tag: 'danger' },
+])
+const STATUS_MAP = computed(() => Object.fromEntries(STATUS_OPTIONS.value.map(s => [s.value, s])))
+function statusLabel(v) { return STATUS_MAP.value[v]?.label || v }
+function statusTag(v)   { return STATUS_MAP.value[v]?.tag || 'info' }
 
 function formatKg(v) {
   if (v == null) return '-'
@@ -194,7 +208,7 @@ async function onChangeStatus(row, newStatus) {
   if (newStatus === row.status) return
   try {
     await changeBatchStatus(row.id, newStatus)
-    ElMessage.success(`状态改为「${statusLabel(newStatus)}」`)
+    ElMessage.success(t('batch.statusChanged', { label: statusLabel(newStatus) }))
     reload()
   } catch {}
 }
@@ -214,6 +228,13 @@ async function onChangeStatus(row, newStatus) {
   border-radius: 4px;
   color: #d63384;
   font-size: 12px;
+}
+
+.link-batch { text-decoration: none; }
+.link-batch .batch-code:hover {
+  background: #ecf5ff;
+  color: #409eff;
+  cursor: pointer;
 }
 
 .qty {

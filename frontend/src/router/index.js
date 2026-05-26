@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/layouts/AppLayout.vue'
+import i18n from '@/i18n'
 
 const routes = [
   {
     path: '/login',
     name: 'login',
     component: () => import('@/views/Login.vue'),
-    meta: { public: true, title: '登录' },
+    meta: { public: true, titleKey: 'auth.login' },
   },
   // 所有受保护路由都套在 AppLayout 下
   {
@@ -18,61 +19,127 @@ const routes = [
         path: '',
         name: 'home',
         component: () => import('@/views/Home.vue'),
-        meta: { title: '首页' },
+        meta: { titleKey: 'menu.home' },
       },
       {
         path: 'master/crops',
         name: 'crops',
         component: () => import('@/views/master/CropList.vue'),
-        meta: { title: '作物管理' },
+        meta: { titleKey: 'menu.crops' },
       },
       {
         path: 'master/varieties',
         name: 'varieties',
         component: () => import('@/views/master/VarietyList.vue'),
-        meta: { title: '品种管理' },
+        meta: { titleKey: 'menu.varieties' },
       },
       {
         path: 'master/packaging-specs',
         name: 'packaging-specs',
         component: () => import('@/views/master/PackagingSpecList.vue'),
-        meta: { title: '包装规格' },
+        meta: { titleKey: 'menu.packagingSpecs' },
       },
       {
         path: 'master/warehouses',
         name: 'warehouses',
         component: () => import('@/views/master/WarehouseList.vue'),
-        meta: { title: '仓库库位' },
+        meta: { titleKey: 'menu.warehouses' },
       },
       {
         path: 'production/planting-plans',
         name: 'planting-plans',
         component: () => import('@/views/production/PlantingPlanList.vue'),
-        meta: { title: '种植计划' },
+        meta: { titleKey: 'menu.plantingPlans' },
       },
       {
         path: 'production/activities',
         name: 'activities',
         component: () => import('@/views/production/ActivityList.vue'),
-        meta: { title: '农事记录' },
+        meta: { titleKey: 'menu.activities' },
       },
       {
         path: 'production/harvests',
         name: 'harvests',
         component: () => import('@/views/production/HarvestList.vue'),
-        meta: { title: '采收记录' },
+        meta: { titleKey: 'menu.harvests' },
       },
       {
         path: 'production/batches',
         name: 'batches',
         component: () => import('@/views/production/BatchList.vue'),
-        meta: { title: '批次追溯' },
+        meta: { titleKey: 'menu.batches' },
+      },
+      {
+        path: 'production/batches/:id',
+        name: 'batch-detail',
+        component: () => import('@/views/production/BatchDetail.vue'),
+        meta: { titleKey: 'batch.detailTitle' },
+      },
+      {
+        path: 'packhouse/packings',
+        name: 'packings',
+        component: () => import('@/views/packhouse/PackingList.vue'),
+        meta: { titleKey: 'menu.packings' },
+      },
+      {
+        path: 'packhouse/inventory',
+        name: 'inventory',
+        component: () => import('@/views/packhouse/InventoryList.vue'),
+        meta: { titleKey: 'menu.inventory' },
+      },
+      {
+        path: 'sales/customers',
+        name: 'customers',
+        component: () => import('@/views/sales/CustomerList.vue'),
+        meta: { titleKey: 'menu.customers' },
+      },
+      {
+        path: 'sales/orders',
+        name: 'orders',
+        component: () => import('@/views/sales/OrderList.vue'),
+        meta: { titleKey: 'menu.orders' },
+      },
+      {
+        path: 'sales/orders/:id',
+        name: 'order-detail',
+        component: () => import('@/views/sales/OrderDetail.vue'),
+        meta: { titleKey: 'order.detailTitle' },
+      },
+      {
+        path: 'operations/action-board',
+        name: 'action-board',
+        component: () => import('@/views/operations/ActionBoard.vue'),
+        meta: { titleKey: 'menu.actionBoard' },
+      },
+      {
+        path: 'finance/reports',
+        name: 'finance-reports',
+        component: () => import('@/views/finance/FinanceReports.vue'),
+        meta: { titleKey: 'menu.reports' },
+      },
+      {
+        path: 'finance/ar',
+        name: 'finance-ar',
+        component: () => import('@/views/finance/AccountsReceivable.vue'),
+        meta: { titleKey: 'menu.ar' },
+      },
+      {
+        path: 'finance/monthly',
+        name: 'finance-monthly',
+        component: () => import('@/views/finance/MonthlyReport.vue'),
+        meta: { titleKey: 'menu.monthly' },
+      },
+      {
+        path: 'procurement/suppliers',
+        name: 'suppliers',
+        component: () => import('@/views/procurement/SupplierList.vue'),
+        meta: { titleKey: 'menu.suppliers' },
       },
       {
         path: 'demo/files',
         name: 'file-demo',
         component: () => import('@/views/FileDemo.vue'),
-        meta: { title: '文件上传演示' },
+        meta: { titleKey: 'menu.fileDemo' },
       },
     ],
   },
@@ -86,7 +153,9 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
-  document.title = to.meta.title ? `${to.meta.title} · 2Africa AgriOS` : "2Africa AgriOS"
+  const t = i18n.global.t
+  const brand = t('brand')
+  document.title = to.meta.titleKey ? `${t(to.meta.titleKey)} · ${brand}` : brand
 
   if (!to.meta.public && !auth.isLoggedIn) {
     return { path: '/login', query: { redirect: to.fullPath } }

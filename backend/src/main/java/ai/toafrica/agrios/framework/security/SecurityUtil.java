@@ -14,7 +14,7 @@ public final class SecurityUtil {
     public static LoginUser current() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof LoginUser u)) {
-            throw new BusinessException(R.UNAUTHORIZED, "未登录");
+            throw new BusinessException(R.UNAUTHORIZED, "Not logged in");
         }
         return u;
     }

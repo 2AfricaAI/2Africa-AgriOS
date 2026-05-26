@@ -33,14 +33,14 @@ public class CropService {
 
     public Crop detail(Long id) {
         Crop c = cropMapper.selectById(id);
-        if (c == null) throw new BusinessException(R.NOT_FOUND, "作物不存在");
+        if (c == null) throw new BusinessException(R.NOT_FOUND, "Crop not found");
         return c;
     }
 
     /** 创建 */
     public Long create(CropForm form) {
         if (existsByCode(form.getCode(), null)) {
-            throw new BusinessException("作物编码已存在: " + form.getCode());
+            throw new BusinessException("Crop code already exists: " + form.getCode());
         }
         Crop c = new Crop();
         BeanUtils.copyProperties(form, c);
@@ -53,9 +53,9 @@ public class CropService {
     /** 修改 */
     public void update(Long id, CropForm form) {
         Crop c = cropMapper.selectById(id);
-        if (c == null) throw new BusinessException(R.NOT_FOUND, "作物不存在");
+        if (c == null) throw new BusinessException(R.NOT_FOUND, "Crop not found");
         if (existsByCode(form.getCode(), id)) {
-            throw new BusinessException("作物编码已被占用: " + form.getCode());
+            throw new BusinessException("Crop code is already in use: " + form.getCode());
         }
         BeanUtils.copyProperties(form, c);
         if (c.getUnit() == null || c.getUnit().isBlank()) c.setUnit("kg");
@@ -65,10 +65,10 @@ public class CropService {
     /** 状态切换 (1=启用 0=停用) */
     public void changeStatus(Long id, Integer status) {
         if (status == null || (status != 0 && status != 1)) {
-            throw new BusinessException("status 只能是 0 或 1");
+            throw new BusinessException("status must be 0 or 1");
         }
         Crop c = cropMapper.selectById(id);
-        if (c == null) throw new BusinessException(R.NOT_FOUND, "作物不存在");
+        if (c == null) throw new BusinessException(R.NOT_FOUND, "Crop not found");
         c.setStatus(status);
         cropMapper.updateById(c);
     }

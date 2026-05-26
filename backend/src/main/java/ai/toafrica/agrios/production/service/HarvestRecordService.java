@@ -90,9 +90,9 @@ public class HarvestRecordService {
 
         // 2) 取计划反查 plot/crop
         PlantingPlan plan = planMapper.selectById(form.getPlanId());
-        if (plan == null) throw new BusinessException("种植计划不存在");
+        if (plan == null) throw new BusinessException("Planting plan not found");
         Plot plot = plotMapper.selectById(plan.getPlotId());
-        if (plot == null) throw new BusinessException("地块不存在");
+        if (plot == null) throw new BusinessException("Plot not found");
 
         Long varietyId = form.getVarietyId() != null ? form.getVarietyId() : plan.getVarietyId();
 

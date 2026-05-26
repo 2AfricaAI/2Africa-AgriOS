@@ -3,8 +3,8 @@
     <!-- 过滤器 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="query" @submit.prevent>
-        <el-form-item label="地块">
-          <el-select v-model="query.plotId" placeholder="全部" clearable filterable style="width: 180px">
+        <el-form-item :label="t('plan.plot')">
+          <el-select v-model="query.plotId" :placeholder="t('common.all')" clearable filterable style="width: 180px">
             <el-option
               v-for="p in plots"
               :key="p.id"
@@ -13,8 +13,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="作物">
-          <el-select v-model="query.cropId" placeholder="全部" clearable filterable style="width: 180px">
+        <el-form-item :label="t('plan.crop')">
+          <el-select v-model="query.cropId" :placeholder="t('common.all')" clearable filterable style="width: 180px">
             <el-option
               v-for="c in crops"
               :key="c.id"
@@ -23,8 +23,8 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.status" placeholder="全部" clearable style="width: 140px">
+        <el-form-item :label="t('common.status')">
+          <el-select v-model="query.status" :placeholder="t('common.all')" clearable style="width: 140px">
             <el-option
               v-for="s in STATUS_OPTIONS"
               :key="s.value"
@@ -33,12 +33,12 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="编码">
-          <el-input v-model="query.code" placeholder="模糊查询" clearable style="width: 160px" />
+        <el-form-item :label="t('plan.code')">
+          <el-input v-model="query.code" :placeholder="t('common.fuzzy')" clearable style="width: 160px" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">查询</el-button>
-          <el-button :icon="RefreshIcon" @click="onReset">重置</el-button>
+          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">{{ t('common.search') }}</el-button>
+          <el-button :icon="RefreshIcon" @click="onReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -46,18 +46,18 @@
     <!-- 表格 -->
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
-        <el-button type="primary" :icon="PlusIcon" @click="onCreate">新建种植计划</el-button>
+        <el-button type="primary" :icon="PlusIcon" @click="onCreate">{{ t('plan.new') }}</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
-        <el-table-column prop="code" label="计划编码" width="140" />
-        <el-table-column label="地块" min-width="160">
+        <el-table-column prop="code" :label="t('plan.code')" width="140" />
+        <el-table-column :label="t('plan.plot')" min-width="160">
           <template #default="{ row }">
             <el-tag size="small">{{ row.plotName }}</el-tag>
             <span class="dim">({{ row.plotCode }})</span>
           </template>
         </el-table-column>
-        <el-table-column label="作物 / 品种" min-width="180">
+        <el-table-column :label="t('plan.cropVariety')" min-width="180">
           <template #default="{ row }">
             <div>
               <el-tag size="small" type="primary">{{ row.cropName }}</el-tag>
@@ -68,33 +68,36 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="面积(亩)" width="100" align="right">
+        <el-table-column :label="t('plan.areaMu')" width="100" align="right">
           <template #default="{ row }">{{ Number(row.areaMu).toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column label="计划周期" width="230">
+        <el-table-column :label="t('plan.period')" width="230">
           <template #default="{ row }">
             <DateRange :start="row.planStartDate" :end="row.planHarvestDate" />
           </template>
         </el-table-column>
-        <el-table-column label="目标产量(kg)" width="120" align="right">
+        <el-table-column :label="t('plan.targetYieldKg')" width="120" align="right">
           <template #default="{ row }">
             <span v-if="row.targetYieldKg == null" class="dim">-</span>
             <span v-else>{{ Number(row.targetYieldKg).toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="110" align="center">
+        <el-table-column :label="t('common.status')" width="110" align="center">
           <template #default="{ row }">
             <el-tag :type="statusTag(row.status)" size="small" effect="dark">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right" align="center">
+        <el-table-column :label="t('common.actions')" width="240" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="onEdit(row)">编辑</el-button>
+            <el-button link type="success" size="small" @click="onViewPnL(row)">
+              {{ t('pnl.viewPnl') }}
+            </el-button>
+            <el-button link type="primary" size="small" @click="onEdit(row)">{{ t('common.edit') }}</el-button>
             <el-dropdown @command="(s) => onChangeStatus(row, s)" style="margin: 0 6px">
               <el-button link type="warning" size="small">
-                改状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                {{ t('batch.changeStatus') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -112,11 +115,11 @@
               </template>
             </el-dropdown>
             <el-popconfirm
-              title="确认删除该计划?"
+              :title="t('plan.confirmDelete')"
               @confirm="onDelete(row)"
             >
               <template #reference>
-                <el-button link type="danger" size="small">删除</el-button>
+                <el-button link type="danger" size="small">{{ t('common.delete') }}</el-button>
               </template>
             </el-popconfirm>
           </template>
@@ -139,32 +142,32 @@
     <!-- 新建/编辑对话框 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="editing ? '编辑种植计划' : '新建种植计划'"
+      :title="editing ? t('plan.editTitle') : t('plan.createTitle')"
       width="640"
       destroy-on-close
       @closed="onDialogClosed"
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="计划编码" prop="code">
-          <el-input v-model="form.code" placeholder="例: PL-26-0001" maxlength="32" />
-          <div class="hint">建议格式 PL-{两位年份}-{4位序号},如 PL-26-0001</div>
+        <el-form-item :label="t('plan.code')" prop="code">
+          <el-input v-model="form.code" :placeholder="t('plan.codePlaceholder')" maxlength="32" />
+          <div class="hint">{{ t('plan.codeHint') }}</div>
         </el-form-item>
 
-        <el-form-item label="地块" prop="plotId">
-          <el-select v-model="form.plotId" placeholder="选择地块" filterable style="width: 100%">
+        <el-form-item :label="t('plan.plot')" prop="plotId">
+          <el-select v-model="form.plotId" :placeholder="t('plan.plotPlaceholder')" filterable style="width: 100%">
             <el-option
               v-for="p in plots"
               :key="p.id"
-              :label="`${p.name} (${p.code})  ·  ${p.areaMu || '-'} 亩`"
+              :label="t('plan.plotOptionLabel', { name: p.name, code: p.code, mu: p.areaMu || '-' })"
               :value="p.id"
             />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="作物" prop="cropId">
+        <el-form-item :label="t('plan.crop')" prop="cropId">
           <el-select
             v-model="form.cropId"
-            placeholder="选择作物"
+            :placeholder="t('plan.cropPlaceholder')"
             filterable
             style="width: 100%"
             @change="onCropChange"
@@ -178,10 +181,10 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="品种">
+        <el-form-item :label="t('plan.variety')">
           <el-select
             v-model="form.varietyId"
-            :placeholder="form.cropId ? '可选 - 该作物下的品种' : '请先选择作物'"
+            :placeholder="form.cropId ? t('plan.varietyOptional') : t('plan.varietyPickCropFirst')"
             clearable
             filterable
             :disabled="!form.cropId"
@@ -195,11 +198,11 @@
             />
           </el-select>
           <div v-if="form.cropId && filteredVarieties.length === 0" class="hint">
-            该作物下还没有品种,可以留空,或先去"主数据 - 品种"补
+            {{ t('plan.noVarietyHint') }}
           </div>
         </el-form-item>
 
-        <el-form-item label="种植面积" prop="areaMu">
+        <el-form-item :label="t('plan.areaInput')" prop="areaMu">
           <el-input-number
             v-model="form.areaMu"
             :min="0.01"
@@ -208,22 +211,22 @@
             controls-position="right"
             style="width: 100%"
           />
-          <span class="unit">亩</span>
+          <span class="unit">{{ t('plan.areaMuUnit') }}</span>
         </el-form-item>
 
-        <el-form-item label="计划周期" prop="planDates">
+        <el-form-item :label="t('plan.period')" prop="planDates">
           <el-date-picker
             v-model="planDateRange"
             type="daterange"
-            range-separator="→"
-            start-placeholder="计划起始"
-            end-placeholder="计划采收"
+            :range-separator="t('date.rangeSep')"
+            :start-placeholder="t('plan.planStartPlaceholder')"
+            :end-placeholder="t('plan.planHarvestPlaceholder')"
             value-format="YYYY-MM-DD"
             style="width: 100%"
           />
         </el-form-item>
 
-        <el-form-item label="目标产量">
+        <el-form-item :label="t('plan.targetYield')">
           <el-input-number
             v-model="form.targetYieldKg"
             :min="0"
@@ -232,23 +235,33 @@
             controls-position="right"
             style="width: 100%"
           />
-          <span class="unit">kg</span>
+          <span class="unit">{{ t('units.kg') }}</span>
         </el-form-item>
 
-        <el-form-item label="备注">
+        <el-form-item :label="t('common.remark')">
           <el-input v-model="form.remark" type="textarea" :rows="2" maxlength="255" show-word-limit />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="onSubmit">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="onSubmit">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
+
+    <!-- Sprint 12 - P&L 详情对话框 -->
+    <PnLDialog
+      v-model="pnlVisible"
+      kind="plan"
+      :ref-id="pnlPlanId"
+      :ref-code="pnlPlanCode"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import PnLDialog from '@/components/PnLDialog.vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
   Search as SearchIcon,
@@ -268,20 +281,22 @@ import { listCrops } from '@/api/crop'
 import { listVarieties } from '@/api/variety'
 import DateRange from '@/components/DateRange.vue'
 
+const { t } = useI18n()
+
 // ============================================================
 // 状态字典
 // ============================================================
-const STATUS_OPTIONS = [
-  { value: 'draft',       label: '草稿',   tag: 'info' },
-  { value: 'planned',     label: '已排期', tag: 'primary' },
-  { value: 'in_progress', label: '种植中', tag: 'warning' },
-  { value: 'harvested',   label: '已采收', tag: 'success' },
-  { value: 'completed',   label: '已完成', tag: 'success' },
-  { value: 'cancelled',   label: '已取消', tag: 'danger' },
-]
-const STATUS_MAP = Object.fromEntries(STATUS_OPTIONS.map(s => [s.value, s]))
-function statusLabel(v) { return STATUS_MAP[v]?.label || v }
-function statusTag(v) { return STATUS_MAP[v]?.tag || 'info' }
+const STATUS_OPTIONS = computed(() => [
+  { value: 'draft',       label: t('plan.statusDraft'),      tag: 'info' },
+  { value: 'planned',     label: t('plan.statusPlanned'),    tag: 'primary' },
+  { value: 'in_progress', label: t('plan.statusInProgress'), tag: 'warning' },
+  { value: 'harvested',   label: t('plan.statusHarvested'),  tag: 'success' },
+  { value: 'completed',   label: t('plan.statusCompleted'),  tag: 'success' },
+  { value: 'cancelled',   label: t('plan.statusCancelled'),  tag: 'danger' },
+])
+const STATUS_MAP = computed(() => Object.fromEntries(STATUS_OPTIONS.value.map(s => [s.value, s])))
+function statusLabel(v) { return STATUS_MAP.value[v]?.label || v }
+function statusTag(v) { return STATUS_MAP.value[v]?.tag || 'info' }
 
 // ============================================================
 // 关联数据 (地块/作物/品种) - 一次拉够,前端复用
@@ -343,6 +358,16 @@ function onReset() {
 function onPageChange(p) { page.value = p; reload() }
 function onSizeChange(s) { pageSize.value = s; reload(1) }
 
+// Sprint 12 - P&L dialog
+const pnlVisible = ref(false)
+const pnlPlanId = ref(null)
+const pnlPlanCode = ref('')
+function onViewPnL(row) {
+  pnlPlanId.value = row.id
+  pnlPlanCode.value = row.code
+  pnlVisible.value = true
+}
+
 onMounted(async () => {
   await loadRelated()
   await reload(1)
@@ -381,19 +406,19 @@ watch(planDateRange, (v) => {
   }
 })
 
-const rules = {
+const rules = computed(() => ({
   code: [
-    { required: true, message: '请输入计划编码', trigger: 'blur' },
-    { max: 32, message: '编码长度 ≤ 32', trigger: 'blur' },
+    { required: true, message: t('plan.enterCode'), trigger: 'blur' },
+    { max: 32, message: t('plan.codeMaxLen'), trigger: 'blur' },
   ],
-  plotId: [{ required: true, message: '请选择地块', trigger: 'change' }],
-  cropId: [{ required: true, message: '请选择作物', trigger: 'change' }],
-  areaMu: [{ required: true, message: '请输入种植面积', trigger: 'change' }],
+  plotId: [{ required: true, message: t('plan.pickPlot'), trigger: 'change' }],
+  cropId: [{ required: true, message: t('plan.pickCrop'), trigger: 'change' }],
+  areaMu: [{ required: true, message: t('plan.enterArea'), trigger: 'change' }],
   planDates: [
     {
       validator: (_r, _v, cb) => {
         if (!form.planStartDate || !form.planHarvestDate) {
-          cb(new Error('请选择计划周期'))
+          cb(new Error(t('plan.pickPeriod')))
         } else {
           cb()
         }
@@ -401,7 +426,7 @@ const rules = {
       trigger: 'change',
     },
   ],
-}
+}))
 
 // 选作物时,如果原品种不属于新作物,清空品种
 function onCropChange() {
@@ -453,10 +478,10 @@ async function onSubmit() {
   try {
     if (editing.value) {
       await updatePlantingPlan(editing.value, form)
-      ElMessage.success('修改成功')
+      ElMessage.success(t('common.updateSuccess'))
     } else {
       await createPlantingPlan(form)
-      ElMessage.success('创建成功')
+      ElMessage.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
     reload()
@@ -474,7 +499,7 @@ async function onChangeStatus(row, newStatus) {
   if (newStatus === row.status) return
   try {
     await changePlantingPlanStatus(row.id, newStatus)
-    ElMessage.success(`状态已改为「${statusLabel(newStatus)}」`)
+    ElMessage.success(t('plan.statusChanged', { label: statusLabel(newStatus) }))
     reload()
   } catch {}
 }
@@ -482,7 +507,7 @@ async function onChangeStatus(row, newStatus) {
 async function onDelete(row) {
   try {
     await deletePlantingPlan(row.id)
-    ElMessage.success('已删除')
+    ElMessage.success(t('common.deleteSuccess'))
     reload()
   } catch {}
 }

@@ -278,17 +278,23 @@ CREATE TABLE `planting_plan` (
 ) ENGINE=InnoDB COMMENT='种植计划';
 
 CREATE TABLE `activity` (
-  `id`             BIGINT       PRIMARY KEY AUTO_INCREMENT,
-  `client_uuid`    VARCHAR(64)  UNIQUE COMMENT '幂等键',
-  `plot_id`        BIGINT       NOT NULL,
-  `plan_id`        BIGINT       NOT NULL,
-  `activity_type`  VARCHAR(16)  NOT NULL COMMENT 'sow/fertilize/spray/weed/water/prune/other',
-  `occur_date`     DATE         NOT NULL,
-  `operator_id`    BIGINT       NOT NULL COMMENT 'staff_id',
-  `photos`         JSON         COMMENT 'OSS URL 数组',
-  `location_gps`   VARCHAR(64),
-  `remark`         VARCHAR(500),
-  `audit_status`   VARCHAR(16)  NOT NULL DEFAULT 'pending' COMMENT 'pending/approved/rejected',
+  `id`               BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `client_uuid`      VARCHAR(64)  UNIQUE COMMENT '幂等键',
+  `plot_id`          BIGINT       NOT NULL,
+  `plan_id`          BIGINT       NOT NULL,
+  `activity_type`    VARCHAR(16)  NOT NULL COMMENT 'sow/fertilize/spray/weed/water/prune/other',
+  `occur_date`       DATE         NOT NULL,
+  `operator_id`     BIGINT       NOT NULL COMMENT 'staff_id',
+  `photos`          JSON         COMMENT 'OSS URL 数组',
+  `location_gps`    VARCHAR(64),
+  `remark`          VARCHAR(500),
+  `labor_cost`       DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '人工成本 (Sprint 11)',
+  `water_cost`       DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '水费',
+  `electricity_cost` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '电费',
+  `fertilizer_cost`  DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '肥料成本',
+  `other_cost`       DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '其他成本',
+  `cost_currency`    VARCHAR(8)    NOT NULL DEFAULT 'KES' COMMENT '本条 activity 所有成本字段共用货币',
+  `audit_status`     VARCHAR(16)  NOT NULL DEFAULT 'pending' COMMENT 'pending/approved/rejected',
   `auditor_id`     BIGINT,
   `audited_at`     DATETIME,
   `audit_remark`   VARCHAR(255),
@@ -483,6 +489,8 @@ CREATE TABLE `customer` (
   `contact_name`  VARCHAR(64),
   `contact_phone` VARCHAR(20),
   `credit_level`  VARCHAR(8)   COMMENT 'A/B/C/D',
+  `credit_days`   INT          NOT NULL DEFAULT 0 COMMENT '账期天数: 0=COD, 7=周结, 30=月结',
+  `payment_terms` VARCHAR(32)  COMMENT '账期 label: COD / 周结 / 月结 / Net 30',
   `since_date`    DATE,
   `status`        VARCHAR(16)  NOT NULL DEFAULT 'active',
   `remark`        VARCHAR(255),
@@ -515,9 +523,13 @@ CREATE TABLE `sales_order` (
   `order_date`     DATE          NOT NULL,
   `delivery_date`  DATE          NOT NULL,
   `ship_to`        VARCHAR(255)  NOT NULL,
+  `currency`       VARCHAR(8)    NOT NULL DEFAULT 'KES' COMMENT 'KES / USD / EUR',
   `total_amount`   DECIMAL(14,2) NOT NULL DEFAULT 0,
   `status`         VARCHAR(16)   NOT NULL DEFAULT 'pending'
                    COMMENT 'pending/confirmed/locked/shipping/shipped/delivered/completed/cancelled/returned',
+  `payment_status` VARCHAR(16)   NOT NULL DEFAULT 'unpaid' COMMENT 'unpaid/partial/paid',
+  `paid_amount`    DECIMAL(14,2) NOT NULL DEFAULT 0 COMMENT '累计已收款 (KES)',
+  `due_date`       DATE          COMMENT '应付日 = order_date + customer.credit_days',
   `remark`         VARCHAR(500),
   `created_at`     DATETIME      DEFAULT CURRENT_TIMESTAMP,
   `created_by`     BIGINT,
@@ -593,6 +605,83 @@ CREATE TABLE `fulfillment_item` (
   KEY `idx_batch` (`batch_id`),
   KEY `idx_inv` (`inventory_id`)
 ) ENGINE=InnoDB COMMENT='出库明细 - 含追溯链路';
+
+CREATE TABLE `payment` (
+  `id`              BIGINT        PRIMARY KEY AUTO_INCREMENT,
+  `code`            VARCHAR(32),
+  `order_id`        BIGINT        NOT NULL,
+  `customer_id`     BIGINT        NOT NULL,
+  `amount`          DECIMAL(14,2) NOT NULL,
+  `currency`        VARCHAR(8)    NOT NULL DEFAULT 'KES',
+  `fx_rate`         DECIMAL(12,6) DEFAULT 1.0,
+  `amount_kes`      DECIMAL(14,2) NOT NULL,
+  `method`          VARCHAR(16)   NOT NULL COMMENT 'cash / bank / cheque / loop_online / loop_pos',
+  `payment_date`    DATE          NOT NULL,
+  `reference_no`    VARCHAR(64),
+  `pos_terminal_id` VARCHAR(64)   COMMENT 'POS 机/Till Number (loop_pos)',
+  `channel`         VARCHAR(32)   COMMENT 'Loop 内部实际通道 mpesa/card/bank',
+  `status`          VARCHAR(16)   NOT NULL DEFAULT 'cleared',
+  `reconciled_by`   BIGINT,
+  `reconciled_at`   DATETIME,
+  `remark`          VARCHAR(255),
+  `created_at`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by`      BIGINT,
+  `updated_at`      DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_order` (`order_id`),
+  KEY `idx_customer_date` (`customer_id`, `payment_date`),
+  KEY `idx_method` (`method`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB COMMENT='回款流水';
+
+CREATE TABLE `revenue` (
+  `id`               BIGINT        PRIMARY KEY AUTO_INCREMENT,
+  `order_id`         BIGINT        NOT NULL,
+  `order_item_id`    BIGINT        NOT NULL,
+  `fulfillment_id`   BIGINT        NOT NULL,
+  `sku_id`           BIGINT        NOT NULL,
+  `customer_id`      BIGINT        NOT NULL,
+  `batch_id`         BIGINT        NULL,
+  `qty`              DECIMAL(12,3) NOT NULL,
+  `gross_amount`     DECIMAL(14,2) NOT NULL,
+  `tax`              DECIMAL(14,2) NOT NULL DEFAULT 0,
+  `net_amount`       DECIMAL(14,2) NOT NULL,
+  `currency`         VARCHAR(8)    NOT NULL DEFAULT 'KES',
+  `recognition_date` DATE          NOT NULL,
+  `status`           VARCHAR(16)   NOT NULL DEFAULT 'recognized',
+  `channel`          VARCHAR(32),
+  `remark`           VARCHAR(255),
+  `created_at`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by`       BIGINT,
+  KEY `idx_order` (`order_id`),
+  KEY `idx_customer_date` (`customer_id`, `recognition_date`),
+  KEY `idx_sku_date` (`sku_id`, `recognition_date`),
+  KEY `idx_date` (`recognition_date`)
+) ENGINE=InnoDB COMMENT='收入流水 - V2.0 P&L 事实表';
+
+CREATE TABLE `action_item` (
+  `id`              BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `rule_code`       VARCHAR(32)  NOT NULL,
+  `severity`        VARCHAR(16)  NOT NULL DEFAULT 'medium',
+  `category`        VARCHAR(32)  NOT NULL,
+  `title`           VARCHAR(255) NOT NULL,
+  `description`     VARCHAR(1000),
+  `owner_role`      VARCHAR(32),
+  `ref_type`        VARCHAR(32),
+  `ref_id`          BIGINT,
+  `ref_code`        VARCHAR(64),
+  `status`          VARCHAR(16)  NOT NULL DEFAULT 'open',
+  `due_date`        DATE,
+  `data_snapshot`   JSON,
+  `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`      DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `resolved_at`     DATETIME,
+  `resolved_by`     BIGINT,
+  `resolved_remark` VARCHAR(255),
+  UNIQUE KEY `uk_rule_ref` (`rule_code`, `ref_type`, `ref_id`),
+  KEY `idx_status_category` (`status`, `category`),
+  KEY `idx_owner_role` (`owner_role`),
+  KEY `idx_severity` (`severity`)
+) ENGINE=InnoDB COMMENT='经营行动清单 - Sprint 10 决策中心';
 
 -- ============================================================================
 -- 8. DAILY REPORT (轻量)
@@ -681,26 +770,26 @@ INSERT INTO `sys_code_rule` (`rule_key`,`template`,`remark`) VALUES
 ('input',     'IN-{seq:05d}',                               '投入品'),
 ('crop',      'CR-{seq:03d}',                               '作物');
 
--- 演示作物
+-- Seed crops (English - for African local staff)
 INSERT INTO `crop` (`code`,`name`,`category`,`unit`,`cycle_days`) VALUES
-('CR-001','番茄','果蔬','kg',90),
-('CR-002','黄瓜','果蔬','kg',60),
-('CR-003','生菜','叶菜','kg',45),
-('CR-004','草莓','果蔬','kg',120);
+('CR-001','Tomato',     'Vegetable',       'kg', 90),
+('CR-002','Cucumber',   'Vegetable',       'kg', 60),
+('CR-003','Lettuce',    'Leafy Vegetable', 'kg', 45),
+('CR-004','Strawberry', 'Fruit',           'kg',120);
 
--- 演示品种
+-- Seed varieties
 INSERT INTO `variety` (`crop_id`,`code`,`name`,`traits`) VALUES
-(1,'V-001','樱桃番茄','小型甜度高'),
-(1,'V-002','普罗旺斯','大果型水分足'),
-(2,'V-001','水果黄瓜','短小爽脆'),
-(3,'V-001','奶油生菜','口感软糯');
+(1,'V-001','Cherry Tomato',     'Small, high sweetness'),
+(1,'V-002','Provence Heritage', 'Large, juicy'),
+(2,'V-001','Mini Snack',        'Short, crisp'),
+(3,'V-001','Butterhead',        'Soft, buttery texture');
 
--- 演示包装规格
+-- Seed packaging specs
 INSERT INTO `packaging_spec` (`code`,`name`,`unit_net_kg`,`unit_gross_kg`,`material`) VALUES
-('SP-250G','250g 透明盒',0.250,0.280,'PET 盒'),
-('SP-500G','500g 自封袋',0.500,0.510,'PE 袋'),
-('SP-1KG', '1kg 礼盒',1.000,1.100,'纸盒+衬'),
-('SP-5KG', '5kg 周转箱',5.000,5.500,'PP 周转箱');
+('SP-250G','250g Clear Punnet', 0.250, 0.280, 'PET'),
+('SP-500G','500g Resealable Bag',0.500, 0.510, 'PE'),
+('SP-1KG', '1kg Gift Box',      1.000, 1.100, 'Paper + Liner'),
+('SP-5KG', '5kg Crate',         5.000, 5.500, 'PP Crate');
 
 -- 演示库位 (注意层级: W01 / W02 是顶层, A1/A2/C1 是其子节点)
 INSERT INTO `location_warehouse` (`code`,`name`,`type`,`parent_id`) VALUES
