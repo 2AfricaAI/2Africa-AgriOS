@@ -3,8 +3,8 @@
     <!-- 过滤器 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="query" @submit.prevent>
-        <el-form-item label="计划">
-          <el-select v-model="query.planId" placeholder="全部" clearable filterable style="width: 200px">
+        <el-form-item :label="t('activity.plan')">
+          <el-select v-model="query.planId" :placeholder="t('common.all')" clearable filterable style="width: 200px">
             <el-option
               v-for="p in plans"
               :key="p.id"
@@ -13,29 +13,29 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="类型">
-          <el-select v-model="query.activityType" placeholder="全部" clearable style="width: 140px">
+        <el-form-item :label="t('activity.type')">
+          <el-select v-model="query.activityType" :placeholder="t('common.all')" clearable style="width: 140px">
             <el-option
-              v-for="t in TYPE_OPTIONS"
-              :key="t.value"
-              :label="t.label"
-              :value="t.value"
+              v-for="opt in TYPE_OPTIONS"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="日期范围">
+        <el-form-item :label="t('activity.date')">
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="→"
-            start-placeholder="起始"
-            end-placeholder="止"
+            :range-separator="t('date.rangeSep')"
+            :start-placeholder="t('date.start')"
+            :end-placeholder="t('date.end')"
             value-format="YYYY-MM-DD"
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="审核">
-          <el-select v-model="query.auditStatus" placeholder="全部" clearable style="width: 130px">
+        <el-form-item :label="t('activity.audit')">
+          <el-select v-model="query.auditStatus" :placeholder="t('common.all')" clearable style="width: 130px">
             <el-option
               v-for="a in AUDIT_OPTIONS"
               :key="a.value"
@@ -45,8 +45,8 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">查询</el-button>
-          <el-button :icon="RefreshIcon" @click="onReset">重置</el-button>
+          <el-button type="primary" :icon="SearchIcon" @click="reload(1)">{{ t('common.search') }}</el-button>
+          <el-button :icon="RefreshIcon" @click="onReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -54,19 +54,19 @@
     <!-- 表格 -->
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
-        <el-button type="primary" :icon="PlusIcon" @click="onCreate">新建农事记录</el-button>
+        <el-button type="primary" :icon="PlusIcon" @click="onCreate">{{ t('activity.new') }}</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
-        <el-table-column prop="occurDate" label="发生日期" width="110" />
-        <el-table-column label="类型" width="100" align="center">
+        <el-table-column prop="occurDate" :label="t('activity.occurDate')" width="110" />
+        <el-table-column :label="t('activity.type')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="typeTag(row.activityType)" size="small" effect="dark">
               {{ typeLabel(row.activityType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="关联" min-width="220">
+        <el-table-column :label="t('activity.relation')" min-width="220">
           <template #default="{ row }">
             <div class="dim" style="margin-bottom: 2px">{{ row.planCode }}</div>
             <div>
@@ -74,13 +74,13 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="操作人" width="110">
+        <el-table-column :label="t('activity.operator')" width="110">
           <template #default="{ row }">
             <span v-if="row.operatorName">{{ row.operatorName }}</span>
             <span v-else class="dim">#{{ row.operatorId }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="照片" width="160">
+        <el-table-column :label="t('activity.photos')" width="160">
           <template #default="{ row }">
             <div v-if="row.photos?.length" class="photo-row">
               <el-image
@@ -98,20 +98,20 @@
             <span v-else class="dim">-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" min-width="180" show-overflow-tooltip />
-        <el-table-column label="审核" width="100" align="center">
+        <el-table-column prop="remark" :label="t('common.remark')" min-width="180" show-overflow-tooltip />
+        <el-table-column :label="t('activity.audit')" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="auditTag(row.auditStatus)" size="small">
               {{ auditLabel(row.auditStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right" align="center">
+        <el-table-column :label="t('common.actions')" width="200" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="onEdit(row)">编辑</el-button>
+            <el-button link type="primary" size="small" @click="onEdit(row)">{{ t('common.edit') }}</el-button>
             <el-dropdown @command="(s) => onAudit(row, s)" style="margin: 0 6px">
               <el-button link type="warning" size="small">
-                审核<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                {{ t('activity.audit') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -126,9 +126,9 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-popconfirm title="确认删除该农事记录?" @confirm="onDelete(row)">
+            <el-popconfirm :title="t('activity.confirmDelete')" @confirm="onDelete(row)">
               <template #reference>
-                <el-button link type="danger" size="small">删除</el-button>
+                <el-button link type="danger" size="small">{{ t('common.delete') }}</el-button>
               </template>
             </el-popconfirm>
           </template>
@@ -151,14 +151,14 @@
     <!-- 新建/编辑对话框 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="editing ? '编辑农事记录' : '新建农事记录'"
+      :title="editing ? t('activity.editTitle') : t('activity.createTitle')"
       width="640"
       destroy-on-close
       @closed="onDialogClosed"
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="关联计划" prop="planId">
-          <el-select v-model="form.planId" placeholder="选择种植计划" filterable style="width: 100%">
+        <el-form-item :label="t('activity.plan')" prop="planId">
+          <el-select v-model="form.planId" :placeholder="t('activity.planPlaceholder')" filterable style="width: 100%">
             <el-option
               v-for="p in plans"
               :key="p.id"
@@ -168,36 +168,70 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="发生日期" prop="occurDate">
+        <el-form-item :label="t('activity.occurDate')" prop="occurDate">
           <el-date-picker
             v-model="form.occurDate"
             type="date"
             value-format="YYYY-MM-DD"
-            placeholder="选择日期"
+            :placeholder="t('activity.datePlaceholder')"
             style="width: 100%"
           />
         </el-form-item>
 
-        <el-form-item label="活动类型" prop="activityType">
-          <el-select v-model="form.activityType" placeholder="请选择" style="width: 100%">
+        <el-form-item :label="t('activity.type')" prop="activityType">
+          <el-select v-model="form.activityType" :placeholder="t('common.selectPlaceholder')" style="width: 100%">
             <el-option
-              v-for="t in TYPE_OPTIONS"
-              :key="t.value"
-              :label="t.label"
-              :value="t.value"
+              v-for="opt in TYPE_OPTIONS"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
             />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="GPS 坐标">
-          <el-input v-model="form.locationGps" placeholder="-1.2864, 36.8172  (可选)" maxlength="64" />
+        <el-form-item :label="t('activity.gps')">
+          <el-input v-model="form.locationGps" :placeholder="t('activity.gpsPlaceholder')" maxlength="64" />
         </el-form-item>
 
-        <el-form-item label="备注">
+        <el-form-item :label="t('common.remark')">
           <el-input v-model="form.remark" type="textarea" :rows="2" maxlength="500" show-word-limit />
         </el-form-item>
 
-        <el-form-item label="照片">
+        <!-- Sprint 11 - 成本字段 (V2.0 Phase 2 P&L) -->
+        <el-divider content-position="left">
+          <span class="cost-divider">💰 {{ t('activity.costsBlock') }}</span>
+        </el-divider>
+
+        <div class="cost-row">
+          <el-form-item :label="t('activity.laborCost')" class="cost-field">
+            <el-input-number v-model="form.laborCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
+          </el-form-item>
+          <el-form-item :label="t('activity.fertilizerCost')" class="cost-field">
+            <el-input-number v-model="form.fertilizerCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
+          </el-form-item>
+        </div>
+        <div class="cost-row">
+          <el-form-item :label="t('activity.waterCost')" class="cost-field">
+            <el-input-number v-model="form.waterCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
+          </el-form-item>
+          <el-form-item :label="t('activity.electricityCost')" class="cost-field">
+            <el-input-number v-model="form.electricityCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
+          </el-form-item>
+        </div>
+        <div class="cost-row">
+          <el-form-item :label="t('activity.otherCost')" class="cost-field">
+            <el-input-number v-model="form.otherCost" :min="0" :precision="2" :controls="false" style="width: 100%" />
+          </el-form-item>
+          <el-form-item :label="t('order.currency')" class="cost-field">
+            <el-select v-model="form.costCurrency" style="width: 100%">
+              <el-option label="KES" value="KES" />
+              <el-option label="USD" value="USD" />
+              <el-option label="EUR" value="EUR" />
+            </el-select>
+          </el-form-item>
+        </div>
+
+        <el-form-item :label="t('activity.photos')">
           <FileUploader
             v-model="photos"
             biz-type="activity_photo"
@@ -208,15 +242,16 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="onSubmit">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="onSubmit">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search as SearchIcon,
@@ -234,30 +269,32 @@ import {
 import { listPlantingPlans } from '@/api/plantingPlan'
 import FileUploader from '@/components/FileUploader.vue'
 
+const { t } = useI18n()
+
 // ============================================================
 // 字典
 // ============================================================
-const TYPE_OPTIONS = [
-  { value: 'sow',       label: 'Sowing',      tag: 'success' },
-  { value: 'fertilize', label: 'Fertilizing', tag: 'warning' },
-  { value: 'spray',     label: 'Spraying',    tag: 'danger' },
-  { value: 'weed',      label: 'Weeding',     tag: 'info' },
-  { value: 'water',     label: 'Watering',    tag: 'primary' },
-  { value: 'prune',     label: 'Pruning',     tag: 'info' },
-  { value: 'other',     label: 'Other',       tag: 'info' },
-]
-const TYPE_MAP = Object.fromEntries(TYPE_OPTIONS.map(t => [t.value, t]))
-function typeLabel(v) { return TYPE_MAP[v]?.label || v }
-function typeTag(v)   { return TYPE_MAP[v]?.tag || 'info' }
+const TYPE_OPTIONS = computed(() => [
+  { value: 'sow',       label: t('activity.typeSeed'),      tag: 'success' },
+  { value: 'fertilize', label: t('activity.typeFertilize'), tag: 'warning' },
+  { value: 'spray',     label: t('activity.typeSpray'),     tag: 'danger' },
+  { value: 'weed',      label: t('activity.typeWeed'),      tag: 'info' },
+  { value: 'water',     label: t('activity.typeWater'),     tag: 'primary' },
+  { value: 'prune',     label: t('activity.typePrune'),     tag: 'info' },
+  { value: 'other',     label: t('activity.typeOther'),     tag: 'info' },
+])
+const TYPE_MAP = computed(() => Object.fromEntries(TYPE_OPTIONS.value.map(opt => [opt.value, opt])))
+function typeLabel(v) { return TYPE_MAP.value[v]?.label || v }
+function typeTag(v)   { return TYPE_MAP.value[v]?.tag || 'info' }
 
-const AUDIT_OPTIONS = [
-  { value: 'pending',  label: '待审核', tag: 'info' },
-  { value: 'approved', label: '已通过', tag: 'success' },
-  { value: 'rejected', label: '已驳回', tag: 'danger' },
-]
-const AUDIT_MAP = Object.fromEntries(AUDIT_OPTIONS.map(a => [a.value, a]))
-function auditLabel(v) { return AUDIT_MAP[v]?.label || v }
-function auditTag(v)   { return AUDIT_MAP[v]?.tag || 'info' }
+const AUDIT_OPTIONS = computed(() => [
+  { value: 'pending',  label: t('activity.auditPending'),  tag: 'info' },
+  { value: 'approved', label: t('activity.auditApproved'), tag: 'success' },
+  { value: 'rejected', label: t('activity.auditRejected'), tag: 'danger' },
+])
+const AUDIT_MAP = computed(() => Object.fromEntries(AUDIT_OPTIONS.value.map(a => [a.value, a])))
+function auditLabel(v) { return AUDIT_MAP.value[v]?.label || v }
+function auditTag(v)   { return AUDIT_MAP.value[v]?.tag || 'info' }
 
 // ============================================================
 // 关联数据
@@ -346,14 +383,21 @@ const emptyForm = () => ({
   occurDate: null,
   locationGps: '',
   remark: '',
+  // Sprint 11 cost fields (V2.0 Phase 2 P&L)
+  laborCost: 0,
+  waterCost: 0,
+  electricityCost: 0,
+  fertilizerCost: 0,
+  otherCost: 0,
+  costCurrency: 'KES',
 })
 const form = reactive(emptyForm())
 
-const rules = {
-  planId:       [{ required: true, message: '请选择种植计划', trigger: 'change' }],
-  activityType: [{ required: true, message: '请选择活动类型', trigger: 'change' }],
-  occurDate:    [{ required: true, message: '请选择发生日期', trigger: 'change' }],
-}
+const rules = computed(() => ({
+  planId:       [{ required: true, message: t('activity.pickPlan'), trigger: 'change' }],
+  activityType: [{ required: true, message: t('activity.pickType'), trigger: 'change' }],
+  occurDate:    [{ required: true, message: t('activity.pickOccurDate'), trigger: 'change' }],
+}))
 
 function onCreate() {
   editing.value = null
@@ -370,6 +414,12 @@ function onEdit(row) {
     occurDate: row.occurDate,
     locationGps: row.locationGps || '',
     remark: row.remark || '',
+    laborCost: Number(row.laborCost) || 0,
+    waterCost: Number(row.waterCost) || 0,
+    electricityCost: Number(row.electricityCost) || 0,
+    fertilizerCost: Number(row.fertilizerCost) || 0,
+    otherCost: Number(row.otherCost) || 0,
+    costCurrency: row.costCurrency || 'KES',
   })
   // 后端返回的 photos 是 FileVO[],可以直接给 FileUploader
   photos.value = row.photos || []
@@ -398,10 +448,10 @@ async function onSubmit() {
     }
     if (editing.value) {
       await updateActivity(editing.value, payload)
-      ElMessage.success('修改成功')
+      ElMessage.success(t('common.updateSuccess'))
     } else {
       await createActivity(payload)
-      ElMessage.success('创建成功')
+      ElMessage.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
     reload()
@@ -419,18 +469,18 @@ async function onAudit(row, newStatus) {
   if (newStatus === row.auditStatus) return
   let remark = ''
   if (newStatus === 'rejected') {
-    const { value } = await ElMessageBox.prompt('请填写驳回原因', '驳回审核', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    const { value } = await ElMessageBox.prompt(t('activity.rejectPrompt'), t('activity.rejectTitle'), {
+      confirmButtonText: t('common.ok'),
+      cancelButtonText: t('common.cancel'),
       inputType: 'textarea',
-      inputPlaceholder: '说明驳回原因, 可空',
+      inputPlaceholder: t('activity.rejectPlaceholder'),
     }).catch(() => ({ value: undefined }))
     if (value === undefined) return
     remark = value
   }
   try {
     await auditActivity(row.id, newStatus, remark)
-    ElMessage.success(`已${auditLabel(newStatus)}`)
+    ElMessage.success(t('activity.auditDone', { label: auditLabel(newStatus) }))
     reload()
   } catch {}
 }
@@ -438,13 +488,17 @@ async function onAudit(row, newStatus) {
 async function onDelete(row) {
   try {
     await deleteActivity(row.id)
-    ElMessage.success('已删除')
+    ElMessage.success(t('common.deleteSuccess'))
     reload()
   } catch {}
 }
 </script>
 
 <style scoped>
+.cost-divider { font-size: 13px; color: #1f7a35; font-weight: 600; }
+.cost-row { display: flex; gap: 14px; }
+.cost-row .cost-field { flex: 1; }
+
 .page { display: flex; flex-direction: column; gap: 16px; }
 .filter-card :deep(.el-card__body),
 .table-card :deep(.el-card__body) { padding: 16px; }

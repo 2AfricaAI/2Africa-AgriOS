@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +39,19 @@ public class Activity {
 
     private String locationGps;
     private String remark;
+
+    /** 人工成本 (V2.0 Phase 2 P&L) */
+    private BigDecimal laborCost;
+    /** 水费 */
+    private BigDecimal waterCost;
+    /** 电费 */
+    private BigDecimal electricityCost;
+    /** 肥料成本 */
+    private BigDecimal fertilizerCost;
+    /** 其他成本 */
+    private BigDecimal otherCost;
+    /** 所有成本字段共用的货币 (与 activity_input.currency 独立) */
+    private String costCurrency;
 
     /** pending / approved / rejected */
     private String auditStatus;

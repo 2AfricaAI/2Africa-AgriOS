@@ -4,6 +4,7 @@ import ai.toafrica.agrios.system.vo.FileVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,14 @@ public class ActivityVO {
 
     private String locationGps;
     private String remark;
+
+    /** Sprint 11 - 成本字段 (V2.0 Phase 2 P&L 种子数据) */
+    private BigDecimal laborCost;
+    private BigDecimal waterCost;
+    private BigDecimal electricityCost;
+    private BigDecimal fertilizerCost;
+    private BigDecimal otherCost;
+    private String costCurrency;
 
     private String auditStatus;
     private Long auditorId;

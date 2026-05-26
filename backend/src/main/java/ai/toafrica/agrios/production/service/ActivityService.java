@@ -80,7 +80,7 @@ public class ActivityService {
         Page<ActivityRow> p = new Page<>(1, 1);
         var pageData = activityMapper.pageWithJoin(p, q);
         if (pageData.getRecords().isEmpty()) {
-            throw new BusinessException(R.NOT_FOUND, "农事记录不存在");
+            throw new BusinessException(R.NOT_FOUND, "Activity record not found");
         }
         return toVOWithPhotos(pageData.getRecords().get(0));
     }
@@ -102,11 +102,11 @@ public class ActivityService {
         // 2) 校验 plan 存在并取出 plotId 反填
         PlantingPlan plan = plantingPlanMapper.selectById(form.getPlanId());
         if (plan == null) {
-            throw new BusinessException("种植计划不存在: id=" + form.getPlanId());
+            throw new BusinessException("Planting plan not found: id=" + form.getPlanId());
         }
         // 如果前端传了 plotId,校验是否一致;否则取计划的 plot
         if (form.getPlotId() != null && !form.getPlotId().equals(plan.getPlotId())) {
-            throw new BusinessException("plotId 与该计划的 plotId 不一致");
+            throw new BusinessException("plotId does not match the plan's plotId");
         }
 
         Activity a = new Activity();
@@ -128,11 +128,11 @@ public class ActivityService {
     // ============================================================
     public void update(Long id, ActivityForm form) {
         Activity a = activityMapper.selectById(id);
-        if (a == null) throw new BusinessException(R.NOT_FOUND, "农事记录不存在");
+        if (a == null) throw new BusinessException(R.NOT_FOUND, "Activity record not found");
 
         PlantingPlan plan = plantingPlanMapper.selectById(form.getPlanId());
         if (plan == null) {
-            throw new BusinessException("种植计划不存在: id=" + form.getPlanId());
+            throw new BusinessException("Planting plan not found: id=" + form.getPlanId());
         }
 
         BeanUtils.copyProperties(form, a);
@@ -146,10 +146,10 @@ public class ActivityService {
     // ============================================================
     public void audit(Long id, String status, String remark) {
         if (!ALL_AUDIT_STATUS.contains(status)) {
-            throw new BusinessException("auditStatus 必须是 pending / approved / rejected");
+            throw new BusinessException("auditStatus must be pending / approved / rejected");
         }
         Activity a = activityMapper.selectById(id);
-        if (a == null) throw new BusinessException(R.NOT_FOUND, "农事记录不存在");
+        if (a == null) throw new BusinessException(R.NOT_FOUND, "Activity record not found");
 
         a.setAuditStatus(status);
         a.setAuditorId(SecurityUtil.currentUserId());

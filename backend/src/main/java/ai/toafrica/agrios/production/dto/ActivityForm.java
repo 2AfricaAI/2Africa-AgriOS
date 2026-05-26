@@ -1,12 +1,14 @@
 package ai.toafrica.agrios.production.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class ActivityForm {
 
     @NotBlank
     @Pattern(regexp = "sow|fertilize|spray|weed|water|prune|other",
-             message = "activityType 必须是 sow/fertilize/spray/weed/water/prune/other")
+             message = "activityType must be sow/fertilize/spray/weed/water/prune/other")
     @Schema(description = "活动类型", example = "sow",
             allowableValues = {"sow", "fertilize", "spray", "weed", "water", "prune", "other"})
     private String activityType;
@@ -50,4 +52,30 @@ public class ActivityForm {
     @Size(max = 500)
     @Schema(description = "备注")
     private String remark;
+
+    // ====== V2.0 Phase 2 成本字段 (Sprint 11) ======
+
+    @DecimalMin(value = "0", inclusive = true, message = "laborCost must be >= 0")
+    @Schema(description = "人工成本", example = "500")
+    private BigDecimal laborCost;
+
+    @DecimalMin(value = "0", inclusive = true, message = "waterCost must be >= 0")
+    @Schema(description = "水费", example = "80")
+    private BigDecimal waterCost;
+
+    @DecimalMin(value = "0", inclusive = true, message = "electricityCost must be >= 0")
+    @Schema(description = "电费", example = "60")
+    private BigDecimal electricityCost;
+
+    @DecimalMin(value = "0", inclusive = true, message = "fertilizerCost must be >= 0")
+    @Schema(description = "肥料成本", example = "200")
+    private BigDecimal fertilizerCost;
+
+    @DecimalMin(value = "0", inclusive = true, message = "otherCost must be >= 0")
+    @Schema(description = "其他成本", example = "0")
+    private BigDecimal otherCost;
+
+    @Pattern(regexp = "^(KES|USD|EUR)?$", message = "costCurrency must be KES / USD / EUR")
+    @Schema(description = "成本货币", example = "KES")
+    private String costCurrency;
 }

@@ -30,6 +30,7 @@ public interface ActivityMapper extends BaseMapper<Activity> {
               a.operator_id, op.nickname AS operator_name,
               a.photos AS photos_json,
               a.location_gps, a.remark,
+              a.labor_cost, a.water_cost, a.electricity_cost, a.fertilizer_cost, a.other_cost, a.cost_currency,
               a.audit_status, a.auditor_id, au.nickname AS auditor_name,
               a.audited_at, a.audit_remark,
               a.created_at, a.updated_at
