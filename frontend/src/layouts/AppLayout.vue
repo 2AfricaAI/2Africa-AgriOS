@@ -282,4 +282,12 @@ async function onLogout() {
 .lang-flag-item { margin-right: 6px; }
 
 .welcome {
-  font
+  font-size: 13px;
+  color: #1f2329;
+}
+
+.main {
+  background: #f0f2f5;
+  overflow: auto;
+}
+</style>
