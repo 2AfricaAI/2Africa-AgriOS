@@ -31,8 +31,6 @@
           <el-menu-item index="/master/packaging-specs">{{ t('menu.packagingSpecs') }}</el-menu-item>
           <el-menu-item index="/master/warehouses">{{ t('menu.warehouses') }}</el-menu-item>
           <el-menu-item index="/master/input-items">{{ t('menu.inputItems') }}</el-menu-item>
-          <el-menu-item index="/master/input-stock">{{ t('menu.inputStock') }}</el-menu-item>
-          <el-menu-item index="/master/stock-log">{{ t('menu.stockLog') }}</el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="production">
@@ -53,6 +51,8 @@
             <span>{{ t('menu.warehouseOps') }}</span>
           </template>
           <el-menu-item index="/warehouse/inbound">{{ t('menu.inbound') }}</el-menu-item>
+          <el-menu-item index="/master/input-stock">{{ t('menu.inputStock') }}</el-menu-item>
+          <el-menu-item index="/master/stock-log">{{ t('menu.stockLog') }}</el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="packhouse">
