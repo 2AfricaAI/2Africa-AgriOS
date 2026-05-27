@@ -290,7 +290,7 @@ const dlg = reactive({ visible: false, id: null })
 const form = reactive({
   code: '', name: '', nameEn: '', inputType: 'fertilizer',
   categoryL2: '', spec: '', packQty: null, packUnitLabel: '',
-  unit: 'kg', activeIngredient: '', registrationNo: '',
+  unit: '', activeIngredient: '', registrationNo: '',
   phiDays: 0, defaultSupplierId: null, defaultWarehouseId: null,
   minStockQty: null, status: 'active', remark: '',
 })
@@ -307,7 +307,7 @@ function onCreate() {
   Object.assign(form, {
     code: '', name: '', nameEn: '', inputType: 'fertilizer',
     categoryL2: '', spec: '', packQty: null, packUnitLabel: '',
-    unit: 'kg', activeIngredient: '', registrationNo: '',
+    unit: '', activeIngredient: '', registrationNo: '',
     phiDays: 0, defaultSupplierId: null, defaultWarehouseId: null,
     minStockQty: null, status: 'active', remark: '',
   })
