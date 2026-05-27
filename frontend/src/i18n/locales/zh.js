@@ -11,7 +11,7 @@ export default {
     crops: '作物',
     varieties: '品种',
     packagingSpecs: '包装规格',
-    warehouses: '库位管理',
+    warehouses: '仓库设置',
     inputItems: '投入品',
     warehouseOps: '仓库管理',
     inbound: '入库管理',
