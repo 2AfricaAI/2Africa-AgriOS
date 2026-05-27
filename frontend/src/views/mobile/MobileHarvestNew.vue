@@ -95,6 +95,7 @@ import { ElMessage } from 'element-plus'
 import { listPlantingPlans } from '@/api/plantingPlan'
 import { createHarvest } from '@/api/harvest'
 import { uploadFile } from '@/api/file'
+import { enqueue as enqueueOffline } from '@/utils/offlineQueue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -212,9 +213,23 @@ async function onSubmit() {
     ElMessage.success(t('m.submitOk'))
     router.replace('/m/')
   } catch (e) {
-    console.error('[MobileHarvestNew] submit failed:', e)
-    // TODO[20.7]: enqueue to IndexedDB for offline retry
-    ElMessage.error(t('m.submitFail') + ' - ' + (e?.message || ''))
+    console.error('[MobileHarvestNew] submit failed, queueing offline:', e)
+    try {
+      await enqueueOffline({
+        kind: 'harvest',
+        form: {
+          ...form,
+          qtyKg: Number(form.qtyKg),
+          clientUuid: generateUuid(),
+        },
+        photoFiles: photos.value.map(p => p.file),
+      })
+      ElMessage.warning(t('m.savedLocally'))
+      router.replace('/m/')
+    } catch (qe) {
+      console.error('[MobileHarvestNew] enqueue failed:', qe)
+      ElMessage.error(t('m.submitFail') + ' - ' + (e?.message || ''))
+    }
   } finally {
     saving.value = false
   }
@@ -297,22 +312,4 @@ async function onSubmit() {
   cursor: pointer;
 }
 .mh2-photo-input { position: absolute; opacity: 0; pointer-events: none; }
-.mh2-photo-icon { font-size: 28px; }
-.mh2-photo-label { font-size: 11px; color: #16a34a; margin-top: 2px; }
-
-/* submit */
-.mh2-submit {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #1f7a35 0%, #15803d 100%);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 8px;
-}
-.mh2-submit:disabled { opacity: 0.6; }
-.mh2-submit:active { transform: scale(0.98); }
-</style>
+.mh2-photo-icon { font-size:

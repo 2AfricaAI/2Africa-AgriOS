@@ -101,6 +101,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { listPlantingPlans } from '@/api/plantingPlan'
 import { createActivity } from '@/api/activity'
+import { enqueue as enqueueOffline } from '@/utils/offlineQueue'
 import { uploadFile } from '@/api/file'
 
 const { t } = useI18n()
@@ -227,8 +228,19 @@ async function onSubmit() {
     ElMessage.success(t('m.submitOk'))
     router.push('/m/')
   } catch (e) {
-    // TODO[20.7]: 失败时入 IndexedDB 待提交队列
-    ElMessage.error(t('m.submitFail') + ' — ' + (e?.message || ''))
+    // 20.7: 失败时入 IndexedDB 待提交队列 (跳过照片上传, 整批入队保留原始 Blob)
+    try {
+      await enqueueOffline({
+        kind: 'activity',
+        form: { ...form, clientUuid: generateUuid() },
+        photoFiles: photos.value.map(p => p.file),
+      })
+      ElMessage.warning(t('m.savedLocally'))
+      router.push('/m/')
+    } catch (qe) {
+      console.error('[MobileActivityNew] enqueue failed:', qe)
+      ElMessage.error(t('m.submitFail') + ' - ' + (e?.message || ''))
+    }
   } finally {
     saving.value = false
   }
@@ -331,21 +343,4 @@ function goBack() { router.push('/m/') }
   gap: 4px; color: #1f7a35; cursor: pointer;
   background: #f7faf8;
 }
-.ma-photo-add-icon { font-size: 26px; }
-.ma-photo-add-text { font-size: 11px; font-weight: 600; }
-
-/* 提交 */
-.ma-submit {
-  background: linear-gradient(135deg, #1f7a35 0%, #2BA84A 100%);
-  color: #fff;
-  border: none;
-  border-radius: 14px;
-  height: 52px;
-  font-size: 16px; font-weight: 700;
-  margin-top: 8px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(31, 122, 53, 0.3);
-}
-.ma-submit:disabled { opacity: 0.6; }
-.ma-submit:active { transform: scale(0.98); }
-</style>
+.ma-photo-add-icon { font-size
