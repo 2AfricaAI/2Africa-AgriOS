@@ -3,7 +3,7 @@ package ai.toafrica.agrios.warehouse.controller;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
-import ai.toafrica.agrios.warehouse.service.OutboundService;
+import ai.toafrica.agrios.warehouse.service.WarehouseOutboundService;
 import ai.toafrica.agrios.warehouse.vo.OutboundDetailVO;
 import ai.toafrica.agrios.warehouse.vo.OutboundVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OutboundController {
 
-    private final OutboundService outboundService;
+    private final WarehouseOutboundService outboundService;
 
     @Operation(summary = "出库单列表")
     @GetMapping
@@ -44,8 +44,8 @@ public class OutboundController {
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_WORKER')")
     @PostMapping("/{id}/pick")
     public R<Void> pick(@PathVariable Long id, @RequestBody PickRequest req) {
-        List<OutboundService.PickItem> items = req.getItems().stream()
-                .map(it -> new OutboundService.PickItem(it.getItemId(), it.getPickedQty(), it.getRemark()))
+        List<WarehouseOutboundService.PickItem> items = req.getItems().stream()
+                .map(it -> new WarehouseOutboundService.PickItem(it.getItemId(), it.getPickedQty(), it.getRemark()))
                 .toList();
         outboundService.pick(id, items, null);
         return R.ok();
@@ -71,8 +71,8 @@ public class OutboundController {
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@RequestBody CreateOutboundRequest req) {
-        List<OutboundService.OutboundItemInput> items = req.getItems().stream()
-                .map(it -> new OutboundService.OutboundItemInput(it.getInputItemId(), it.getRequestedQty()))
+        List<WarehouseOutboundService.OutboundItemInput> items = req.getItems().stream()
+                .map(it -> new WarehouseOutboundService.OutboundItemInput(it.getInputItemId(), it.getRequestedQty()))
                 .toList();
         return R.ok(outboundService.create(
                 req.getSourceType() != null ? req.getSourceType() : "manual",

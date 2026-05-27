@@ -34,7 +34,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OutboundService {
+public class WarehouseOutboundService {
 
     private final WarehouseOutboundMapper outboundMapper;
     private final WarehouseOutboundItemMapper itemMapper;
