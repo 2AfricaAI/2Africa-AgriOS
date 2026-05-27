@@ -13,6 +13,7 @@ export default {
     packagingSpecs: '包装规格',
     warehouses: '仓库管理',
     inputItems: '投入品',
+    inputStock: '投入品库存',
     production: '生产',
     plots: '地块管理',
     plantingPlans: '种植计划',
@@ -242,6 +243,18 @@ export default {
     editTitle: '编辑投入品',
     createTitle: '新建投入品',
     confirmToggle: '确认{action}投入品「{name}」?',
+  },
+
+  inputStock: {
+    title: '投入品库存',
+    item: '物料',
+    warehouse: '仓库',
+    whCode: '仓库编码',
+    onHand: '在库量',
+    reserved: '预留量',
+    available: '可用量',
+    lastMove: '最后出入库',
+    lowStockOnly: '仅显示低库存',
   },
 
   actType: {

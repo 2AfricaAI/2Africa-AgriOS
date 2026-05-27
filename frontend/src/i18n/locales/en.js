@@ -15,6 +15,7 @@ export default {
     packagingSpecs: 'Packaging Specs',
     warehouses: 'Warehouses',
     inputItems: 'Input Items',
+    inputStock: 'Input Stock',
     production: 'Production',
     plots: 'Plots',
     plantingPlans: 'Planting Plans',
@@ -253,6 +254,18 @@ export default {
     editTitle: 'Edit input item',
     createTitle: 'New input item',
     confirmToggle: 'Confirm to {action} input "{name}"?',
+  },
+
+  inputStock: {
+    title: 'Input Stock',
+    item: 'Item',
+    warehouse: 'Warehouse',
+    whCode: 'WH Code',
+    onHand: 'On Hand',
+    reserved: 'Reserved',
+    available: 'Available',
+    lastMove: 'Last Movement',
+    lowStockOnly: 'Low stock only',
   },
 
   actType: {
