@@ -8,6 +8,9 @@ export function listInbound(params) {
 export function getInbound(id) {
   return request.get(`${BASE}/${id}`)
 }
+export function createInbound(data) {
+  return request.post(BASE, data)
+}
 export function confirmInbound(id, data) {
   return request.post(`${BASE}/${id}/confirm`, data)
 }

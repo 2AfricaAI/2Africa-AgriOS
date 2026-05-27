@@ -109,6 +109,37 @@ public class InboundService {
     public record PoItemInput(Long inputItemId, BigDecimal expectedQty) {}
 
     // ============================================================
+    // 手工新建入库单 (Sprint 22.9a)
+    // ============================================================
+    @Transactional(rollbackFor = Exception.class)
+    public Long createManual(Long warehouseId, String sourceType, List<PoItemInput> items, String remark) {
+        String today = LocalDateTime.now().format(YMD);
+        int seq = inboundMapper.countByDate(today) + 1;
+        String code = String.format("IN-%s-%04d", today, seq);
+
+        WarehouseInbound inbound = new WarehouseInbound();
+        inbound.setCode(code);
+        inbound.setSourceType(sourceType != null ? sourceType : "manual");
+        inbound.setSourceId(null);
+        inbound.setWarehouseId(warehouseId);
+        inbound.setStatus("draft");
+        inbound.setRemark(remark);
+        inboundMapper.insert(inbound);
+
+        for (PoItemInput pi : items) {
+            WarehouseInboundItem item = new WarehouseInboundItem();
+            item.setInboundId(inbound.getId());
+            item.setInputItemId(pi.inputItemId);
+            item.setExpectedQty(pi.expectedQty);
+            item.setActualQty(null);
+            itemMapper.insert(item);
+        }
+        log.info("[Inbound manual] code={} warehouse={} type={} items={}",
+                code, warehouseId, sourceType, items.size());
+        return inbound.getId();
+    }
+
+    // ============================================================
     // 确认入库 (仓库人员操作)
     // ============================================================
     @Transactional(rollbackFor = Exception.class)

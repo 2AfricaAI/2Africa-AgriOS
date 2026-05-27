@@ -34,6 +34,7 @@
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
         <span class="table-title">{{ t('inbound.title') }}</span>
+        <el-button type="primary" size="small" @click="newDlg.visible = true">{{ t('inbound.newManual') }}</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe row-key="id" @expand-change="onExpand">
@@ -144,6 +145,54 @@
         <el-button type="success" :loading="confirming" @click="onConfirmSubmit">{{ t('inbound.confirmSubmit') }}</el-button>
       </template>
     </el-dialog>
+
+    <!-- New manual inbound dialog -->
+    <el-dialog v-model="newDlg.visible" :title="t('inbound.newManual')" width="700px" :close-on-click-modal="false">
+      <el-form label-width="100px">
+        <el-form-item :label="t('inbound.warehouse')">
+          <el-select v-model="newDlg.warehouseId" filterable style="width: 100%">
+            <el-option v-for="w in warehouses" :key="w.id" :value="w.id" :label="`${w.code} · ${w.name}`" />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('inbound.sourceType')">
+          <el-select v-model="newDlg.sourceType" style="width: 100%">
+            <el-option label="Manual" value="manual" />
+            <el-option label="Return In" value="return_in" />
+            <el-option label="Transfer In" value="transfer_in" />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('common.remark')">
+          <el-input v-model="newDlg.remark" maxlength="255" />
+        </el-form-item>
+      </el-form>
+      <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 600;">{{ t('inbound.items') }}</span>
+        <el-button link type="primary" @click="newDlg.items.push({ inputItemId: null, expectedQty: 1 })">+ {{ t('inbound.addLine') }}</el-button>
+      </div>
+      <el-table :data="newDlg.items" border size="small">
+        <el-table-column :label="t('inputItem.name')" min-width="200">
+          <template #default="{ $index }">
+            <el-select v-model="newDlg.items[$index].inputItemId" filterable size="small" style="width: 100%">
+              <el-option v-for="ii in inputItems" :key="ii.id" :value="ii.id" :label="`${ii.code} · ${ii.nameEn || ii.name}`" />
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('inbound.expectedQty')" width="130">
+          <template #default="{ $index }">
+            <el-input-number v-model="newDlg.items[$index].expectedQty" :min="0.001" :precision="3" :controls="false" size="small" style="width: 100%" />
+          </template>
+        </el-table-column>
+        <el-table-column width="50" align="center">
+          <template #default="{ $index }">
+            <el-button link type="danger" size="small" :disabled="newDlg.items.length <= 1" @click="newDlg.items.splice($index, 1)">×</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="newDlg.visible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="creating" @click="onCreateSubmit">{{ t('common.save') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -152,8 +201,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search as SearchIcon, Refresh as RefreshIcon } from '@element-plus/icons-vue'
-import { listInbound, getInbound, confirmInbound, cancelInbound } from '@/api/inbound'
+import { listInbound, getInbound, createInbound, confirmInbound, cancelInbound } from '@/api/inbound'
 import { listWarehouses } from '@/api/warehouse'
+import { listInputItems } from '@/api/inputItem'
 
 const { t } = useI18n()
 
@@ -188,10 +238,15 @@ function onReset() {
 
 // ----- warehouses -----
 const warehouses = ref([])
+const inputItems = ref([])
 async function loadWarehouses() {
   try {
-    const data = await listWarehouses({ status: 1, page: 1, size: 200 })
-    warehouses.value = data.list || []
+    const [whData, iiData] = await Promise.all([
+      listWarehouses({ status: 1, page: 1, size: 200 }),
+      listInputItems({ status: 'active', page: 1, size: 500 }),
+    ])
+    warehouses.value = whData.list || []
+    inputItems.value = iiData.list || []
   } catch {/* */}
 }
 
@@ -254,6 +309,23 @@ async function onCancel(row) {
     ElMessage.success(t('inbound.cancelSuccess'))
     reload()
   } catch (e) { if (e === 'cancel') return }
+}
+
+// ----- new manual inbound -----
+const newDlg = reactive({ visible: false, warehouseId: null, sourceType: 'manual', remark: '', items: [{ inputItemId: null, expectedQty: 1 }] })
+const creating = ref(false)
+async function onCreateSubmit() {
+  if (!newDlg.warehouseId) { ElMessage.warning('Select warehouse'); return }
+  const valid = newDlg.items.filter(it => it.inputItemId && it.expectedQty > 0)
+  if (!valid.length) { ElMessage.warning('Add at least one item'); return }
+  creating.value = true
+  try {
+    await createInbound(newDlg)
+    ElMessage.success(t('common.createSuccess'))
+    newDlg.visible = false
+    newDlg.items = [{ inputItemId: null, expectedQty: 1 }]
+    reload()
+  } finally { creating.value = false }
 }
 
 onMounted(() => { loadWarehouses(); reload() })

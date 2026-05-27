@@ -41,6 +41,16 @@ public class InboundController {
         return R.ok(inboundService.detail(id));
     }
 
+    @Operation(summary = "手工新建入库单")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
+    @PostMapping
+    public R<Long> create(@RequestBody CreateInboundRequest req) {
+        List<InboundService.PoItemInput> items = req.getItems().stream()
+                .map(it -> new InboundService.PoItemInput(it.getInputItemId(), it.getExpectedQty()))
+                .toList();
+        return R.ok(inboundService.createManual(req.getWarehouseId(), req.getSourceType(), items, req.getRemark()));
+    }
+
     @Operation(summary = "确认入库 (仓库人员填写实际数量)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/confirm")
@@ -70,5 +80,18 @@ public class InboundController {
         private Long itemId;
         private BigDecimal actualQty;
         private String remark;
+    }
+
+    @Data
+    public static class CreateInboundRequest {
+        private Long warehouseId;
+        private String sourceType;
+        private String remark;
+        private List<CreateInboundItemDTO> items;
+    }
+    @Data
+    public static class CreateInboundItemDTO {
+        private Long inputItemId;
+        private BigDecimal expectedQty;
     }
 }
