@@ -56,4 +56,10 @@ public class HarvestRecordController {
     }
 
     @Operation(summary = "删除采收记录 (同时软删对应 batch)")
-    @PreAuthorize("hasAuthority('ROLE_SU
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
+    @DeleteMapping("/{id}")
+    public R<Void> delete(@PathVariable Long id) {
+        harvestService.delete(id);
+        return R.ok();
+    }
+}

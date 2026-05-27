@@ -84,4 +84,10 @@ public class ActivityController {
     }
 
     @Operation(summary = "删除 (慎用 - 农事记录通常为审计目的不删)")
-    @PreAuthorize("hasAuthority('ROLE_SU
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
+    @DeleteMapping("/{id}")
+    public R<Void> delete(@PathVariable Long id) {
+        activityService.delete(id);
+        return R.ok();
+    }
+}
