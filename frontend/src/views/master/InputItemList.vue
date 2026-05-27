@@ -53,8 +53,26 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="spec" :label="t('inputItem.spec')" width="110" />
-        <el-table-column prop="unit" :label="t('inputItem.unit')" width="70" align="center" />
+        <el-table-column prop="spec" :label="t('inputItem.spec')" width="100" />
+        <el-table-column :label="t('inputItem.packing')" width="100" align="center">
+          <template #default="{ row }">
+            <span v-if="row.packQty">{{ row.packQty }}{{ row.packUnitLabel ? `/${row.packUnitLabel}` : '' }}</span>
+            <span v-else class="muted">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="unit" :label="t('inputItem.unit')" width="60" align="center" />
+        <el-table-column prop="defaultWarehouseName" :label="t('inputItem.warehouse')" min-width="110" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span v-if="row.defaultWarehouseName">{{ row.defaultWarehouseName }}</span>
+            <span v-else class="muted">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('inputItem.minStock')" width="90" align="right">
+          <template #default="{ row }">
+            <span v-if="row.minStockQty != null">{{ row.minStockQty }}</span>
+            <span v-else class="muted">-</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('inputItem.phi')" width="80" align="center">
           <template #default="{ row }">
             <span v-if="row.inputType === 'pesticide'">
@@ -116,9 +134,24 @@
             <el-option v-for="t_ in INPUT_TYPES" :key="t_.value" :label="t(`inputItem.type${cap(t_.value)}`)" :value="t_.value" />
           </el-select>
         </el-form-item>
+        <el-form-item :label="t('inputItem.categoryL2')">
+          <el-input v-model="form.categoryL2" :placeholder="t('inputItem.categoryL2Hint')" maxlength="64" />
+        </el-form-item>
         <el-form-item :label="t('inputItem.spec')">
           <el-input v-model="form.spec" placeholder="e.g. 50kg/bag" maxlength="128" />
         </el-form-item>
+        <el-row :gutter="12">
+          <el-col :span="12">
+            <el-form-item :label="t('inputItem.packQty')">
+              <el-input-number v-model="form.packQty" :min="0.001" :precision="3" :controls="false" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item :label="t('inputItem.packUnit')">
+              <el-input v-model="form.packUnitLabel" placeholder="bag / bottle / box" maxlength="32" />
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item :label="t('inputItem.unit')" prop="unit">
           <el-input v-model="form.unit" placeholder="kg / L / pack / box / pcs" maxlength="16" />
         </el-form-item>
@@ -139,6 +172,16 @@
           <el-select v-model="form.defaultSupplierId" filterable clearable style="width: 100%">
             <el-option v-for="s in suppliers" :key="s.id" :label="`${s.code} · ${s.name}`" :value="s.id" />
           </el-select>
+        </el-form-item>
+        <el-form-item :label="t('inputItem.defaultWarehouse')">
+          <el-select v-model="form.defaultWarehouseId" filterable clearable style="width: 100%"
+                     :placeholder="t('inputItem.selectWarehouse')">
+            <el-option v-for="w in warehouses" :key="w.id" :label="`${w.code} · ${w.name}`" :value="w.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('inputItem.minStock')">
+          <el-input-number v-model="form.minStockQty" :min="0" :precision="3" :controls="false" style="width: 200px" />
+          <span class="muted" style="margin-left: 8px">{{ form.unit || 'kg' }}</span>
         </el-form-item>
         <el-form-item :label="t('common.remark')">
           <el-input v-model="form.remark" type="textarea" :rows="2" maxlength="255" show-word-limit />
@@ -163,6 +206,7 @@ import {
   listInputItems, createInputItem, updateInputItem, toggleInputItemStatus,
 } from '@/api/inputItem'
 import { listSuppliers } from '@/api/supplier'
+import { listWarehouses } from '@/api/warehouse'
 
 const { t } = useI18n()
 
@@ -232,12 +276,23 @@ async function loadSuppliers() {
   } catch {/* ignore */}
 }
 
+// ----- warehouses (for default warehouse dropdown, Sprint 22.1.5) -----
+const warehouses = ref([])
+async function loadWarehouses() {
+  try {
+    const data = await listWarehouses({ status: 1, page: 1, size: 200 })
+    warehouses.value = data.list || []
+  } catch {/* ignore */}
+}
+
 // ----- create / edit -----
 const dlg = reactive({ visible: false, id: null })
 const form = reactive({
   code: '', name: '', nameEn: '', inputType: 'fertilizer',
-  spec: '', unit: 'kg', activeIngredient: '', registrationNo: '',
-  phiDays: 0, defaultSupplierId: null, status: 'active', remark: '',
+  categoryL2: '', spec: '', packQty: null, packUnitLabel: '',
+  unit: 'kg', activeIngredient: '', registrationNo: '',
+  phiDays: 0, defaultSupplierId: null, defaultWarehouseId: null,
+  minStockQty: null, status: 'active', remark: '',
 })
 const rules = {
   code:      [{ required: true, message: () => t('valid.required', { field: t('inputItem.code') }), trigger: 'blur' }],
@@ -251,8 +306,10 @@ const saving = ref(false)
 function onCreate() {
   Object.assign(form, {
     code: '', name: '', nameEn: '', inputType: 'fertilizer',
-    spec: '', unit: 'kg', activeIngredient: '', registrationNo: '',
-    phiDays: 0, defaultSupplierId: null, status: 'active', remark: '',
+    categoryL2: '', spec: '', packQty: null, packUnitLabel: '',
+    unit: 'kg', activeIngredient: '', registrationNo: '',
+    phiDays: 0, defaultSupplierId: null, defaultWarehouseId: null,
+    minStockQty: null, status: 'active', remark: '',
   })
   dlg.id = null
   dlg.visible = true
@@ -260,10 +317,14 @@ function onCreate() {
 function onEdit(row) {
   Object.assign(form, {
     code: row.code, name: row.name, nameEn: row.nameEn || '', inputType: row.inputType,
-    spec: row.spec || '', unit: row.unit, activeIngredient: row.activeIngredient || '',
+    categoryL2: row.categoryL2 || '', spec: row.spec || '',
+    packQty: row.packQty ?? null, packUnitLabel: row.packUnitLabel || '',
+    unit: row.unit, activeIngredient: row.activeIngredient || '',
     registrationNo: row.registrationNo || '', phiDays: row.phiDays || 0,
-    defaultSupplierId: row.defaultSupplierId || null, status: row.status,
-    remark: row.remark || '',
+    defaultSupplierId: row.defaultSupplierId || null,
+    defaultWarehouseId: row.defaultWarehouseId || null,
+    minStockQty: row.minStockQty ?? null,
+    status: row.status, remark: row.remark || '',
   })
   dlg.id = row.id
   dlg.visible = true
@@ -302,7 +363,7 @@ async function onToggle(row) {
   reload()
 }
 
-onMounted(() => { loadSuppliers(); reload() })
+onMounted(() => { loadSuppliers(); loadWarehouses(); reload() })
 </script>
 
 <style scoped>
