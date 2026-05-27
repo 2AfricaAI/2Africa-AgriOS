@@ -35,9 +35,6 @@ public class HarvestRecordForm {
     @Schema(description = "采收量 (kg)", example = "1250.500")
     private BigDecimal qtyKg;
 
-    @Schema(description = "照片 sys_file.id 数组")
-    private List<Long> photos;
-
-    @Size(max = 255)
-    private String remark;
-}
+    @Size(max = 64)
+    @Schema(description = "GPS 坐标,例如 -1.2864,36.8172 (Sprint 20.5 移动端)")
+    private String locationGps

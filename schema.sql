@@ -334,6 +334,7 @@ CREATE TABLE `harvest_record` (
   `batch_id`     BIGINT        NOT NULL COMMENT '自动生成的批次',
   `harvest_date` DATE          NOT NULL,
   `qty_kg`       DECIMAL(12,3) NOT NULL CHECK (`qty_kg` > 0),
+  `location_gps` VARCHAR(64)   NULL COMMENT 'GPS lat,lng captured at harvest time',
   `operator_id`  BIGINT        NOT NULL,
   `photos`       JSON,
   `remark`       VARCHAR(255),
@@ -714,7 +715,7 @@ INSERT INTO `sys_role` (`code`,`name`,`data_scope`,`remark`) VALUES
 -- 初始用户 admin / Admin@123456 (BCrypt 哈希请上线时替换)
 INSERT INTO `sys_user` (`username`,`password`,`nickname`,`status`) VALUES
 -- BCrypt hash for password: Admin@123456  (cost=10)
-('admin','$2b$10$GFHq9PcQS8SvCpf8pDczfuYnJUT0Nf.hBHNA3b6/7z5JPX4VC5srC','系统管理员','active');
+('admin','$2b$10$GFHq9PcQS8SvCpf8pDczfuYnJUT0Nf.hBHNA3b6/7z5JPX4VC5srC','Administrator','active');
 
 INSERT INTO `sys_user_role` (`user_id`,`role_id`) VALUES (1,1);
 

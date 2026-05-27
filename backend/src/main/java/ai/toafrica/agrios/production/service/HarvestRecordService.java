@@ -131,6 +131,7 @@ public class HarvestRecordService {
         h.setQtyKg(form.getQtyKg());
         h.setOperatorId(SecurityUtil.currentUserId());
         h.setPhotos(form.getPhotos() != null ? form.getPhotos() : Collections.emptyList());
+        h.setLocationGps(form.getLocationGps());
         h.setRemark(form.getRemark());
         harvestMapper.insert(h);
 
@@ -176,7 +177,4 @@ public class HarvestRecordService {
         try {
             return objectMapper.readValue(json, new TypeReference<List<Long>>() {});
         } catch (Exception e) {
-            return new ArrayList<>();
-        }
-    }
-}
+       
