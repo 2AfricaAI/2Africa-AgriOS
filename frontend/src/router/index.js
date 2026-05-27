@@ -59,6 +59,12 @@ const routes = [
         meta: { titleKey: 'menu.inputStock' },
       },
       {
+        path: 'master/stock-log',
+        name: 'stock-log',
+        component: () => import('@/views/master/InputStockLogList.vue'),
+        meta: { titleKey: 'menu.stockLog' },
+      },
+      {
         path: 'production/plots',
         name: 'plots',
         component: () => import('@/views/production/PlotList.vue'),

@@ -3,6 +3,8 @@ package ai.toafrica.agrios.master.service;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.master.entity.InputStock;
+import ai.toafrica.agrios.master.entity.InputStockLog;
+import ai.toafrica.agrios.master.mapper.InputStockLogMapper;
 import ai.toafrica.agrios.master.mapper.InputStockMapper;
 import ai.toafrica.agrios.master.vo.InputStockVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 public class InputStockService {
 
     private final InputStockMapper stockMapper;
+    private final InputStockLogMapper logMapper;
 
     // ============================================================
     // 列表查询 (分页 + 多维过滤)
@@ -52,15 +55,44 @@ public class InputStockService {
     // 内部: 调整库存 (入库正值, 出库负值)
     //   Sprint 22.4 (PO receive) 和 22.5 (Activity consume) 会调
     // ============================================================
+    /**
+     * 调整库存 + 自动写流水日志 (Sprint 22.3 升级)
+     *
+     * @param inputItemId  物料 ID
+     * @param warehouseId  仓库 ID
+     * @param delta        变动量 (正=入库, 负=出库)
+     * @param reasonType   po_receive / activity_consume / stocktake_adjust / damage / manual / ...
+     * @param referenceType 多态引用类型 (purchase_order / activity / null)
+     * @param referenceId   多态引用 ID (PO id / Activity id / null)
+     * @param operatorId   操作人 (sys_user.id, 可 null)
+     * @param remark       备注
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void adjustStock(Long inputItemId, Long warehouseId, BigDecimal delta, String reason) {
+    public void adjustStock(Long inputItemId, Long warehouseId, BigDecimal delta,
+                            String reasonType, String referenceType, Long referenceId,
+                            Long operatorId, String remark) {
         InputStock stock = findOrCreate(inputItemId, warehouseId);
         stock.setQtyOnHand(stock.getQtyOnHand().add(delta));
         stock.setLastStockAt(LocalDateTime.now());
         stockMapper.updateById(stock);
-        log.info("[InputStock] item={} warehouse={} delta={} reason={} -> onHand={}",
-                inputItemId, warehouseId, delta.toPlainString(), reason,
-                stock.getQtyOnHand().toPlainString());
+
+        // 写流水日志 (Sprint 22.3)
+        InputStockLog entry = new InputStockLog();
+        entry.setInputItemId(inputItemId);
+        entry.setWarehouseId(warehouseId);
+        entry.setDirection(delta.signum() >= 0 ? "IN" : "OUT");
+        entry.setQty(delta.abs());
+        entry.setReasonType(reasonType);
+        entry.setReferenceType(referenceType);
+        entry.setReferenceId(referenceId);
+        entry.setQtyAfter(stock.getQtyOnHand());
+        entry.setOperatorId(operatorId);
+        entry.setRemark(remark);
+        logMapper.insert(entry);
+
+        log.info("[InputStock] item={} wh={} delta={} reason={} ref={}:{} -> onHand={}",
+                inputItemId, warehouseId, delta.toPlainString(), reasonType,
+                referenceType, referenceId, stock.getQtyOnHand().toPlainString());
     }
 
     /**
