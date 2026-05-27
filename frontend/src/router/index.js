@@ -71,6 +71,18 @@ const routes = [
         meta: { titleKey: 'menu.outbound' },
       },
       {
+        path: 'warehouse/scrap',
+        name: 'warehouse-scrap',
+        component: () => import('@/views/warehouse/ScrapList.vue'),
+        meta: { titleKey: 'menu.scrap' },
+      },
+      {
+        path: 'warehouse/transfer',
+        name: 'warehouse-transfer',
+        component: () => import('@/views/warehouse/TransferList.vue'),
+        meta: { titleKey: 'menu.transfer' },
+      },
+      {
         path: 'warehouse/stocktake',
         name: 'warehouse-stocktake',
         component: () => import('@/views/warehouse/StocktakeList.vue'),
