@@ -38,10 +38,12 @@ public class LocationWarehouseController {
                 @RequestParam(required = false) String type,
             @Parameter(description = "Business purpose (Sprint 22): finished_goods | seed_storage | fertilizer_storage | pesticide_storage | construction_storage | spare_parts_storage | tools_storage | packaging_storage | other_storage")
                 @RequestParam(required = false) String purpose,
+            @Parameter(description = "Hierarchy level (Sprint 22.0.5): warehouse | zone | shelf | bin")
+                @RequestParam(required = false) String level,
             @Parameter(description = "Parent id (0=top)") @RequestParam(required = false) Long parentId,
             @Parameter(description = "Status: 1=enabled 0=disabled") @RequestParam(required = false) Integer status,
             PageQuery pq) {
-        return R.ok(warehouseService.page(name, code, type, purpose, parentId, status, pq));
+        return R.ok(warehouseService.page(name, code, type, purpose, level, parentId, status, pq));
     }
 
     @Operation(summary = "仓库/库位详情")
@@ -70,6 +72,14 @@ public class LocationWarehouseController {
     @PostMapping("/{id}/status/{status}")
     public R<Void> changeStatus(@PathVariable Long id, @PathVariable Integer status) {
         warehouseService.changeStatus(id, status);
+        return R.ok();
+    }
+
+    @Operation(summary = "Delete warehouse/location (leaf only, SUPER_ADMIN)")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+    @DeleteMapping("/{id}")
+    public R<Void> delete(@PathVariable Long id) {
+        warehouseService.delete(id);
         return R.ok();
     }
 }

@@ -38,6 +38,14 @@ public class WarehouseForm {
                                "packaging_storage", "other_storage"})
     private String purpose;
 
+    @NotBlank
+    @Pattern(regexp = "warehouse|zone|shelf|bin",
+             message = "level must be one of: warehouse/zone/shelf/bin")
+    @Schema(description = "Hierarchy level (Sprint 22.0.5)",
+            example = "warehouse",
+            allowableValues = {"warehouse", "zone", "shelf", "bin"})
+    private String level;
+
     @Schema(description = "Parent node id, 0=top-level", example = "0", defaultValue = "0")
     private Long parentId;
 

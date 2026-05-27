@@ -201,11 +201,14 @@ CREATE TABLE `location_warehouse` (
   `type`        VARCHAR(16)  NOT NULL DEFAULT 'normal' COMMENT 'PHYSICAL: normal/cold/quarantine',
   `purpose`     VARCHAR(32)  NOT NULL DEFAULT 'finished_goods'
                 COMMENT 'BUSINESS (Sprint 22): finished_goods | seed_storage | fertilizer_storage | pesticide_storage | construction_storage | spare_parts_storage | tools_storage | packaging_storage | other_storage',
+  `level`       VARCHAR(16)  NOT NULL DEFAULT 'warehouse'
+                COMMENT 'HIERARCHY (Sprint 22.0.5): warehouse | zone | shelf | bin',
   `parent_id`   BIGINT       DEFAULT 0,
   `capacity_kg` DECIMAL(12,2),
   `status`      TINYINT(1)   NOT NULL DEFAULT 1,
   `created_at`  DATETIME     DEFAULT CURRENT_TIMESTAMP,
-  KEY `idx_warehouse_purpose` (`purpose`)
+  KEY `idx_warehouse_purpose` (`purpose`),
+  KEY `idx_warehouse_level` (`level`)
 ) ENGINE=InnoDB COMMENT='Warehouses / locations';
 
 -- ============================================================================

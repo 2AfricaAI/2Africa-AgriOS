@@ -92,6 +92,13 @@ export default {
     purposeToolsStorage: 'Chumba cha zana',
     purposePackagingStorage: 'Vifaa vya ufungaji',
     purposeOtherStorage: 'Hifadhi nyingine',
+    level: 'Kiwango',
+    selectLevel: 'Chagua kiwango',
+    levelWarehouse: 'Ghala',
+    levelZone: 'Eneo',
+    levelShelf: 'Rafu',
+    levelBin: 'Sehemu',
+    confirmDelete: 'Futa ghala "{code} - {name}"? Haitaweza kurudishwa.',
   },
 
   // ---------- Mobile (PWA) - the worker's daily UI ----------

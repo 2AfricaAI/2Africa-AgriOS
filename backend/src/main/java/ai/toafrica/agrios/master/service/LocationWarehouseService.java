@@ -20,21 +20,68 @@ public class LocationWarehouseService {
     private final LocationWarehouseMapper warehouseMapper;
 
     public PageResult<LocationWarehouse> page(
-            String name, String code, String type, String purpose, Long parentId,
-            Integer status, PageQuery pq) {
+            String name, String code, String type, String purpose, String level,
+            Long parentId, Integer status, PageQuery pq) {
         LambdaQueryWrapper<LocationWarehouse> q = new LambdaQueryWrapper<>();
         if (name != null && !name.isBlank())       q.like(LocationWarehouse::getName, name.trim());
         if (code != null && !code.isBlank())       q.like(LocationWarehouse::getCode, code.trim());
         if (type != null && !type.isBlank())       q.eq(LocationWarehouse::getType, type.trim());
         if (purpose != null && !purpose.isBlank()) q.eq(LocationWarehouse::getPurpose, purpose.trim());
+        if (level != null && !level.isBlank())     q.eq(LocationWarehouse::getLevel, level.trim());
         if (parentId != null) q.eq(LocationWarehouse::getParentId, parentId);
         if (status != null)   q.eq(LocationWarehouse::getStatus, status);
         q.orderByAsc(LocationWarehouse::getPurpose)
+         .orderByAsc(LocationWarehouse::getLevel)
          .orderByAsc(LocationWarehouse::getParentId)
          .orderByAsc(LocationWarehouse::getCode);
 
         Page<LocationWarehouse> p = new Page<>(pq.getPage(), pq.getSize());
         return PageResult.of(warehouseMapper.selectPage(p, q));
+    }
+
+    // ====================================================================
+    // Sprint 22.0.5 hierarchy helpers - used by input_stock (Sprint 22+)
+    // ====================================================================
+
+    /** True if this node has no children (can hold stock if not 'warehouse' level). */
+    public boolean isLeaf(Long id) {
+        LambdaQueryWrapper<LocationWarehouse> q = new LambdaQueryWrapper<>();
+        q.eq(LocationWarehouse::getParentId, id);
+        Long n = warehouseMapper.selectCount(q);
+        return n == null || n == 0;
+    }
+
+    /** True if this node can directly hold input_stock - leaf AND not a warehouse-level container. */
+    public boolean isStockable(LocationWarehouse w) {
+        if (w == null) return false;
+        if ("warehouse".equals(w.getLevel())) return false;  // warehouse must drill down
+        return isLeaf(w.getId());
+    }
+
+    /** Hard delete - only allowed if (1) node exists, (2) no children. */
+    public void delete(Long id) {
+        LocationWarehouse w = warehouseMapper.selectById(id);
+        if (w == null) throw new BusinessException(R.NOT_FOUND, "Warehouse not found: " + id);
+        if (!isLeaf(id)) {
+            throw new BusinessException(
+                "Cannot delete '" + w.getCode() + "' - it has sub-locations. Delete the children first.");
+        }
+        // TODO[Sprint 22]: also check input_stock + inventory references before allowing
+        warehouseMapper.deleteById(id);
+    }
+
+    /** Throws if attempting to stock at a non-stockable node. */
+    public void requireStockable(Long warehouseId) {
+        LocationWarehouse w = warehouseMapper.selectById(warehouseId);
+        if (w == null) throw new BusinessException(R.NOT_FOUND, "Warehouse not found: " + warehouseId);
+        if ("warehouse".equals(w.getLevel())) {
+            throw new BusinessException(
+                "Cannot stock at warehouse-level container '" + w.getCode() + "' - drill down to a zone/shelf/bin");
+        }
+        if (!isLeaf(w.getId())) {
+            throw new BusinessException(
+                "Cannot stock at non-leaf node '" + w.getCode() + "' - has sub-locations");
+        }
     }
 
     public LocationWarehouse detail(Long id) {

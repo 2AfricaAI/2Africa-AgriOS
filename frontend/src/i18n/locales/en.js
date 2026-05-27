@@ -357,6 +357,13 @@ export default {
     purposeToolsStorage: 'Tool room',
     purposePackagingStorage: 'Packaging materials',
     purposeOtherStorage: 'Other storage',
+    level: 'Level',
+    selectLevel: 'Please select a level',
+    levelWarehouse: 'Warehouse',
+    levelZone: 'Zone',
+    levelShelf: 'Shelf',
+    levelBin: 'Bin',
+    confirmDelete: 'Delete warehouse "{code} - {name}"? This cannot be undone.',
     confirmToggle: 'Confirm to {action} warehouse "{name}"?',
   },
 

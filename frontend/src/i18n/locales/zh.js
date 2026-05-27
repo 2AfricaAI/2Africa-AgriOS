@@ -11,7 +11,7 @@ export default {
     crops: '作物',
     varieties: '品种',
     packagingSpecs: '包装规格',
-    warehouses: '仓库库位',
+    warehouses: '仓库管理',
     inputItems: '投入品',
     production: '生产',
     plots: '地块管理',
@@ -304,7 +304,7 @@ export default {
   },
 
   wh: {
-    title: '仓库 & 库位',
+    title: '仓库管理',
     code: '库位编码',
     name: '库位名',
     type: '类型',
@@ -342,6 +342,13 @@ export default {
     purposeToolsStorage: '工具间',
     purposePackagingStorage: '包装耗材仓',
     purposeOtherStorage: '其他兜底',
+    level: '层级',
+    selectLevel: '请选择层级',
+    levelWarehouse: '仓库',
+    levelZone: '库区',
+    levelShelf: '货架',
+    levelBin: '库位',
+    confirmDelete: '确认删除仓位「{code} - {name}」？此操作不可撤销。',
     confirmToggle: '确认{action}仓库「{name}」?',
   },
 

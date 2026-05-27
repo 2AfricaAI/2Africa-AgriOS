@@ -25,6 +25,11 @@ public class LocationWarehouse {
      *  packaging_storage / other_storage - BUSINESS PURPOSE (Sprint 22) */
     private String purpose;
 
+    /** warehouse / zone / shelf / bin - HIERARCHY LEVEL (Sprint 22.0.5)
+     *  Stock can only attach to leaf nodes (any of zone/shelf/bin).
+     *  Warehouse can never hold stock directly - must drill down. */
+    private String level;
+
     /** 0=顶层节点 */
     private Long parentId;
 

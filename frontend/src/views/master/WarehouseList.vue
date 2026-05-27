@@ -13,6 +13,26 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item :label="t('wh.purpose')">
+          <el-select v-model="query.purpose" :placeholder="t('common.all')" clearable style="width: 200px">
+            <el-option
+              v-for="opt in PURPOSE_OPTIONS"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('wh.level')">
+          <el-select v-model="query.level" :placeholder="t('common.all')" clearable style="width: 140px">
+            <el-option
+              v-for="opt in LEVEL_OPTIONS"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item :label="t('wh.parentNode')">
           <el-select
             v-model="query.parentId"
@@ -73,6 +93,13 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column :label="t('wh.level')" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="levelTagColor(row.level)" size="small">
+              {{ levelLabel(row.level) }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('wh.parentNode')" min-width="160">
           <template #default="{ row }">
             <span v-if="!row.parentId || row.parentId === 0" style="color: #909399">{{ t('wh.topNodeShort') }}</span>
@@ -93,7 +120,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" :label="t('common.createdAt')" width="170" />
-        <el-table-column :label="t('common.actions')" width="120" fixed="right" align="center">
+        <el-table-column :label="t('common.actions')" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="onEdit(row)">{{ t('common.edit') }}</el-button>
             <el-button
@@ -104,6 +131,7 @@
             >
               {{ row.status === 1 ? t('common.actionDisable') : t('common.actionEnable') }}
             </el-button>
+            <el-button link type="danger" size="small" @click="onDelete(row)">{{ t('common.delete') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -150,6 +178,16 @@
           <el-select v-model="form.purpose" :placeholder="t('common.selectPlaceholder')" style="width: 100%">
             <el-option
               v-for="opt in PURPOSE_OPTIONS"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('wh.level')" prop="level">
+          <el-select v-model="form.level" :placeholder="t('common.selectPlaceholder')" style="width: 100%">
+            <el-option
+              v-for="opt in LEVEL_OPTIONS"
               :key="opt.value"
               :label="opt.label"
               :value="opt.value"
@@ -207,6 +245,7 @@ import {
   createWarehouse,
   updateWarehouse,
   changeWarehouseStatus,
+  deleteWarehouse,
 } from '@/api/warehouse'
 
 const { t } = useI18n()
@@ -243,6 +282,19 @@ const PURPOSE_MAP = computed(() =>
 function purposeLabel(v) { return PURPOSE_MAP.value[v]?.label || v }
 function purposeTagColor(v) { return PURPOSE_MAP.value[v]?.tag || 'info' }
 
+// Sprint 22.0.5 - hierarchy level (4 enum values)
+const LEVEL_OPTIONS = computed(() => [
+  { value: 'warehouse', label: t('wh.levelWarehouse'), tag: ''        },
+  { value: 'zone',      label: t('wh.levelZone'),      tag: 'warning' },
+  { value: 'shelf',     label: t('wh.levelShelf'),     tag: 'info'    },
+  { value: 'bin',       label: t('wh.levelBin'),       tag: 'success' },
+])
+const LEVEL_MAP = computed(() =>
+  Object.fromEntries(LEVEL_OPTIONS.value.map(opt => [opt.value, opt]))
+)
+function levelLabel(v) { return LEVEL_MAP.value[v]?.label || v }
+function levelTagColor(v) { return LEVEL_MAP.value[v]?.tag || 'info' }
+
 // ============================================================
 // 全量仓库列表(用于父节点下拉 + id→name 映射)
 // ============================================================
@@ -271,7 +323,7 @@ const list = ref([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
-const query = reactive({ type: '', purpose: '', parentId: null, code: '', name: '', status: null })
+const query = reactive({ type: '', purpose: '', level: '', parentId: null, code: '', name: '', status: null })
 
 async function reload(toPage) {
   if (toPage) page.value = toPage
@@ -292,6 +344,7 @@ async function reload(toPage) {
 function onReset() {
   query.type = ''
   query.purpose = ''
+  query.level = ''
   query.parentId = null
   query.code = ''
   query.name = ''
@@ -320,6 +373,7 @@ const emptyForm = () => ({
   name: '',
   type: 'normal',
   purpose: 'finished_goods',
+  level: 'warehouse',
   parentId: 0,
   capacityKg: null,
 })
@@ -341,6 +395,7 @@ const rules = computed(() => ({
   ],
   type: [{ required: true, message: t('wh.selectType'), trigger: 'change' }],
   purpose: [{ required: true, message: t('wh.selectPurpose'), trigger: 'change' }],
+  level: [{ required: true, message: t('wh.selectLevel'), trigger: 'change' }],
 }))
 
 function onCreate() {
@@ -356,6 +411,7 @@ function onEdit(row) {
     name: row.name,
     type: row.type || 'normal',
     purpose: row.purpose || 'finished_goods',
+    level: row.level || 'warehouse',
     parentId: row.parentId || 0,
     capacityKg: row.capacityKg != null ? Number(row.capacityKg) : null,
   })
@@ -409,6 +465,28 @@ async function onToggleStatus(row) {
     reload()
   } catch (e) {
     if (e === 'cancel') return
+  }
+}
+
+// Sprint 22.0.6 - hard delete (leaf nodes only, SUPER_ADMIN)
+async function onDelete(row) {
+  try {
+    await ElMessageBox.confirm(
+      t('wh.confirmDelete', { code: row.code, name: row.name }),
+      t('common.tip'),
+      { type: 'warning', confirmButtonClass: 'el-button--danger' },
+    )
+  } catch {
+    return
+  }
+  try {
+    await deleteWarehouse(row.id)
+    ElMessage.success(t('common.deleteSuccess'))
+    await loadAllWarehouses()
+    reload()
+  } catch (e) {
+    // backend BusinessException 'has sub-locations' will be surfaced by request interceptor
+    console.error('[delete warehouse]', e)
   }
 }
 </script>

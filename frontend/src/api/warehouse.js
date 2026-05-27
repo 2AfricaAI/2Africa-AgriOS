@@ -21,3 +21,7 @@ export function updateWarehouse(id, form) {
 export function changeWarehouseStatus(id, status) {
   return request.post(`${BASE}/${id}/status/${status}`)
 }
+
+export function deleteWarehouse(id) {
+  return request.delete(`${BASE}/${id}`)
+}
