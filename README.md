@@ -1,6 +1,6 @@
 # 2Africa AgriOS
 
-> AI 驱动的非洲（重点肯尼亚）中小农场运营操作系统。
+> AI 驱动的农场运营操作系统。
 > 覆盖种植 → 采收 → 销售 → 财务 → 决策的完整业务闭环。
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green)](#)
