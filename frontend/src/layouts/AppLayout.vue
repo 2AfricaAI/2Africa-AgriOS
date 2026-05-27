@@ -47,6 +47,14 @@
           <el-menu-item index="/production/batches">{{ t('menu.batches') }}</el-menu-item>
         </el-sub-menu>
 
+        <el-sub-menu index="warehouse-ops">
+          <template #title>
+            <el-icon><GoodsIcon /></el-icon>
+            <span>{{ t('menu.warehouseOps') }}</span>
+          </template>
+          <el-menu-item index="/warehouse/inbound">{{ t('menu.inbound') }}</el-menu-item>
+        </el-sub-menu>
+
         <el-sub-menu index="packhouse">
           <template #title>
             <el-icon><BoxIcon /></el-icon>

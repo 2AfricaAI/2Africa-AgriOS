@@ -65,6 +65,12 @@ const routes = [
         meta: { titleKey: 'menu.stockLog' },
       },
       {
+        path: 'warehouse/inbound',
+        name: 'warehouse-inbound',
+        component: () => import('@/views/warehouse/InboundList.vue'),
+        meta: { titleKey: 'menu.inbound' },
+      },
+      {
         path: 'production/plots',
         name: 'plots',
         component: () => import('@/views/production/PlotList.vue'),
