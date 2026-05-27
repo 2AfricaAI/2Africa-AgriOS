@@ -231,7 +231,12 @@ router.beforeEach((to) => {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
   if (to.name === 'login' && auth.isLoggedIn) {
-    return { path: '/' }
+    // 20.8: worker 登录后直接进移动端, 其他角色去桌面
+    return { path: auth.isWorkerOnly ? '/m/' : '/' }
+  }
+  // 20.8: 工人角色尝试访问桌面端 (非 /m/* 路由) -> 强制跳回移动端
+  if (auth.isLoggedIn && auth.isWorkerOnly && !to.meta.mobile && to.name !== 'login') {
+    return { path: '/m/' }
   }
 })
 

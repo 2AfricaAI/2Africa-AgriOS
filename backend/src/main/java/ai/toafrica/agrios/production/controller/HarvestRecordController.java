@@ -47,17 +47,13 @@ public class HarvestRecordController {
         return R.ok(harvestService.page(plotId, planId, dateFrom, dateTo, pq));
     }
 
-    @Operation(summary = "新建采收记录 (自动产生 batch)")
+    @Operation(summary = "新建采收记录 (自动产生 batch, 含工人移动端)")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
+                  "hasAuthority('ROLE_LEADER') or hasAuthority('ROLE_WORKER')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody HarvestRecordForm form) {
         return R.ok(harvestService.create(form));
     }
 
     @Operation(summary = "删除采收记录 (同时软删对应 batch)")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
-    @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable Long id) {
-        harvestService.delete(id);
-        return R.ok();
-    }
-}
+    @PreAuthorize("hasAuthority('ROLE_SU

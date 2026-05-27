@@ -26,6 +26,14 @@ export const useAuthStore = defineStore('auth', {
   },
   getters: {
     isLoggedIn: (s) => !!s.accessToken,
+    /** True if user's only role is WORKER - they should be locked to /m/ mobile UI */
+    isWorkerOnly: (s) => {
+      if (!s.roles || s.roles.length === 0) return false
+      return s.roles.every(r => {
+        const code = (r?.code || r || '').toUpperCase()
+        return code === 'WORKER' || code === 'ROLE_WORKER'
+      })
+    },
   },
   actions: {
     setLogin(payload) {

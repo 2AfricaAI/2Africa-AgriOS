@@ -1180,6 +1180,8 @@ export default {
     remarkPlaceholder: 'Notes (weather, observations, issues...)',
     submitOk: 'Submitted',
     submitFail: 'Submit failed - saved locally, will retry online',
+    savedLocally: 'Saved locally - will sync when online',
+    syncedN: 'Synced {n} pending submit(s)',
 
     // GPS
     gps: 'GPS location',

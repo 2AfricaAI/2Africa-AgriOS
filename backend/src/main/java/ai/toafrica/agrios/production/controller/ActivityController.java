@@ -59,7 +59,9 @@ public class ActivityController {
         return R.ok(activityService.detail(id));
     }
 
-    @Operation(summary = "新建农事记录")
+    @Operation(summary = "新建农事记录 (含工人移动端)")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
+                  "hasAuthority('ROLE_LEADER') or hasAuthority('ROLE_WORKER')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody ActivityForm form) {
         return R.ok(activityService.create(form));
@@ -82,10 +84,4 @@ public class ActivityController {
     }
 
     @Operation(summary = "删除 (慎用 - 农事记录通常为审计目的不删)")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
-    @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable Long id) {
-        activityService.delete(id);
-        return R.ok();
-    }
-}
+    @PreAuthorize("hasAuthority('ROLE_SU

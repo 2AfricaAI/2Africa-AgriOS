@@ -1,13 +1,16 @@
 import { createI18n } from 'vue-i18n'
 import en from './locales/en'
 import zh from './locales/zh'
+import sw from './locales/sw'
 
 import enElement from 'element-plus/es/locale/lang/en'
 import zhElement from 'element-plus/es/locale/lang/zh-cn'
+// Element Plus 没有 sw 内置语言包, 沿用英文 (Element 控件文案非核心)
 
 export const SUPPORT_LOCALES = [
-  { code: 'en', label: 'English',  flag: 'EN', element: enElement },
-  { code: 'zh', label: '中文',     flag: '中', element: zhElement },
+  { code: 'en', label: 'English',   flag: 'EN', element: enElement },
+  { code: 'zh', label: '中文',      flag: '中', element: zhElement },
+  { code: 'sw', label: 'Kiswahili', flag: 'SW', element: enElement },
 ]
 
 const STORAGE_KEY = 'agrios.locale'
@@ -25,11 +28,11 @@ export function persistLocale(code) {
 }
 
 const i18n = createI18n({
-  legacy: false,                 // 用 Composition API
-  globalInjection: true,         // 模板里能直接 $t
+  legacy: false,
+  globalInjection: true,
   locale: getStoredLocale(),
   fallbackLocale: 'en',
-  messages: { en, zh },
+  messages: { en, zh, sw },
   missingWarn: false,
   fallbackWarn: false,
 })

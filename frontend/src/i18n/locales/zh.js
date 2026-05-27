@@ -1155,6 +1155,8 @@ export default {
     remarkPlaceholder: '备注（天气、观察、问题…）',
     submitOk: '已提交',
     submitFail: '提交失败 - 已本地保存，联网自动重试',
+    savedLocally: '已本地保存，联网后自动同步',
+    syncedN: '已同步 {n} 条待发记录',
 
     // GPS
     gps: 'GPS 位置',

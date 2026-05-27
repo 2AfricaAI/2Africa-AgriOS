@@ -713,11 +713,14 @@ INSERT INTO `sys_role` (`code`,`name`,`data_scope`,`remark`) VALUES
 ('WORKER',     '农场工人',   'self','仅本人记录');
 
 -- 初始用户 admin / Admin@123456 (BCrypt 哈希请上线时替换)
+-- worker / Admin@123456 (Sprint 20.8 移动端工人测试账号, 同密码哈希)
 INSERT INTO `sys_user` (`username`,`password`,`nickname`,`status`) VALUES
 -- BCrypt hash for password: Admin@123456  (cost=10)
-('admin','$2b$10$GFHq9PcQS8SvCpf8pDczfuYnJUT0Nf.hBHNA3b6/7z5JPX4VC5srC','Administrator','active');
+('admin', '$2b$10$GFHq9PcQS8SvCpf8pDczfuYnJUT0Nf.hBHNA3b6/7z5JPX4VC5srC','Administrator','active'),
+('worker','$2b$10$GFHq9PcQS8SvCpf8pDczfuYnJUT0Nf.hBHNA3b6/7z5JPX4VC5srC','John Mwangi','active');
 
-INSERT INTO `sys_user_role` (`user_id`,`role_id`) VALUES (1,1);
+-- 用户-角色绑定 (admin=SUPER_ADMIN, worker=WORKER role_id=6)
+INSERT INTO `sys_user_role` (`user_id`,`role_id`) VALUES (1,1), (2,6);
 
 -- 字典类型
 INSERT INTO `sys_dict_type` (`dict_type`,`dict_name`) VALUES
@@ -797,11 +800,4 @@ INSERT INTO `location_warehouse` (`code`,`name`,`type`,`parent_id`) VALUES
 ('W01',    '一号包装仓',     'normal', 0),
 ('W01-A1', '一号仓-A1货架',  'normal', 1),
 ('W01-A2', '一号仓-A2货架',  'normal', 1),
-('W02',    '冷藏库',         'cold',   0),
-('W02-C1', '冷藏库-C1',      'cold',   4);
-
-SET FOREIGN_KEY_CHECKS = 1;
-
--- ============================================================================
--- END OF SCHEMA
--- ============================================================================
+('W02',    '冷藏库',         'cold',  
