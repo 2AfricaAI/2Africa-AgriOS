@@ -348,6 +348,8 @@ export default {
     levelZone: '库区',
     levelShelf: '货架',
     levelBin: '库位',
+    expandAll: '展开全部',
+    collapseAll: '折叠全部',
     confirmDelete: '确认删除仓位「{code} - {name}」？此操作不可撤销。',
     confirmToggle: '确认{action}仓库「{name}」?',
   },

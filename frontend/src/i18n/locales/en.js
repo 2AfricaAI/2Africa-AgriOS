@@ -363,6 +363,8 @@ export default {
     levelZone: 'Zone',
     levelShelf: 'Shelf',
     levelBin: 'Bin',
+    expandAll: 'Expand all',
+    collapseAll: 'Collapse all',
     confirmDelete: 'Delete warehouse "{code} - {name}"? This cannot be undone.',
     confirmToggle: 'Confirm to {action} warehouse "{name}"?',
   },

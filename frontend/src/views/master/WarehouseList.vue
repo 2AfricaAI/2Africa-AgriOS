@@ -73,40 +73,50 @@
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
         <el-button type="primary" :icon="PlusIcon" @click="onCreate">{{ t('wh.newFull') }}</el-button>
+        <el-button :icon="ExpandIcon"   @click="expandAll(true)">{{ t('wh.expandAll') }}</el-button>
+        <el-button :icon="CollapseIcon" @click="expandAll(false)">{{ t('wh.collapseAll') }}</el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading" border stripe row-key="id">
+      <el-table
+        :data="tree"
+        v-loading="loading"
+        border stripe
+        row-key="id"
+        :tree-props="{ children: 'children' }"
+        :expand-row-keys="expandedKeys"
+        @expand-change="onExpandChange"
+      >
         <el-table-column prop="id" label="ID" width="70" align="center" />
-        <el-table-column prop="code" :label="t('wh.code')" width="120" />
-        <el-table-column prop="name" :label="t('wh.name')" min-width="140" />
-        <el-table-column :label="t('wh.type')" width="100" align="center">
+        <el-table-column prop="code" :label="t('wh.code')" width="130" show-overflow-tooltip />
+        <el-table-column prop="name" :label="t('wh.name')" min-width="180" show-overflow-tooltip />
+        <el-table-column :label="t('wh.type')" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="typeTagColor(row.type)" size="small">
               {{ typeLabel(row.type) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('wh.purpose')" width="160" align="center">
+        <el-table-column :label="t('wh.purpose')" width="130" align="center">
           <template #default="{ row }">
             <el-tag :type="purposeTagColor(row.purpose)" size="small">
               {{ purposeLabel(row.purpose) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('wh.level')" width="100" align="center">
+        <el-table-column :label="t('wh.level')" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="levelTagColor(row.level)" size="small">
               {{ levelLabel(row.level) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="t('wh.parentNode')" min-width="160">
+        <el-table-column :label="t('wh.parentNode')" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <span v-if="!row.parentId || row.parentId === 0" style="color: #909399">{{ t('wh.topNodeShort') }}</span>
             <span v-else>{{ warehouseName(row.parentId) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="capacityKg" :label="t('wh.capacityKg')" width="120" align="right">
+        <el-table-column prop="capacityKg" :label="t('wh.capacityKg')" width="100" align="right">
           <template #default="{ row }">
             <span v-if="row.capacityKg == null" style="color: #c0c4cc">-</span>
             <span v-else>{{ Number(row.capacityKg).toLocaleString() }}</span>
@@ -119,7 +129,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createdAt" :label="t('common.createdAt')" width="170" />
+        <el-table-column prop="createdAt" :label="t('common.createdAt')" width="150" />
         <el-table-column :label="t('common.actions')" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="onEdit(row)">{{ t('common.edit') }}</el-button>
@@ -136,17 +146,9 @@
         </el-table-column>
       </el-table>
 
-      <el-pagination
-        class="pager"
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        :page-sizes="[10, 20, 50, 100]"
-        :total="total"
-        :page-size="pageSize"
-        :current-page="page"
-        @size-change="onSizeChange"
-        @current-change="onPageChange"
-      />
+      <div class="tree-footer">
+        <span>{{ t('common.total') }}: {{ total }}</span>
+      </div>
     </el-card>
 
     <!-- 新建/编辑对话框 -->
@@ -239,6 +241,8 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Plus as PlusIcon,
+  ArrowDown as ExpandIcon,
+  ArrowUp as CollapseIcon,
 } from '@element-plus/icons-vue'
 import {
   listWarehouses,
@@ -325,16 +329,64 @@ const page = ref(1)
 const pageSize = ref(20)
 const query = reactive({ type: '', purpose: '', level: '', parentId: null, code: '', name: '', status: null })
 
+// Sprint 22.0.8 - tree view (nested by parent_id)
+const tree = computed(() => buildTree(list.value))
+const expandedKeys = ref([])
+
+function buildTree(flat) {
+  if (!flat || !flat.length) return []
+  const byId = {}
+  flat.forEach(w => { byId[w.id] = { ...w, children: [] } })
+  const roots = []
+  flat.forEach(w => {
+    const node = byId[w.id]
+    if (w.parentId && w.parentId !== 0 && byId[w.parentId]) {
+      byId[w.parentId].children.push(node)
+    } else {
+      roots.push(node)
+    }
+  })
+  // Drop empty children arrays so el-table doesn't show expand caret on leaves
+  function clean(node) {
+    if (!node.children.length) delete node.children
+    else node.children.forEach(clean)
+  }
+  roots.forEach(clean)
+  return roots
+}
+
+function expandAll(yes) {
+  if (yes) {
+    // Collect all rows that have children
+    expandedKeys.value = list.value
+      .filter(w => list.value.some(c => c.parentId === w.id))
+      .map(w => w.id)
+  } else {
+    expandedKeys.value = []
+  }
+}
+function onExpandChange(row, expanded) {
+  const keys = new Set(expandedKeys.value)
+  if (expanded) keys.add(row.id)
+  else          keys.delete(row.id)
+  expandedKeys.value = Array.from(keys)
+}
+
 async function reload(toPage) {
   if (toPage) page.value = toPage
   loading.value = true
   try {
+    // Tree mode: pull all rows in one shot so parent+children co-exist
     const data = await listWarehouses({
       ...query,
-      page: page.value,
-      size: pageSize.value,
+      page: 1,
+      size: 500,
     })
     list.value = data.list
+    // Default-expand top-level warehouses (level=warehouse)
+    expandedKeys.value = list.value
+      .filter(w => w.level === 'warehouse' && list.value.some(c => c.parentId === w.id))
+      .map(w => w.id)
     total.value = data.total
   } finally {
     loading.value = false
@@ -498,4 +550,5 @@ async function onDelete(row) {
 .toolbar { margin-bottom: 12px; display: flex; justify-content: flex-end; }
 .pager { margin-top: 14px; justify-content: flex-end; }
 .hint { font-size: 12px; color: #909399; margin-top: 4px; }
+.tree-footer { margin-top: 12px; text-align: right; color: #606266; font-size: 13px; }
 </style>

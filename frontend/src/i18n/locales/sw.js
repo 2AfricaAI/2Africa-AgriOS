@@ -98,6 +98,8 @@ export default {
     levelZone: 'Eneo',
     levelShelf: 'Rafu',
     levelBin: 'Sehemu',
+    expandAll: 'Panua zote',
+    collapseAll: 'Kunja zote',
     confirmDelete: 'Futa ghala "{code} - {name}"? Haitaweza kurudishwa.',
   },
 

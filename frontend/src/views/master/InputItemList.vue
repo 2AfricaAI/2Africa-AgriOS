@@ -298,4 +298,17 @@ async function onToggle(row) {
     { type: 'warning' },
   ).catch(() => Promise.reject('cancel'))
   await toggleInputItemStatus(row.id, next)
-  ElMessage.success(t('common.operationSucce
+  ElMessage.success(t('common.operationSuccess'))
+  reload()
+}
+
+onMounted(() => { loadSuppliers(); reload() })
+</script>
+
+<style scoped>
+.page { padding: 16px; }
+.filter-card { margin-bottom: 12px; }
+.toolbar { margin-bottom: 12px; }
+.pager { margin-top: 12px; text-align: right; }
+.muted { color: #909399; font-size: 11px; }
+</style>
