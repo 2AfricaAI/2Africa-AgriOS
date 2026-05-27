@@ -18,8 +18,12 @@ public class PurchaseOrderItem {
 
     private Long poId;
 
+    /** 软外键 -> input_item.id (Sprint 22.1: PO 打通主数据) */
+    private Long inputItemId;
+
     /** labor / water / electricity / fertilizer / seed / pesticide / equipment / service / other */
     private String inputType;
+    /** 下单快照名称 (即使后续主数据改名也不影响历史 PO) */
     private String description;
 
     private BigDecimal quantity;

@@ -174,4 +174,10 @@ public class HarvestRecordService {
 
     private List<Long> parsePhotosJson(String json) {
         if (json == null || json.isBlank() || "null".equals(json)) return new ArrayList<>();
-        try
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<Long>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+}

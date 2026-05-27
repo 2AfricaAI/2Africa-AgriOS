@@ -129,4 +129,9 @@ public class InputItemService {
     private InputItemVO toVO(InputItem e, Map<Long, String> supplierNameById) {
         InputItemVO v = new InputItemVO();
         BeanUtils.copyProperties(e, v);
-        if (e.getDefaultSupplierId() !=
+        if (e.getDefaultSupplierId() != null) {
+            v.setDefaultSupplierName(supplierNameById.get(e.getDefaultSupplierId()));
+        }
+        return v;
+    }
+}

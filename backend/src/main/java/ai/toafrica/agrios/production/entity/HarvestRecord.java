@@ -48,4 +48,6 @@ public class HarvestRecord {
     private LocalDateTime createdAt;
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
-    @TableField(fill = FieldFill.INSE
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updatedAt;
+}

@@ -15,11 +15,23 @@ public interface PurchaseOrderItemMapper extends BaseMapper<PurchaseOrderItem> {
 
     @Select("""
             SELECT
-              id, po_id, input_type, description,
-              quantity, unit, unit_price, amount, received_qty, remark
-              FROM purchase_order_item
-              WHERE po_id = #{poId}
-              ORDER BY id ASC
+              i.id                    AS id,
+              i.po_id                 AS po_id,
+              i.input_item_id         AS input_item_id,
+              ii.name                 AS input_item_name,
+              ii.code                 AS input_item_code,
+              i.input_type            AS input_type,
+              i.description           AS description,
+              i.quantity              AS quantity,
+              i.unit                  AS unit,
+              i.unit_price            AS unit_price,
+              i.amount                AS amount,
+              i.received_qty          AS received_qty,
+              i.remark                AS remark
+              FROM purchase_order_item i
+              LEFT JOIN input_item ii ON i.input_item_id = ii.id AND ii.deleted_at IS NULL
+              WHERE i.po_id = #{poId}
+              ORDER BY i.id ASC
             """)
     List<PurchaseOrderItemVO> findByPoId(@Param("poId") Long poId);
 

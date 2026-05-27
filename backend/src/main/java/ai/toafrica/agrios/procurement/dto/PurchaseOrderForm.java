@@ -45,6 +45,10 @@ public class PurchaseOrderForm {
     @Data
     @Schema(description = "Purchase order line item")
     public static class Item {
+        /** Sprint 22.1: 软外键到 input_item.id (推荐填,允许 NULL 兼容老逻辑) */
+        @Schema(description = "FK to input_item.id (recommended)", example = "123")
+        private Long inputItemId;
+
         @NotBlank
         @Pattern(regexp = "^(labor|water|electricity|fertilizer|seed|pesticide|equipment|service|other)$",
                  message = "inputType must be one of labor/water/electricity/fertilizer/seed/pesticide/equipment/service/other")
@@ -53,7 +57,7 @@ public class PurchaseOrderForm {
 
         @NotBlank
         @Size(max = 255)
-        @Schema(description = "Description, e.g. NPK 17:17:17 50kg bag")
+        @Schema(description = "Description (snapshot at order time)")
         private String description;
 
         @NotNull

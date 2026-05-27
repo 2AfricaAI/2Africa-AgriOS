@@ -65,4 +65,6 @@ public class InputItem {
     private Long createdBy;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
-    @TableF
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updatedBy;
+}

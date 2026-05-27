@@ -692,6 +692,8 @@ export default {
     items: 'Items',
     addLine: 'Add line',
     emptyItems: 'No items yet.',
+    inputItem: 'Item (master)',
+    selectInputItem: 'Select item from master',
     inputType: 'Input Type',
     itemDesc: 'Description',
     itemDescPlaceholder: 'e.g. NPK 17:17:17 50kg bag',

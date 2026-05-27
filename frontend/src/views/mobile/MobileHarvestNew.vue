@@ -317,4 +317,17 @@ async function onSubmit() {
 
 /* submit */
 .mh2-submit {
-  wid
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #1f7a35 0%, #15803d 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.mh2-submit:disabled { opacity: 0.6; }
+.mh2-submit:active { transform: scale(0.98); }
+</style>

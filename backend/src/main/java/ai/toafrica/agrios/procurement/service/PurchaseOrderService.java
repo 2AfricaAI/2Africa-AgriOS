@@ -229,6 +229,7 @@ public class PurchaseOrderService {
             BigDecimal amount = it.getQuantity().multiply(it.getUnitPrice());
             PurchaseOrderItem poi = new PurchaseOrderItem();
             poi.setPoId(poId);
+            poi.setInputItemId(it.getInputItemId());   // Sprint 22.1: 软外键到主数据 (允许 NULL)
             poi.setInputType(it.getInputType());
             poi.setDescription(it.getDescription());
             poi.setQuantity(it.getQuantity());

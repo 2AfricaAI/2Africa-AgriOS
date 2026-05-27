@@ -670,6 +670,8 @@ export default {
     items: '采购明细',
     addLine: '+ 增加一行',
     emptyItems: '暂无明细, 点上方"增加一行"',
+    inputItem: '物料 (主数据)',
+    selectInputItem: '从主数据中选择',
     inputType: '类型',
     itemDesc: '描述',
     itemDescPlaceholder: '如: NPK 17:17:17 50kg 袋装',

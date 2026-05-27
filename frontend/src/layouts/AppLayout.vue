@@ -268,4 +268,5 @@ async function onLogout() {
   gap: 12px;
 }
 
-.lang-btn { font-size: 
+.lang-btn { font-size: 12px; color: #fff; cursor: pointer; }
+</style>

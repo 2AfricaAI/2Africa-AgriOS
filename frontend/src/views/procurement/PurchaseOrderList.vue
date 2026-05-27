@@ -44,12 +44,21 @@
             <div class="items-wrap" v-loading="detailLoading[row.id]">
               <el-table v-if="detailItems[row.id]" :data="detailItems[row.id]" size="small" border stripe>
                 <el-table-column type="index" label="#" width="50" align="center" />
-                <el-table-column :label="t('po.inputType')" width="120">
+                <el-table-column :label="t('po.inputItem')" min-width="180">
+                  <template #default="{ row: r }">
+                    <template v-if="r.inputItemCode">
+                      <code class="po-code">{{ r.inputItemCode }}</code>
+                      <div class="dim small">{{ r.inputItemName }}</div>
+                    </template>
+                    <span v-else class="dim">-</span>
+                  </template>
+                </el-table-column>
+                <el-table-column :label="t('po.inputType')" width="110">
                   <template #default="{ row: r }">
                     <el-tag size="small" :type="inputTypeTag(r.inputType)">{{ inputTypeLabel(r.inputType) }}</el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column prop="description" :label="t('po.itemDesc')" min-width="240" />
+                <el-table-column prop="description" :label="t('po.itemDesc')" min-width="200" />
                 <el-table-column :label="t('po.quantity')" width="120" align="right">
                   <template #default="{ row: r }">
                     <strong>{{ Number(r.quantity).toLocaleString(undefined, { maximumFractionDigits: 3 }) }}</strong>
@@ -236,7 +245,27 @@
           </div>
           <el-table :data="form.items" border size="small" :empty-text="t('po.emptyItems')">
             <el-table-column type="index" width="46" label="#" align="center" />
-            <el-table-column :label="t('po.inputType')" width="140">
+            <el-table-column :label="t('po.inputItem')" min-width="200">
+              <template #default="{ $index }">
+                <el-select
+                  v-model="form.items[$index].inputItemId"
+                  filterable clearable size="small" style="width: 100%"
+                  :placeholder="t('po.selectInputItem')"
+                  @change="(v) => onInputItemChange($index, v)"
+                >
+                  <el-option
+                    v-for="ii in inputItemOptions"
+                    :key="ii.id"
+                    :value="ii.id"
+                    :label="`${ii.code} · ${ii.nameEn || ii.name}`"
+                  >
+                    <span style="float:left">{{ ii.code }} · {{ ii.nameEn || ii.name }}</span>
+                    <span style="float:right; color:#909399; font-size:12px">{{ ii.inputType }} / {{ ii.unit }}</span>
+                  </el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column :label="t('po.inputType')" width="120">
               <template #default="{ $index }">
                 <el-select v-model="form.items[$index].inputType" filterable size="small" style="width: 100%">
                   <el-option v-for="opt in INPUT_TYPE_OPTIONS" :key="opt.value" :label="opt.label" :value="opt.value" />
@@ -325,6 +354,7 @@ import {
   deletePurchaseOrder,
 } from '@/api/purchaseOrder'
 import { listSuppliers } from '@/api/supplier'
+import { listInputItems } from '@/api/inputItem'
 import VendorPaymentDialog from '@/components/VendorPaymentDialog.vue'
 
 const { t } = useI18n()
@@ -426,8 +456,41 @@ async function loadSuppliers() {
     supplierOptions.value = data.list || []
   } catch { supplierOptions.value = [] }
 }
+
+// ----- 投入品主数据下拉 (Sprint 22.1c) -----
+const inputItemOptions = ref([])
+const inputItemMap = computed(() => {
+  const m = {}
+  for (const it of inputItemOptions.value) m[it.id] = it
+  return m
+})
+async function loadInputItems() {
+  try {
+    const data = await listInputItems({ status: 'active', page: 1, size: 500 })
+    inputItemOptions.value = data.list || []
+  } catch { inputItemOptions.value = [] }
+}
+
+/**
+ * 用户在行内选了主数据 -> 自动回填快照: inputType / description / unit
+ * 用户后续可以手动改 description / unit (作为下单时快照)
+ */
+function onInputItemChange(idx, inputItemId) {
+  const item = inputItemMap.value[inputItemId]
+  if (!item) return
+  const row = form.items[idx]
+  // 主数据 inputType (seed/fertilizer/pesticide/construction/spare_parts/tools/packaging/other)
+  // PO inputType (labor/water/electricity/fertilizer/seed/pesticide/equipment/service/other)
+  // 兼容映射: 主数据可直传的: fertilizer / seed / pesticide / other
+  // 其他主数据类目暂回退到 'other' 保持向后兼容
+  const POSITIVE = new Set(['labor','water','electricity','fertilizer','seed','pesticide','equipment','service','other'])
+  row.inputType = POSITIVE.has(item.inputType) ? item.inputType : 'other'
+  row.description = item.nameEn || item.name || ''
+  if (item.unit) row.unit = item.unit
+}
+
 onMounted(async () => {
-  await loadSuppliers()
+  await Promise.all([loadSuppliers(), loadInputItems()])
   reload(1)
 })
 
@@ -462,7 +525,7 @@ const emptyForm = () => ({
   currency: 'KES',
   fxRate: 1,
   remark: '',
-  items: [{ inputType: 'fertilizer', description: '', quantity: 1, unit: 'bag', unitPrice: 0, remark: '' }],
+  items: [{ inputItemId: null, inputType: 'fertilizer', description: '', quantity: 1, unit: 'bag', unitPrice: 0, remark: '' }],
 })
 const form = reactive(emptyForm())
 
@@ -497,7 +560,7 @@ const dueDatePreview = computed(() => {
 })
 
 function addItem() {
-  form.items.push({ inputType: 'fertilizer', description: '', quantity: 1, unit: 'bag', unitPrice: 0, remark: '' })
+  form.items.push({ inputItemId: null, inputType: 'fertilizer', description: '', quantity: 1, unit: 'bag', unitPrice: 0, remark: '' })
 }
 function removeItem(i) { if (form.items.length > 1) form.items.splice(i, 1) }
 function onDialogClosed() {
@@ -528,6 +591,7 @@ async function onEdit(row) {
       fxRate: h.fxRate || 1,
       remark: h.remark || '',
       items: (data.items || []).map(it => ({
+        inputItemId: it.inputItemId ?? null,   // Sprint 22.1c
         inputType: it.inputType, description: it.description,
         quantity: Number(it.quantity), unit: it.unit,
         unitPrice: Number(it.unitPrice), remark: it.remark,
@@ -618,7 +682,6 @@ function onOpenPayment(row) {
   payDialogVisible.value = true
 }
 async function onPaymentSaved() {
-  // 刷新当前行的明细 (如果展开) + 整个列表
   await reload()
 }
 </script>
@@ -627,64 +690,27 @@ async function onPaymentSaved() {
 .page { display: flex; flex-direction: column; gap: 16px; }
 .filter-card :deep(.el-card__body),
 .table-card :deep(.el-card__body) { padding: 16px; }
-.toolbar { margin-bottom: 12px; display: flex; justify-content: flex-end; }
-.pager { margin-top: 14px; justify-content: flex-end; }
+.filter-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.table-title { font-size: 16px; font-weight: 600; color: #1f2937; }
+.pagination-wrap { display: flex; justify-content: flex-end; margin-top: 12px; }
 
-.po-code {
-  font-family: 'Consolas', monospace;
-  background: #f5f7fa;
-  padding: 2px 8px;
-  border-radius: 4px;
-  color: #fa8c16;
-  font-size: 12px;
-  font-weight: 600;
-}
+.po-code { font-size: 12px; background: #f4f4f5; padding: 2px 6px; border-radius: 3px; color: #1f7a35; }
 .link-code { text-decoration: none; }
-.link-code .po-code:hover { background: #fff5e6; }
-.cid { font-family: 'Consolas', monospace; color: #909399; font-size: 12px; }
+.cid { color: #909399; font-size: 12px; }
 .dim { color: #909399; }
-.small { font-size: 11px; }
-.overdue { color: #f56c6c; font-weight: 700; }
+.small { font-size: 12px; }
+.overdue { color: #f56c6c; font-weight: 600; }
 
-.received-full    { color: #1f7a35; font-weight: 600; }
-.received-partial { color: #e6a23c; font-weight: 600; }
+.items-wrap { padding: 8px 12px; background: #fafafa; border-radius: 4px; }
+.items-block { margin-top: 16px; }
+.items-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.items-title { font-size: 14px; font-weight: 600; color: #1f2937; }
+.grand-total { margin-top: 12px; text-align: right; font-size: 15px; color: #1f7a35; }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 16px;
-}
+.received-full    { color: #16a34a; font-weight: 600; }
+.received-partial { color: #d97706; font-weight: 600; }
 
-.terms-preview {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 10px; background: #fff5e6;
-  border: 1px dashed #f7c873; border-radius: 4px;
-  font-size: 13px;
-}
-.terms-preview .arrow { color: #909399; margin: 0 4px; }
-.terms-preview .due-date {
-  color: #fa8c16; font-weight: 700; font-family: 'Consolas', monospace;
-}
-
-.items-block { margin-top: 8px; }
-.items-head {
-  display: flex; align-items: center; justify-content: space-between;
-  background: #f5f7fa; padding: 8px 12px; border-radius: 4px 4px 0 0;
-}
-.items-title { font-weight: 600; font-size: 13px; color: #1f2329; }
-
-.grand-total {
-  margin-top: 10px;
-  text-align: right;
-  font-size: 14px;
-  padding: 8px 12px;
-  background: #fff5e6;
-  border-radius: 4px;
-  color: #fa8c16;
-}
-
-.items-wrap {
-  padding: 12px 18px;
-  background: #f7f9fc;
-}
+.due-preview { font-size: 12px; color: #6b7280; margin-top: 4px; }
+.due-preview code { background: #f4f4f5; padding: 1px 4px; border-radius: 3px; color: #1f7a35; }
 </style>
