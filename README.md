@@ -38,4 +38,4 @@ cd frontend && npm install && npm run dev
 
 ## License
 
-Proprietary © 2026 2Africa.AI. 由 [@2AfricaAI](https://github.com/2AfricaAI) 与 Claude (Anthropic) 协作开发。
+Proprietary © 2026 2Africa.AI. 由 [@2AfricaAI](https://github.com/2AfricaAI) 开发。
