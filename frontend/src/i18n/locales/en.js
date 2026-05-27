@@ -1121,4 +1121,73 @@ export default {
     pickStart: 'Start date',
     pickEnd: 'End date',
   },
+
+  // ---------- Mobile (PWA) ----------
+  m: {
+    // shell
+    home: 'Home',
+    activity: 'Activity',
+    harvest: 'Harvest',
+    tasks: 'Tasks',
+    me: 'Me',
+    offline: 'Offline',
+    desktop: 'Desktop',
+    syncPending: '{n} pending sync',
+    logoutConfirm: 'Log out of mobile?',
+
+    // greetings
+    greetMorning: 'Good morning',
+    greetAfternoon: 'Good afternoon',
+    greetEvening: 'Good evening',
+    greetNight: 'Burning the midnight oil',
+    greetEarlyMorning: 'Early start',
+
+    // home
+    myTasks: 'My tasks',
+    todayList: "Today's tasks",
+    noTasks: 'No tasks - well done!',
+    viewAll: 'View all',
+    sevHigh: 'High',
+    sevMedium: 'Medium',
+    sevLow: 'Low',
+
+    // record forms
+    recordActivity: 'Record activity',
+    recordHarvest: 'Record harvest',
+    plan: 'Planting plan',
+    pickPlan: 'Select plan',
+    noPlans: 'No active plans - create one on desktop first',
+    harvestDate: 'Harvest date',
+    qtyKg: 'Quantity (kg)',
+    qtyPlaceholder: 'e.g. 125.5',
+
+    // tasks page
+    tabToday: 'Today',
+    tabRisk: 'Risks',
+    tabFollow: 'Follow-up',
+    markDone: 'Done',
+    dismiss: 'Dismiss',
+    markedDone: 'Marked done',
+    dismissed: 'Dismissed',
+    dueToday: 'Due today',
+    dueTomorrow: 'Due tomorrow',
+    overdueDays: '{n}d overdue',
+    inDays: 'in {n}d',
+    activityType: 'Activity type',
+    date: 'Date',
+    photos: 'Photos',
+    addPhoto: 'Add photo',
+    remarkPlaceholder: 'Notes (weather, observations, issues...)',
+    submitOk: 'Submitted',
+    submitFail: 'Submit failed - saved locally, will retry online',
+
+    // GPS
+    gps: 'GPS location',
+    gpsPlaceholder: 'Tap to locate',
+    locate: 'Locate',
+    gpsSuccess: 'Located ({m}m accuracy)',
+    gpsAccuracy: '{m}m accuracy',
+    gpsFailed: 'Location failed',
+    gpsUnsupported: 'GPS not supported by this device',
+  },
 }

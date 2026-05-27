@@ -1096,4 +1096,73 @@ export default {
     pickStart: '起始日期',
     pickEnd: '截止日期',
   },
+
+  // ---------- 移动端 (PWA) ----------
+  m: {
+    // 框架
+    home: '首页',
+    activity: '记农事',
+    harvest: '记采收',
+    tasks: '任务',
+    me: '我',
+    offline: '离线',
+    desktop: '桌面端',
+    syncPending: '{n} 条待同步',
+    logoutConfirm: '确定要退出移动端吗？',
+
+    // 问候
+    greetMorning: '早上好',
+    greetAfternoon: '下午好',
+    greetEvening: '晚上好',
+    greetNight: '深夜辛苦了',
+    greetEarlyMorning: '早起加油',
+
+    // 首页
+    myTasks: '我的任务',
+    todayList: '今天要做',
+    noTasks: '今天没有任务，干得漂亮！',
+    viewAll: '查看全部',
+    sevHigh: '高',
+    sevMedium: '中',
+    sevLow: '低',
+
+    // 录入
+    recordActivity: '记农事',
+    recordHarvest: '记采收',
+    plan: '种植计划',
+    pickPlan: '选择计划',
+    noPlans: '没有进行中的计划 - 请先到桌面端建',
+    harvestDate: '采收日期',
+    qtyKg: '采收量 (kg)',
+    qtyPlaceholder: '例如: 125.5',
+
+    // 任务页
+    tabToday: '今天',
+    tabRisk: '风险',
+    tabFollow: '跟进',
+    markDone: '完成',
+    dismiss: '忽略',
+    markedDone: '已完成',
+    dismissed: '已忽略',
+    dueToday: '今天到期',
+    dueTomorrow: '明天到期',
+    overdueDays: '已逾期 {n} 天',
+    inDays: '{n} 天后',
+    activityType: '农事类型',
+    date: '日期',
+    photos: '现场照片',
+    addPhoto: '添加照片',
+    remarkPlaceholder: '备注（天气、观察、问题…）',
+    submitOk: '已提交',
+    submitFail: '提交失败 - 已本地保存，联网自动重试',
+
+    // GPS
+    gps: 'GPS 位置',
+    gpsPlaceholder: '点击定位',
+    locate: '定位',
+    gpsSuccess: '定位成功（精度 {m} 米）',
+    gpsAccuracy: '精度 {m} 米',
+    gpsFailed: '定位失败',
+    gpsUnsupported: '当前设备不支持 GPS',
+  },
 }

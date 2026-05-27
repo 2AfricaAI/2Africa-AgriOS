@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/layouts/AppLayout.vue'
+import MobileLayout from '@/layouts/MobileLayout.vue'
 import i18n from '@/i18n'
 
 const routes = [
@@ -170,6 +171,45 @@ const routes = [
         name: 'file-demo',
         component: () => import('@/views/FileDemo.vue'),
         meta: { titleKey: 'menu.fileDemo' },
+      },
+    ],
+  },
+  // ---------- Mobile (PWA) ----------
+  {
+    path: '/m',
+    component: MobileLayout,
+    meta: { mobile: true },
+    children: [
+      {
+        path: '',
+        name: 'm-home',
+        component: () => import('@/views/mobile/MobileHome.vue'),
+        meta: { titleKey: 'm.home', mobile: true },
+      },
+      {
+        path: 'activity/new',
+        name: 'm-activity-new',
+        component: () => import('@/views/mobile/MobileActivityNew.vue'),
+        meta: { titleKey: 'm.recordActivity', mobile: true },
+      },
+      {
+        path: 'harvest/new',
+        name: 'm-harvest-new',
+        component: () => import('@/views/mobile/MobileHarvestNew.vue'),
+        meta: { titleKey: 'm.recordHarvest', mobile: true },
+      },
+      {
+        path: 'tasks',
+        name: 'm-tasks',
+        component: () => import('@/views/mobile/MobileTasks.vue'),
+        meta: { titleKey: 'm.myTasks', mobile: true },
+      },
+      // 20.8: me - 占位
+      {
+        path: 'me',
+        name: 'm-me',
+        component: () => import('@/views/mobile/MobileHome.vue'),
+        meta: { titleKey: 'm.me', mobile: true, todo: '20.8' },
       },
     ],
   },
