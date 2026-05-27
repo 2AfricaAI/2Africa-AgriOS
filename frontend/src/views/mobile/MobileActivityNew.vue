@@ -348,16 +348,4 @@ function goBack() { router.push('/m/') }
 
 /* 提交 */
 .ma-submit {
-  background: linear-gradient(135deg, #1f7a35 0%, #2BA84A 100%);
-  color: #fff;
-  border: none;
-  border-radius: 14px;
-  height: 52px;
-  font-size: 16px; font-weight: 700;
-  margin-top: 8px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(31, 122, 53, 0.3);
-}
-.ma-submit:disabled { opacity: 0.6; }
-.ma-submit:active { transform: scale(0.98); }
-</style>
+  ba

@@ -21,5 +21,4 @@ public class InputItemVO {
     private String status;
     private String remark;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-}
+    private Loca

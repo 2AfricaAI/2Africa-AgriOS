@@ -66,6 +66,13 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column :label="t('wh.purpose')" width="160" align="center">
+          <template #default="{ row }">
+            <el-tag :type="purposeTagColor(row.purpose)" size="small">
+              {{ purposeLabel(row.purpose) }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('wh.parentNode')" min-width="160">
           <template #default="{ row }">
             <span v-if="!row.parentId || row.parentId === 0" style="color: #909399">{{ t('wh.topNodeShort') }}</span>
@@ -133,6 +140,16 @@
           <el-select v-model="form.type" :placeholder="t('common.selectPlaceholder')" style="width: 100%">
             <el-option
               v-for="opt in TYPE_OPTIONS"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('wh.purpose')" prop="purpose">
+          <el-select v-model="form.purpose" :placeholder="t('common.selectPlaceholder')" style="width: 100%">
+            <el-option
+              v-for="opt in PURPOSE_OPTIONS"
               :key="opt.value"
               :label="opt.label"
               :value="opt.value"
@@ -208,6 +225,24 @@ const TYPE_MAP = computed(() =>
 function typeLabel(v) { return TYPE_MAP.value[v]?.label || v }
 function typeTagColor(v) { return TYPE_MAP.value[v]?.tag || 'info' }
 
+// Sprint 22.0 - business purpose (9 categories, separated by GAP requirement)
+const PURPOSE_OPTIONS = computed(() => [
+  { value: 'finished_goods',       label: t('wh.purposeFinishedGoods'),      tag: 'success' },
+  { value: 'seed_storage',         label: t('wh.purposeSeedStorage'),        tag: 'warning' },
+  { value: 'fertilizer_storage',   label: t('wh.purposeFertilizerStorage'),  tag: 'success' },
+  { value: 'pesticide_storage',    label: t('wh.purposePesticideStorage'),   tag: 'danger'  },
+  { value: 'construction_storage', label: t('wh.purposeConstructionStorage'),tag: 'info'    },
+  { value: 'spare_parts_storage',  label: t('wh.purposeSparePartsStorage'),  tag: 'info'    },
+  { value: 'tools_storage',        label: t('wh.purposeToolsStorage'),       tag: 'info'    },
+  { value: 'packaging_storage',    label: t('wh.purposePackagingStorage'),   tag: 'primary' },
+  { value: 'other_storage',        label: t('wh.purposeOtherStorage'),       tag: 'info'    },
+])
+const PURPOSE_MAP = computed(() =>
+  Object.fromEntries(PURPOSE_OPTIONS.value.map(opt => [opt.value, opt]))
+)
+function purposeLabel(v) { return PURPOSE_MAP.value[v]?.label || v }
+function purposeTagColor(v) { return PURPOSE_MAP.value[v]?.tag || 'info' }
+
 // ============================================================
 // 全量仓库列表(用于父节点下拉 + id→name 映射)
 // ============================================================
@@ -236,7 +271,7 @@ const list = ref([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
-const query = reactive({ type: '', parentId: null, code: '', name: '', status: null })
+const query = reactive({ type: '', purpose: '', parentId: null, code: '', name: '', status: null })
 
 async function reload(toPage) {
   if (toPage) page.value = toPage
@@ -256,6 +291,7 @@ async function reload(toPage) {
 
 function onReset() {
   query.type = ''
+  query.purpose = ''
   query.parentId = null
   query.code = ''
   query.name = ''
@@ -283,6 +319,7 @@ const emptyForm = () => ({
   code: '',
   name: '',
   type: 'normal',
+  purpose: 'finished_goods',
   parentId: 0,
   capacityKg: null,
 })
@@ -303,6 +340,7 @@ const rules = computed(() => ({
     { max: 64, message: t('valid.maxLen', { field: t('wh.name'), n: 64 }), trigger: 'blur' },
   ],
   type: [{ required: true, message: t('wh.selectType'), trigger: 'change' }],
+  purpose: [{ required: true, message: t('wh.selectPurpose'), trigger: 'change' }],
 }))
 
 function onCreate() {
@@ -317,6 +355,7 @@ function onEdit(row) {
     code: row.code,
     name: row.name,
     type: row.type || 'normal',
+    purpose: row.purpose || 'finished_goods',
     parentId: row.parentId || 0,
     capacityKg: row.capacityKg != null ? Number(row.capacityKg) : null,
   })

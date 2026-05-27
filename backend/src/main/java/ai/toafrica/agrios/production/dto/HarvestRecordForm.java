@@ -42,6 +42,4 @@ public class HarvestRecordForm {
     @Schema(description = "照片 sys_file.id 数组")
     private List<Long> photos;
 
-    @Size(max = 255)
-    private String remark;
-}
+    @S

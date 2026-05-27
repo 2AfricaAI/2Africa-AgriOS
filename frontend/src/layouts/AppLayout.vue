@@ -268,26 +268,4 @@ async function onLogout() {
   gap: 12px;
 }
 
-.lang-btn { font-size: 13px; padding: 0 8px; }
-.lang-label { margin: 0 4px; }
-.lang-flag,
-.lang-flag-item {
-  display: inline-block;
-  min-width: 22px;
-  font-weight: 700;
-  color: #1677ff;
-  font-size: 12px;
-  letter-spacing: 0.4px;
-}
-.lang-flag-item { margin-right: 6px; }
-
-.welcome {
-  font-size: 13px;
-  color: #1f2329;
-}
-
-.main {
-  background: #f0f2f5;
-  overflow: auto;
-}
-</style>
+.lang-btn { font-size: 

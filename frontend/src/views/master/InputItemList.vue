@@ -166,22 +166,31 @@ import { listSuppliers } from '@/api/supplier'
 
 const { t } = useI18n()
 
+// Sprint 22.0 - 8 categories aligned with warehouse.purpose
 const INPUT_TYPES = [
-  { value: 'fertilizer' },
-  { value: 'pesticide'  },
-  { value: 'seed'       },
-  { value: 'film'       },
-  { value: 'labor'      },
-  { value: 'other'      },
+  { value: 'seed'         },
+  { value: 'fertilizer'   },
+  { value: 'pesticide'    },
+  { value: 'construction' },
+  { value: 'spare_parts'  },
+  { value: 'tools'        },
+  { value: 'packaging'    },
+  { value: 'other'        },
 ]
-const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
+// camelCase helper for i18n key 'inputItem.typeSpareParts' from 'spare_parts'
+const cap = (s) => {
+  if (!s) return ''
+  return s.split('_').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('')
+}
 const typeTagColor = (t_) => ({
-  fertilizer: 'success',
-  pesticide:  'danger',
-  seed:       'warning',
-  film:       'info',
-  labor:      '',
-  other:      'info',
+  seed:         'warning',
+  fertilizer:   'success',
+  pesticide:    'danger',
+  construction: 'info',
+  spare_parts:  'info',
+  tools:        'info',
+  packaging:    'primary',
+  other:        'info',
 })[t_] || 'info'
 
 // ----- query -----
@@ -289,17 +298,4 @@ async function onToggle(row) {
     { type: 'warning' },
   ).catch(() => Promise.reject('cancel'))
   await toggleInputItemStatus(row.id, next)
-  ElMessage.success(t('common.operationSuccess'))
-  reload()
-}
-
-onMounted(() => { loadSuppliers(); reload() })
-</script>
-
-<style scoped>
-.page { padding: 16px; }
-.filter-card { margin-bottom: 12px; }
-.toolbar { margin-bottom: 12px; }
-.pager { margin-top: 12px; text-align: right; }
-.muted { color: #909399; font-size: 11px; }
-</style>
+  ElMessage.success(t('common.operationSucce

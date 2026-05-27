@@ -68,8 +68,4 @@ public class InputItemController {
     @Operation(summary = "删除投入品 (仅 SUPER_ADMIN)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable Long id) {
-        service.delete(id);
-        return R.ok();
-    }
-}
+    public R<Void> delete(@PathVariable 

@@ -68,14 +68,30 @@ export default {
     typeFertilizer: 'Mbolea',
     typePesticide: 'Dawa za wadudu',
     typeSeed: 'Mbegu',
-    typeFilm: 'Filamu ya kufunika',
-    typeLabor: 'Kazi',
+    typeConstruction: 'Ujenzi',
+    typeSpareParts: 'Vipuri',
+    typeTools: 'Zana',
+    typePackaging: 'Ufungaji',
     typeOther: 'Nyingine',
     spec: 'Maelezo',
     activeIngredient: 'Kiungo amili',
     regNo: 'Nambari ya usajili',
     phi: 'PHI',
     defaultSupplier: 'Muuzaji chaguo-msingi',
+  },
+
+  // ---------- Warehouses (Phase 4 purpose) ----------
+  wh: {
+    purpose: 'Madhumuni',
+    purposeFinishedGoods: 'Bidhaa zilizokamilika',
+    purposeSeedStorage: 'Hifadhi ya mbegu',
+    purposeFertilizerStorage: 'Hifadhi ya mbolea',
+    purposePesticideStorage: 'Kabati la dawa',
+    purposeConstructionStorage: 'Yadi ya ujenzi',
+    purposeSparePartsStorage: 'Sehemu za vipuri',
+    purposeToolsStorage: 'Chumba cha zana',
+    purposePackagingStorage: 'Vifaa vya ufungaji',
+    purposeOtherStorage: 'Hifadhi nyingine',
   },
 
   // ---------- Mobile (PWA) - the worker's daily UI ----------

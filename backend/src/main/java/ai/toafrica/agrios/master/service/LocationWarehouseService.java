@@ -20,14 +20,18 @@ public class LocationWarehouseService {
     private final LocationWarehouseMapper warehouseMapper;
 
     public PageResult<LocationWarehouse> page(
-            String name, String code, String type, Long parentId, Integer status, PageQuery pq) {
+            String name, String code, String type, String purpose, Long parentId,
+            Integer status, PageQuery pq) {
         LambdaQueryWrapper<LocationWarehouse> q = new LambdaQueryWrapper<>();
-        if (name != null && !name.isBlank()) q.like(LocationWarehouse::getName, name.trim());
-        if (code != null && !code.isBlank()) q.like(LocationWarehouse::getCode, code.trim());
-        if (type != null && !type.isBlank()) q.eq(LocationWarehouse::getType, type.trim());
+        if (name != null && !name.isBlank())       q.like(LocationWarehouse::getName, name.trim());
+        if (code != null && !code.isBlank())       q.like(LocationWarehouse::getCode, code.trim());
+        if (type != null && !type.isBlank())       q.eq(LocationWarehouse::getType, type.trim());
+        if (purpose != null && !purpose.isBlank()) q.eq(LocationWarehouse::getPurpose, purpose.trim());
         if (parentId != null) q.eq(LocationWarehouse::getParentId, parentId);
-        if (status != null) q.eq(LocationWarehouse::getStatus, status);
-        q.orderByAsc(LocationWarehouse::getParentId).orderByAsc(LocationWarehouse::getCode);
+        if (status != null)   q.eq(LocationWarehouse::getStatus, status);
+        q.orderByAsc(LocationWarehouse::getPurpose)
+         .orderByAsc(LocationWarehouse::getParentId)
+         .orderByAsc(LocationWarehouse::getCode);
 
         Page<LocationWarehouse> p = new Page<>(pq.getPage(), pq.getSize());
         return PageResult.of(warehouseMapper.selectPage(p, q));

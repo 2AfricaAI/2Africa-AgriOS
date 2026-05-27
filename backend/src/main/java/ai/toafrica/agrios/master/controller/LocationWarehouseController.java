@@ -32,13 +32,16 @@ public class LocationWarehouseController {
     @Operation(summary = "仓库/库位列表(分页 + 过滤)")
     @GetMapping
     public R<PageResult<LocationWarehouse>> list(
-            @Parameter(description = "名称模糊查询") @RequestParam(required = false) String name,
-            @Parameter(description = "编码模糊查询") @RequestParam(required = false) String code,
-            @Parameter(description = "类型 normal/cold/quarantine") @RequestParam(required = false) String type,
-            @Parameter(description = "父节点 ID, 0 表示顶层") @RequestParam(required = false) Long parentId,
-            @Parameter(description = "状态 1=启用 0=停用") @RequestParam(required = false) Integer status,
+            @Parameter(description = "Name fuzzy")  @RequestParam(required = false) String name,
+            @Parameter(description = "Code fuzzy")  @RequestParam(required = false) String code,
+            @Parameter(description = "Physical type: normal/cold/quarantine")
+                @RequestParam(required = false) String type,
+            @Parameter(description = "Business purpose (Sprint 22): finished_goods | seed_storage | fertilizer_storage | pesticide_storage | construction_storage | spare_parts_storage | tools_storage | packaging_storage | other_storage")
+                @RequestParam(required = false) String purpose,
+            @Parameter(description = "Parent id (0=top)") @RequestParam(required = false) Long parentId,
+            @Parameter(description = "Status: 1=enabled 0=disabled") @RequestParam(required = false) Integer status,
             PageQuery pq) {
-        return R.ok(warehouseService.page(name, code, type, parentId, status, pq));
+        return R.ok(warehouseService.page(name, code, type, purpose, parentId, status, pq));
     }
 
     @Operation(summary = "仓库/库位详情")

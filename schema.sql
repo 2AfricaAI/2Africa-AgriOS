@@ -195,15 +195,18 @@ CREATE TABLE `packaging_spec` (
 ) ENGINE=InnoDB COMMENT='包装规格';
 
 CREATE TABLE `location_warehouse` (
-  `id`         BIGINT       PRIMARY KEY AUTO_INCREMENT,
-  `code`       VARCHAR(32)  NOT NULL UNIQUE COMMENT '如 W01-A1',
-  `name`       VARCHAR(64)  NOT NULL,
-  `type`       VARCHAR(16)  NOT NULL DEFAULT 'normal' COMMENT 'normal/cold/quarantine',
-  `parent_id`  BIGINT       DEFAULT 0,
+  `id`          BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `code`        VARCHAR(32)  NOT NULL UNIQUE COMMENT 'e.g. W01-A1, IW-SEED',
+  `name`        VARCHAR(64)  NOT NULL,
+  `type`        VARCHAR(16)  NOT NULL DEFAULT 'normal' COMMENT 'PHYSICAL: normal/cold/quarantine',
+  `purpose`     VARCHAR(32)  NOT NULL DEFAULT 'finished_goods'
+                COMMENT 'BUSINESS (Sprint 22): finished_goods | seed_storage | fertilizer_storage | pesticide_storage | construction_storage | spare_parts_storage | tools_storage | packaging_storage | other_storage',
+  `parent_id`   BIGINT       DEFAULT 0,
   `capacity_kg` DECIMAL(12,2),
-  `status`     TINYINT(1)   NOT NULL DEFAULT 1,
-  `created_at` DATETIME     DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB COMMENT='仓库/库位';
+  `status`      TINYINT(1)   NOT NULL DEFAULT 1,
+  `created_at`  DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_warehouse_purpose` (`purpose`)
+) ENGINE=InnoDB COMMENT='Warehouses / locations';
 
 -- ============================================================================
 -- 3. PEOPLE

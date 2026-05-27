@@ -8,12 +8,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-@Schema(description = "投入品主数据 - 创建/修改表单")
+@Schema(description = "Input item master data - create / update form")
 public class InputItemForm {
 
     @NotBlank
     @Size(max = 32)
-    @Schema(description = "编码, e.g. II-0007", example = "II-0007")
+    @Schema(description = "Code, e.g. II-0007", example = "II-0007")
     private String code;
 
     @NotBlank
@@ -24,8 +24,8 @@ public class InputItemForm {
     private String nameEn;
 
     @NotBlank
-    @Pattern(regexp = "fertilizer|pesticide|seed|film|labor|other",
-             message = "inputType must be fertilizer/pesticide/seed/film/labor/other")
+    @Pattern(regexp = "seed|fertilizer|pesticide|construction|spare_parts|tools|packaging|other",
+             message = "inputType must be one of: seed/fertilizer/pesticide/construction/spare_parts/tools/packaging/other")
     private String inputType;
 
     @Size(max = 128)
@@ -42,10 +42,10 @@ public class InputItemForm {
     private String registrationNo;
 
     @Min(value = 0, message = "phiDays must be >= 0")
-    @Schema(description = "Pre-Harvest Interval 天数, 仅 pesticide 有意义", example = "14")
+    @Schema(description = "Pre-Harvest Interval days (pesticide only)", example = "14")
     private Integer phiDays;
 
-    @Schema(description = "默认供应商 ID (可选)")
+    @Schema(description = "Default supplier id (optional)")
     private Long defaultSupplierId;
 
     @Pattern(regexp = "^(active|inactive)?$")

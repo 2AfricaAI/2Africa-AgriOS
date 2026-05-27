@@ -214,11 +214,4 @@ async function onLogout() {
   position: absolute;
   top: 6px; right: 50%;
   margin-right: -22px;
-  min-width: 16px; height: 16px;
-  padding: 0 4px;
-  background: #f56c6c;
-  color: #fff; font-size: 10px; font-weight: 700;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-}
-</style>
+  mi

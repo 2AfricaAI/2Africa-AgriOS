@@ -24,10 +24,21 @@ public class WarehouseForm {
 
     @NotBlank
     @Pattern(regexp = "normal|cold|quarantine", message = "type must be normal/cold/quarantine")
-    @Schema(description = "类型", example = "normal", allowableValues = {"normal", "cold", "quarantine"})
+    @Schema(description = "Physical type", example = "normal",
+            allowableValues = {"normal", "cold", "quarantine"})
     private String type;
 
-    @Schema(description = "父节点 ID, 0 表示顶层节点", example = "0", defaultValue = "0")
+    @NotBlank
+    @Pattern(regexp = "finished_goods|seed_storage|fertilizer_storage|pesticide_storage|construction_storage|spare_parts_storage|tools_storage|packaging_storage|other_storage",
+             message = "purpose must be one of the 9 storage purposes")
+    @Schema(description = "Business purpose (Sprint 22)",
+            example = "finished_goods",
+            allowableValues = {"finished_goods", "seed_storage", "fertilizer_storage", "pesticide_storage",
+                               "construction_storage", "spare_parts_storage", "tools_storage",
+                               "packaging_storage", "other_storage"})
+    private String purpose;
+
+    @Schema(description = "Parent node id, 0=top-level", example = "0", defaultValue = "0")
     private Long parentId;
 
     @DecimalMin(value = "0.00", inclusive = true)

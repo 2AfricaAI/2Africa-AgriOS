@@ -17,8 +17,13 @@ public class LocationWarehouse {
     private String code;
     private String name;
 
-    /** normal / cold / quarantine */
+    /** normal / cold / quarantine - PHYSICAL */
     private String type;
+
+    /** finished_goods / seed_storage / fertilizer_storage / pesticide_storage /
+     *  construction_storage / spare_parts_storage / tools_storage /
+     *  packaging_storage / other_storage - BUSINESS PURPOSE (Sprint 22) */
+    private String purpose;
 
     /** 0=顶层节点 */
     private Long parentId;

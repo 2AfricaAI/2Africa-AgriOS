@@ -18,5 +18,4 @@ export function toggleInputItemStatus(id, status) {
   return request.post(`${BASE}/${id}/status/${status}`)
 }
 export function deleteInputItem(id) {
-  return request.delete(`${BASE}/${id}`)
-}
+  return request.delete

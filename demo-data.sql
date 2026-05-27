@@ -116,24 +116,4 @@ INSERT INTO `planting_plan` (`code`,`plot_id`,`crop_id`,`variety_id`,`area_mu`,`
 
 -- ============================================================================
 -- Verification
--- ============================================================================
-SELECT '=== plots ===' AS '';
-SELECT id, code, name, area_mu, soil_type, irrigation FROM plot ORDER BY id;
-
-SELECT '=== crops (all) ===' AS '';
-SELECT id, code, name, category, cycle_days FROM crop ORDER BY id;
-
-SELECT '=== varieties (grouped by crop) ===' AS '';
-SELECT c.name AS crop, v.code, v.name AS variety, v.traits
-  FROM variety v JOIN crop c ON v.crop_id = c.id
-  ORDER BY v.crop_id, v.id;
-
-SELECT '=== planting plans ===' AS '';
-SELECT pp.code, p.name AS plot, c.name AS crop, v.name AS variety,
-       pp.area_mu, pp.plan_start_date, pp.plan_harvest_date, pp.status
-  FROM planting_plan pp
-  LEFT JOIN plot p    ON pp.plot_id    = p.id
-  LEFT JOIN crop c    ON pp.crop_id    = c.id
-  LEFT JOIN variety v ON pp.variety_id = v.id
-  WHERE pp.deleted_at IS NULL
-  ORDER BY pp.id;
+-- =============================================================

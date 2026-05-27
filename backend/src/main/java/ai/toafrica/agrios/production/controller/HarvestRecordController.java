@@ -59,7 +59,4 @@ public class HarvestRecordController {
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {
-        harvestService.delete(id);
-        return R.ok();
-    }
-}
+     

@@ -51,5 +51,4 @@ VALUES
    NULL, NULL, 0,
    'KARI hybrid - mainstream maize variety'),
   ('II-0006', 'Black Mulch Film',       'film',       '100m/roll', 'pcs',
-   NULL, NULL, 0,
-   'Weed suppression and water retention');
+   NULL, 
