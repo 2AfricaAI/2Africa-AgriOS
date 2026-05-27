@@ -6,7 +6,7 @@ import ai.toafrica.agrios.common.R;
 import ai.toafrica.agrios.common.exception.BusinessException;
 import ai.toafrica.agrios.master.entity.InputItem;
 import ai.toafrica.agrios.master.mapper.InputItemMapper;
-import ai.toafrica.agrios.master.service.InputStockService;
+import ai.toafrica.agrios.warehouse.service.InboundService;
 import ai.toafrica.agrios.procurement.dto.PurchaseOrderForm;
 import ai.toafrica.agrios.procurement.entity.PurchaseOrder;
 import ai.toafrica.agrios.procurement.entity.PurchaseOrderItem;
@@ -54,7 +54,7 @@ public class PurchaseOrderService {
     private final PurchaseOrderItemMapper itemMapper;
     private final SupplierMapper supplierMapper;
     private final InputItemMapper inputItemMapper;        // Sprint 22.4
-    private final InputStockService inputStockService;    // Sprint 22.4
+    private final InboundService inboundService;          // Sprint 22.4 revised
 
     private static final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final Set<String> EDITABLE_STATUSES = Set.of("draft", "confirmed");
@@ -175,13 +175,12 @@ public class PurchaseOrderService {
     }
 
     /**
-     * 全部收货 + 自动入库 (Sprint 22.4 升级)
+     * 全部收货 + 生成入库单草稿 (Sprint 22.4 revised)
      *
      * 1) received_qty 同步到 quantity
-     * 2) 对每个有 inputItemId 的明细行:
-     *    - 查 inputItem.defaultWarehouseId
-     *    - 调 inputStockService.adjustStock(+qty) 入库 + 写流水
-     * 3) 状态推进到 received
+     * 2) 按 defaultWarehouseId 分组,每个仓库生成一张入库单 (draft)
+     * 3) 仓库人员在入库单页面确认后才真正入库
+     * 4) 状态推进到 received
      */
     @Transactional(rollbackFor = Exception.class)
     public void markReceived(Long id) {
@@ -192,37 +191,40 @@ public class PurchaseOrderService {
         }
         List<PurchaseOrderItem> items = itemMapper.selectList(
                 new LambdaQueryWrapper<PurchaseOrderItem>().eq(PurchaseOrderItem::getPoId, id));
+
+        // 按 defaultWarehouseId 分组 → 每个仓库一张入库单
+        java.util.Map<Long, java.util.List<InboundService.PoItemInput>> byWarehouse = new java.util.HashMap<>();
+
         for (PurchaseOrderItem it : items) {
-            // 1) 更新 received_qty
             it.setReceivedQty(it.getQuantity());
             itemMapper.updateById(it);
 
-            // 2) Sprint 22.4: 自动入库
             if (it.getInputItemId() != null) {
                 InputItem inputItem = inputItemMapper.selectById(it.getInputItemId());
                 if (inputItem != null && inputItem.getDefaultWarehouseId() != null) {
-                    inputStockService.adjustStock(
-                            it.getInputItemId(),
-                            inputItem.getDefaultWarehouseId(),
-                            it.getQuantity(),                       // 正数 = 入库
-                            "po_receive",                           // reasonType
-                            "purchase_order",                       // referenceType
-                            o.getId(),                              // referenceId = PO id
-                            null,                                   // operatorId (TODO: 从 SecurityContext 取)
-                            "PO " + o.getCode() + " received"      // remark
-                    );
-                    log.info("[PO auto-inbound] item={} warehouse={} qty={} po={}",
-                            it.getInputItemId(), inputItem.getDefaultWarehouseId(),
-                            it.getQuantity().toPlainString(), o.getCode());
+                    byWarehouse
+                        .computeIfAbsent(inputItem.getDefaultWarehouseId(), k -> new java.util.ArrayList<>())
+                        .add(new InboundService.PoItemInput(it.getInputItemId(), it.getQuantity()));
                 } else {
-                    log.warn("[PO receive] item={} has no defaultWarehouseId, skipping auto-inbound",
+                    log.warn("[PO receive] item={} has no defaultWarehouseId, skipping inbound generation",
                             it.getInputItemId());
                 }
             }
         }
+
+        // 生成入库单草稿 (每个仓库一张)
+        for (var entry : byWarehouse.entrySet()) {
+            Long whId = entry.getKey();
+            var poItems = entry.getValue();
+            Long inboundId = inboundService.createFromPO(o.getId(), whId, poItems);
+            log.info("[PO→Inbound] po={} warehouse={} inboundId={} items={}",
+                    o.getCode(), whId, inboundId, poItems.size());
+        }
+
         o.setStatus("received");
         orderMapper.updateById(o);
-        log.info("[PO received] code={} items={}", o.getCode(), items.size());
+        log.info("[PO received] code={} items={} inbound_orders={}",
+                o.getCode(), items.size(), byWarehouse.size());
     }
 
     @Transactional(rollbackFor = Exception.class)
