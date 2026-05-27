@@ -6,7 +6,9 @@ import ai.toafrica.agrios.common.R;
 import ai.toafrica.agrios.common.exception.BusinessException;
 import ai.toafrica.agrios.master.dto.InputItemForm;
 import ai.toafrica.agrios.master.entity.InputItem;
+import ai.toafrica.agrios.master.entity.LocationWarehouse;
 import ai.toafrica.agrios.master.mapper.InputItemMapper;
+import ai.toafrica.agrios.master.mapper.LocationWarehouseMapper;
 import ai.toafrica.agrios.master.vo.InputItemVO;
 import ai.toafrica.agrios.procurement.entity.Supplier;
 import ai.toafrica.agrios.procurement.mapper.SupplierMapper;
@@ -33,6 +35,7 @@ public class InputItemService {
 
     private final InputItemMapper inputItemMapper;
     private final SupplierMapper  supplierMapper;
+    private final LocationWarehouseMapper warehouseMapper;
 
     public PageResult<InputItemVO> page(String code, String name, String inputType,
                                         Long supplierId, String status, PageQuery pq) {
@@ -59,8 +62,19 @@ public class InputItemService {
                     .forEach(s -> supName.put(s.getId(), s.getName()));
         }
 
+        // Sprint 22.1.5: batch lookup warehouse names
+        Set<Long> whIds = raw.getRecords().stream()
+                .map(InputItem::getDefaultWarehouseId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> whName = new HashMap<>();
+        if (!whIds.isEmpty()) {
+            warehouseMapper.selectBatchIds(whIds)
+                    .forEach(w -> whName.put(w.getId(), w.getName()));
+        }
+
         Page<InputItemVO> voPage = new Page<>(raw.getCurrent(), raw.getSize(), raw.getTotal());
-        voPage.setRecords(raw.getRecords().stream().map(e -> toVO(e, supName)).toList());
+        voPage.setRecords(raw.getRecords().stream().map(e -> toVO(e, supName, whName)).toList());
         return PageResult.of(voPage);
     }
 
@@ -72,7 +86,12 @@ public class InputItemService {
             Supplier s = supplierMapper.selectById(e.getDefaultSupplierId());
             if (s != null) supName.put(s.getId(), s.getName());
         }
-        return toVO(e, supName);
+        Map<Long, String> whName = new HashMap<>();
+        if (e.getDefaultWarehouseId() != null) {
+            LocationWarehouse w = warehouseMapper.selectById(e.getDefaultWarehouseId());
+            if (w != null) whName.put(w.getId(), w.getName());
+        }
+        return toVO(e, supName, whName);
     }
 
     public Long create(InputItemForm form) {
@@ -126,11 +145,14 @@ public class InputItemService {
         }
     }
 
-    private InputItemVO toVO(InputItem e, Map<Long, String> supplierNameById) {
+    private InputItemVO toVO(InputItem e, Map<Long, String> supplierNameById, Map<Long, String> warehouseNameById) {
         InputItemVO v = new InputItemVO();
         BeanUtils.copyProperties(e, v);
         if (e.getDefaultSupplierId() != null) {
             v.setDefaultSupplierName(supplierNameById.get(e.getDefaultSupplierId()));
+        }
+        if (e.getDefaultWarehouseId() != null) {
+            v.setDefaultWarehouseName(warehouseNameById.get(e.getDefaultWarehouseId()));
         }
         return v;
     }

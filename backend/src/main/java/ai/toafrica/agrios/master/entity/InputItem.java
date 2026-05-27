@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -36,10 +37,19 @@ public class InputItem {
     /** fertilizer/pesticide/seed/film/labor/other */
     private String inputType;
 
-    /** 规格 e.g. "50kg/bag" */
+    /** Sprint 22.1.5: L2 子分类 (fertilizer→nitrogen/phosphate/compound/organic; pesticide→herbicide/insecticide/fungicide) */
+    private String categoryL2;
+
+    /** 规格 e.g. "50kg/bag" (自由文本) */
     private String spec;
 
-    /** kg/L/pack/box/pcs */
+    /** Sprint 22.1.5: 单包数量 (如 50 表示 50kg/袋) */
+    private BigDecimal packQty;
+
+    /** Sprint 22.1.5: 包装单位 (bag/bottle/box/can/sack) */
+    private String packUnitLabel;
+
+    /** kg/L/pack/box/pcs (基本单位) */
     private String unit;
 
     /** 有效成分 (主要给农药用) */
@@ -53,6 +63,12 @@ public class InputItem {
 
     /** 默认供应商 FK -> supplier.id (可选) */
     private Long defaultSupplierId;
+
+    /** Sprint 22.1.5: 默认入库仓 FK -> location_warehouse.id */
+    private Long defaultWarehouseId;
+
+    /** Sprint 22.1.5: 库存预警阈值 (base unit, R-INV-04 用) */
+    private BigDecimal minStockQty;
 
     /** active / inactive */
     private String status;
