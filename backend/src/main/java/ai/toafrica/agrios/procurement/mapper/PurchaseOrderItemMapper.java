@@ -29,7 +29,7 @@ public interface PurchaseOrderItemMapper extends BaseMapper<PurchaseOrderItem> {
               i.received_qty          AS received_qty,
               i.remark                AS remark
               FROM purchase_order_item i
-              LEFT JOIN input_item ii ON i.input_item_id = ii.id AND ii.deleted_at IS NULL
+              LEFT JOIN input_item ii ON i.input_item_id = ii.id
               WHERE i.po_id = #{poId}
               ORDER BY i.id ASC
             """)
