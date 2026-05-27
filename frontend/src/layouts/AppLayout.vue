@@ -51,6 +51,7 @@
             <span>{{ t('menu.warehouseOps') }}</span>
           </template>
           <el-menu-item index="/warehouse/inbound">{{ t('menu.inbound') }}</el-menu-item>
+          <el-menu-item index="/warehouse/outbound">{{ t('menu.outbound') }}</el-menu-item>
           <el-menu-item index="/master/input-stock">{{ t('menu.inputStock') }}</el-menu-item>
           <el-menu-item index="/master/stock-log">{{ t('menu.stockLog') }}</el-menu-item>
         </el-sub-menu>
