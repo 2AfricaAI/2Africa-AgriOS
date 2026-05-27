@@ -47,6 +47,12 @@ const routes = [
         meta: { titleKey: 'menu.warehouses' },
       },
       {
+        path: 'master/input-items',
+        name: 'input-items',
+        component: () => import('@/views/master/InputItemList.vue'),
+        meta: { titleKey: 'menu.inputItems' },
+      },
+      {
         path: 'production/plots',
         name: 'plots',
         component: () => import('@/views/production/PlotList.vue'),
@@ -234,10 +240,4 @@ router.beforeEach((to) => {
     // 20.8: worker 登录后直接进移动端, 其他角色去桌面
     return { path: auth.isWorkerOnly ? '/m/' : '/' }
   }
-  // 20.8: 工人角色尝试访问桌面端 (非 /m/* 路由) -> 强制跳回移动端
-  if (auth.isLoggedIn && auth.isWorkerOnly && !to.meta.mobile && to.name !== 'login') {
-    return { path: '/m/' }
-  }
-})
-
-export default router
+  // 20.8: 工人角色尝试访问

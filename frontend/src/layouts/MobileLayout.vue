@@ -178,3 +178,47 @@ async function onLogout() {
 /* 主区 */
 .m-main {
   flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 底部 nav */
+.m-bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  border-top: 1px solid #e4e7ed;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  z-index: 100;
+}
+.m-nav-item {
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: #909399;
+  font-size: 11px;
+  transition: color 0.15s;
+}
+.m-nav-item.active { color: #1f7a35; }
+.m-nav-item.active .m-nav-icon { transform: scale(1.1); }
+.m-nav-icon { font-size: 22px; transition: transform 0.15s; }
+.m-nav-label { font-size: 10px; }
+.m-nav-badge {
+  position: absolute;
+  top: 6px; right: 50%;
+  margin-right: -22px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  background: #f56c6c;
+  color: #fff; font-size: 10px; font-weight: 700;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+</style>

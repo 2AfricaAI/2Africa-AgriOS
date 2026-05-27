@@ -177,4 +177,7 @@ public class HarvestRecordService {
         try {
             return objectMapper.readValue(json, new TypeReference<List<Long>>() {});
         } catch (Exception e) {
-       
+            return new ArrayList<>();
+        }
+    }
+}

@@ -1,5 +1,19 @@
 -- ============================================================================
--- 2Africa AgriOS - Demo Data (All English)
+-- 2Africa AgriOS - Demo / Test Seed Data
+--
+-- *** CONVENTION (Sprint 21+) ***
+--   ALL VALUES IN THIS FILE AND ALL FUTURE MIGRATIONS MUST BE ENGLISH-ONLY.
+--
+--   Reason 1 (target market): Kenya/Africa-facing product. Operators read
+--                             English / Swahili, not Chinese.
+--   Reason 2 (encoding safety): The Windows PowerShell + docker exec pipeline
+--                               historically lost UTF-8 multibyte characters
+--                               (Chinese -> '?'). Keeping seed data ASCII
+--                               eliminates one whole class of transport bugs.
+--
+--   SQL comments (--) may still be in any language - they are developer
+--   facing and never enter the database.
+--
 -- Scenario: 5 Kenyan plots + African staple/cash crops + 5 planting plans
 -- Usage:
 --   docker cp demo-data.sql toafrica-mysql:/tmp/
@@ -104,22 +118,4 @@ INSERT INTO `planting_plan` (`code`,`plot_id`,`crop_id`,`variety_id`,`area_mu`,`
 -- Verification
 -- ============================================================================
 SELECT '=== plots ===' AS '';
-SELECT id, code, name, area_mu, soil_type, irrigation FROM plot ORDER BY id;
-
-SELECT '=== crops (all) ===' AS '';
-SELECT id, code, name, category, cycle_days FROM crop ORDER BY id;
-
-SELECT '=== varieties (grouped by crop) ===' AS '';
-SELECT c.name AS crop, v.code, v.name AS variety, v.traits
-  FROM variety v JOIN crop c ON v.crop_id = c.id
-  ORDER BY v.crop_id, v.id;
-
-SELECT '=== planting plans ===' AS '';
-SELECT pp.code, p.name AS plot, c.name AS crop, v.name AS variety,
-       pp.area_mu, pp.plan_start_date, pp.plan_harvest_date, pp.status
-  FROM planting_plan pp
-  LEFT JOIN plot p    ON pp.plot_id    = p.id
-  LEFT JOIN crop c    ON pp.crop_id    = c.id
-  LEFT JOIN variety v ON pp.variety_id = v.id
-  WHERE pp.deleted_at IS NULL
-  ORDER BY pp.id;
+SELECT id, code, name, area_mu, soil_type, irrigation FROM plot ORDER BY

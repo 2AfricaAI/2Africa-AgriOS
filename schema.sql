@@ -319,6 +319,30 @@ CREATE TABLE `activity_input` (
   KEY `idx_input` (`input_id`)
 ) ENGINE=InnoDB COMMENT='农事-投入品明细';
 
+-- Sprint 21.1 (Phase 4) - 投入品主数据
+CREATE TABLE `input_item` (
+  `id`                   BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `code`                 VARCHAR(32)  NOT NULL UNIQUE COMMENT 'II-0001',
+  `name`                 VARCHAR(128) NOT NULL,
+  `name_en`              VARCHAR(128),
+  `input_type`           VARCHAR(32)  NOT NULL COMMENT 'fertilizer/pesticide/seed/film/labor/other',
+  `spec`                 VARCHAR(128),
+  `unit`                 VARCHAR(16)  NOT NULL DEFAULT 'kg',
+  `active_ingredient`    VARCHAR(128),
+  `registration_no`      VARCHAR(64),
+  `phi_days`             INT          NOT NULL DEFAULT 0,
+  `default_supplier_id`  BIGINT,
+  `status`               VARCHAR(16)  NOT NULL DEFAULT 'active',
+  `remark`               VARCHAR(255),
+  `created_at`           DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  `created_by`           BIGINT,
+  `updated_at`           DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated_by`           BIGINT,
+  KEY `idx_input_type` (`input_type`),
+  KEY `idx_default_supplier` (`default_supplier_id`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB COMMENT='投入品主数据 (Phase 4)';
+
 -- ============================================================================
 -- 5. HARVEST & BATCH
 -- ============================================================================
@@ -782,22 +806,4 @@ INSERT INTO `crop` (`code`,`name`,`category`,`unit`,`cycle_days`) VALUES
 ('CR-004','Strawberry', 'Fruit',           'kg',120);
 
 -- Seed varieties
-INSERT INTO `variety` (`crop_id`,`code`,`name`,`traits`) VALUES
-(1,'V-001','Cherry Tomato',     'Small, high sweetness'),
-(1,'V-002','Provence Heritage', 'Large, juicy'),
-(2,'V-001','Mini Snack',        'Short, crisp'),
-(3,'V-001','Butterhead',        'Soft, buttery texture');
-
--- Seed packaging specs
-INSERT INTO `packaging_spec` (`code`,`name`,`unit_net_kg`,`unit_gross_kg`,`material`) VALUES
-('SP-250G','250g Clear Punnet', 0.250, 0.280, 'PET'),
-('SP-500G','500g Resealable Bag',0.500, 0.510, 'PE'),
-('SP-1KG', '1kg Gift Box',      1.000, 1.100, 'Paper + Liner'),
-('SP-5KG', '5kg Crate',         5.000, 5.500, 'PP Crate');
-
--- 演示库位 (注意层级: W01 / W02 是顶层, A1/A2/C1 是其子节点)
-INSERT INTO `location_warehouse` (`code`,`name`,`type`,`parent_id`) VALUES
-('W01',    '一号包装仓',     'normal', 0),
-('W01-A1', '一号仓-A1货架',  'normal', 1),
-('W01-A2', '一号仓-A2货架',  'normal', 1),
-('W02',    '冷藏库',         'cold',  
+INSERT INTO `variety` (`crop_id`,`code`,`name`,`traits`) VAL

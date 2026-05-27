@@ -61,6 +61,23 @@ export default {
     mustBePositive: '{field} lazima iwe > 0',
   },
 
+  // ---------- Input Items (Phase 4) ----------
+  inputItem: {
+    title: 'Pembejeo',
+    type: 'Aina',
+    typeFertilizer: 'Mbolea',
+    typePesticide: 'Dawa za wadudu',
+    typeSeed: 'Mbegu',
+    typeFilm: 'Filamu ya kufunika',
+    typeLabor: 'Kazi',
+    typeOther: 'Nyingine',
+    spec: 'Maelezo',
+    activeIngredient: 'Kiungo amili',
+    regNo: 'Nambari ya usajili',
+    phi: 'PHI',
+    defaultSupplier: 'Muuzaji chaguo-msingi',
+  },
+
   // ---------- Mobile (PWA) - the worker's daily UI ----------
   m: {
     // shell

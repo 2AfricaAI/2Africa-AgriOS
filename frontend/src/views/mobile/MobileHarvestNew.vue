@@ -312,4 +312,22 @@ async function onSubmit() {
   cursor: pointer;
 }
 .mh2-photo-input { position: absolute; opacity: 0; pointer-events: none; }
-.mh2-photo-icon { font-size:
+.mh2-photo-icon { font-size: 28px; }
+.mh2-photo-label { font-size: 11px; color: #16a34a; margin-top: 2px; }
+
+/* submit */
+.mh2-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #1f7a35 0%, #15803d 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.mh2-submit:disabled { opacity: 0.6; }
+.mh2-submit:active { transform: scale(0.98); }
+</style>
