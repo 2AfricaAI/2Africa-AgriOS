@@ -58,7 +58,8 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
-                    "/actuator/health"
+                    "/actuator/health",
+                    "/v1/public/**"   // Sprint 25: public trace endpoint (QR scan)
                 ).permitAll()
                 .anyRequest().authenticated()
             )

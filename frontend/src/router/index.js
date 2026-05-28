@@ -77,6 +77,12 @@ const routes = [
         meta: { titleKey: 'menu.qcInspections' },
       },
       {
+        path: 'qc/trace',
+        name: 'qc-trace',
+        component: () => import('@/views/qc/TracePage.vue'),
+        meta: { titleKey: 'menu.qcTrace' },
+      },
+      {
         path: 'warehouse/reports',
         name: 'warehouse-reports',
         component: () => import('@/views/warehouse/WarehouseReports.vue'),
@@ -273,6 +279,14 @@ const routes = [
       },
     ],
   },
+  // ---------- Public trace (QR scan landing, no auth, no layout) ----------
+  {
+    path: '/trace/:code',
+    name: 'public-trace',
+    component: () => import('@/views/qc/TracePage.vue'),
+    props: route => ({ publicMode: true }),
+    meta: { public: true, titleKey: 'trace.title' },
+  },
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
@@ -295,7 +309,8 @@ router.beforeEach((to) => {
     return { path: auth.isWorkerOnly ? '/m/' : '/' }
   }
   // 20.8: 工人角色尝试访问桌面端 (非 /m/* 路由) -> 强制跳回移动端
-  if (auth.isLoggedIn && auth.isWorkerOnly && !to.meta.mobile && to.name !== 'login') {
+  // 公开追溯页 (扫码落地) 例外, 任何人都允许访问
+  if (auth.isLoggedIn && auth.isWorkerOnly && !to.meta.mobile && !to.meta.public && to.name !== 'login') {
     return { path: '/m/' }
   }
 })

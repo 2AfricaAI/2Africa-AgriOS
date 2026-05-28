@@ -4,6 +4,9 @@
     <div class="page-head">
       <el-button :icon="ArrowLeft" text @click="goBack">{{ t('batch.backToList') }}</el-button>
       <div class="head-actions" v-if="data?.batch">
+        <el-button type="info" plain :icon="LocationFilled" @click="openTrace">
+          {{ t('menu.qcTrace') }}
+        </el-button>
         <el-button type="success" @click="pnlVisible = true">
           {{ t('pnl.viewPnl') }}
         </el-button>
@@ -294,6 +297,7 @@ import {
   Scissor,
   Delete,
   Plus,
+  LocationFilled,
 } from '@element-plus/icons-vue'
 import { getBatchDetail, splitBatch } from '@/api/batch'
 import PnLDialog from '@/components/PnLDialog.vue'
@@ -355,6 +359,11 @@ watch(batchId, (v) => { if (v) load() })
 
 function goBack() {
   router.push('/production/batches')
+}
+
+function openTrace() {
+  if (!data.value?.batch?.code) return
+  router.push({ path: '/qc/trace', query: { code: data.value.batch.code } })
 }
 
 // ----- 拆分对话框 -----
