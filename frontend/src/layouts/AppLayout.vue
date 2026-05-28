@@ -21,76 +21,76 @@
           <template #title>{{ t('menu.home') }}</template>
         </el-menu-item>
 
-        <el-sub-menu index="master">
+        <el-sub-menu v-if="canMaster" index="master">
           <template #title>
             <el-icon><GoodsIcon /></el-icon>
             <span>{{ t('menu.masterData') }}</span>
           </template>
-          <el-menu-item index="/master/crops">{{ t('menu.crops') }}</el-menu-item>
-          <el-menu-item index="/master/varieties">{{ t('menu.varieties') }}</el-menu-item>
-          <el-menu-item index="/master/packaging-specs">{{ t('menu.packagingSpecs') }}</el-menu-item>
-          <el-menu-item index="/master/warehouses">{{ t('menu.warehouses') }}</el-menu-item>
-          <el-menu-item index="/master/input-items">{{ t('menu.inputItems') }}</el-menu-item>
+          <el-menu-item v-if="can('master:crop:list')" index="/master/crops">{{ t('menu.crops') }}</el-menu-item>
+          <el-menu-item v-if="can('master:variety:list')" index="/master/varieties">{{ t('menu.varieties') }}</el-menu-item>
+          <el-menu-item v-if="can('master:packaging-spec:list')" index="/master/packaging-specs">{{ t('menu.packagingSpecs') }}</el-menu-item>
+          <el-menu-item v-if="can('master:warehouse:list')" index="/master/warehouses">{{ t('menu.warehouses') }}</el-menu-item>
+          <el-menu-item v-if="can('master:input-item:list')" index="/master/input-items">{{ t('menu.inputItems') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="production">
+        <el-sub-menu v-if="canProduction" index="production">
           <template #title>
             <el-icon><ProductionIcon /></el-icon>
             <span>{{ t('menu.production') }}</span>
           </template>
-          <el-menu-item index="/production/plots">{{ t('menu.plots') }}</el-menu-item>
-          <el-menu-item index="/production/planting-plans">{{ t('menu.plantingPlans') }}</el-menu-item>
-          <el-menu-item index="/production/activities">{{ t('menu.activities') }}</el-menu-item>
-          <el-menu-item index="/production/harvests">{{ t('menu.harvests') }}</el-menu-item>
-          <el-menu-item index="/production/batches">{{ t('menu.batches') }}</el-menu-item>
+          <el-menu-item v-if="can('production:plot:list')" index="/production/plots">{{ t('menu.plots') }}</el-menu-item>
+          <el-menu-item v-if="can('production:planting-plan:list')" index="/production/planting-plans">{{ t('menu.plantingPlans') }}</el-menu-item>
+          <el-menu-item v-if="can('production:activity:list')" index="/production/activities">{{ t('menu.activities') }}</el-menu-item>
+          <el-menu-item v-if="can('production:harvest:list')" index="/production/harvests">{{ t('menu.harvests') }}</el-menu-item>
+          <el-menu-item v-if="can('production:batch:list')" index="/production/batches">{{ t('menu.batches') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="warehouse-ops">
+        <el-sub-menu v-if="canWarehouseOps" index="warehouse-ops">
           <template #title>
             <el-icon><GoodsIcon /></el-icon>
             <span>{{ t('menu.warehouseOps') }}</span>
           </template>
-          <el-menu-item index="/warehouse/inbound">{{ t('menu.inbound') }}</el-menu-item>
-          <el-menu-item index="/warehouse/outbound">{{ t('menu.outbound') }}</el-menu-item>
-          <el-menu-item index="/warehouse/stocktake">{{ t('menu.stocktake') }}</el-menu-item>
-          <el-menu-item index="/warehouse/transfer">{{ t('menu.transfer') }}</el-menu-item>
-          <el-menu-item index="/warehouse/scrap">{{ t('menu.scrap') }}</el-menu-item>
-          <el-menu-item index="/master/input-stock">{{ t('menu.inputStock') }}</el-menu-item>
-          <el-menu-item index="/master/stock-log">{{ t('menu.stockLog') }}</el-menu-item>
-          <el-menu-item index="/warehouse/reports">{{ t('menu.warehouseReports') }}</el-menu-item>
+          <el-menu-item v-if="can('warehouse:inbound:list')" index="/warehouse/inbound">{{ t('menu.inbound') }}</el-menu-item>
+          <el-menu-item v-if="can('warehouse:outbound:list')" index="/warehouse/outbound">{{ t('menu.outbound') }}</el-menu-item>
+          <el-menu-item v-if="can('warehouse:stocktake:list')" index="/warehouse/stocktake">{{ t('menu.stocktake') }}</el-menu-item>
+          <el-menu-item v-if="can('warehouse:transfer:list')" index="/warehouse/transfer">{{ t('menu.transfer') }}</el-menu-item>
+          <el-menu-item v-if="can('warehouse:scrap:list')" index="/warehouse/scrap">{{ t('menu.scrap') }}</el-menu-item>
+          <el-menu-item v-if="can('master:input-stock:list')" index="/master/input-stock">{{ t('menu.inputStock') }}</el-menu-item>
+          <el-menu-item v-if="can('master:stock-log:list')" index="/master/stock-log">{{ t('menu.stockLog') }}</el-menu-item>
+          <el-menu-item v-if="can('warehouse:report:view')" index="/warehouse/reports">{{ t('menu.warehouseReports') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="qc">
+        <el-sub-menu v-if="canQc" index="qc">
           <template #title>
             <el-icon><QcIcon /></el-icon>
             <span>{{ t('menu.qc') }}</span>
           </template>
-          <el-menu-item index="/qc/inspections">{{ t('menu.qcInspections') }}</el-menu-item>
-          <el-menu-item index="/qc/trace">{{ t('menu.qcTrace') }}</el-menu-item>
-          <el-menu-item index="/qc/complaints">{{ t('menu.complaints') }}</el-menu-item>
-          <el-menu-item index="/qc/recalls">{{ t('menu.recalls') }}</el-menu-item>
-          <el-menu-item index="/qc/gap-reports">{{ t('menu.gapReports') }}</el-menu-item>
+          <el-menu-item v-if="can('qc:inspection:list')" index="/qc/inspections">{{ t('menu.qcInspections') }}</el-menu-item>
+          <el-menu-item v-if="can('qc:trace:view')" index="/qc/trace">{{ t('menu.qcTrace') }}</el-menu-item>
+          <el-menu-item v-if="can('qc:complaint:list')" index="/qc/complaints">{{ t('menu.complaints') }}</el-menu-item>
+          <el-menu-item v-if="can('qc:recall:list')" index="/qc/recalls">{{ t('menu.recalls') }}</el-menu-item>
+          <el-menu-item v-if="can('qc:gap-report:view')" index="/qc/gap-reports">{{ t('menu.gapReports') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="packhouse">
+        <el-sub-menu v-if="canPackhouse" index="packhouse">
           <template #title>
             <el-icon><BoxIcon /></el-icon>
             <span>{{ t('menu.packhouse') }}</span>
           </template>
-          <el-menu-item index="/packhouse/packings">{{ t('menu.packings') }}</el-menu-item>
-          <el-menu-item index="/packhouse/inventory">{{ t('menu.inventory') }}</el-menu-item>
+          <el-menu-item v-if="can('packhouse:packing:list')" index="/packhouse/packings">{{ t('menu.packings') }}</el-menu-item>
+          <el-menu-item v-if="can('packhouse:inventory:list')" index="/packhouse/inventory">{{ t('menu.inventory') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="sales">
+        <el-sub-menu v-if="canSales" index="sales">
           <template #title>
             <el-icon><SalesIcon /></el-icon>
             <span>{{ t('menu.sales') }}</span>
           </template>
-          <el-menu-item index="/sales/customers">{{ t('menu.customers') }}</el-menu-item>
-          <el-menu-item index="/sales/orders">{{ t('menu.orders') }}</el-menu-item>
+          <el-menu-item v-if="can('sales:customer:list')" index="/sales/customers">{{ t('menu.customers') }}</el-menu-item>
+          <el-menu-item v-if="can('sales:order:list')" index="/sales/orders">{{ t('menu.orders') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="operations">
+        <el-sub-menu v-if="canOperations" index="operations">
           <template #title>
             <el-icon><OpsIcon /></el-icon>
             <span>{{ t('menu.operations') }}</span>
@@ -98,31 +98,40 @@
           <el-menu-item index="/operations/action-board">{{ t('menu.actionBoard') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="finance">
+        <el-sub-menu v-if="canFinance" index="finance">
           <template #title>
             <el-icon><FinanceIcon /></el-icon>
             <span>{{ t('menu.finance') }}</span>
           </template>
-          <el-menu-item index="/finance/reports">{{ t('menu.reports') }}</el-menu-item>
-          <el-menu-item index="/finance/ar">{{ t('menu.ar') }}</el-menu-item>
-          <el-menu-item index="/finance/cash-flow">{{ t('menu.cashFlow') }}</el-menu-item>
-          <el-menu-item index="/finance/monthly">{{ t('menu.monthly') }}</el-menu-item>
+          <el-menu-item v-if="can('finance:report:view')" index="/finance/reports">{{ t('menu.reports') }}</el-menu-item>
+          <el-menu-item v-if="can('finance:ar:view')" index="/finance/ar">{{ t('menu.ar') }}</el-menu-item>
+          <el-menu-item v-if="can('finance:cash-flow:view')" index="/finance/cash-flow">{{ t('menu.cashFlow') }}</el-menu-item>
+          <el-menu-item v-if="can('finance:monthly:view')" index="/finance/monthly">{{ t('menu.monthly') }}</el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="procurement">
+        <el-sub-menu v-if="canProcurement" index="procurement">
           <template #title>
             <el-icon><ProcurementIcon /></el-icon>
             <span>{{ t('menu.procurement') }}</span>
           </template>
-          <el-menu-item index="/procurement/suppliers">{{ t('menu.suppliers') }}</el-menu-item>
-          <el-menu-item index="/procurement/orders">{{ t('menu.purchaseOrders') }}</el-menu-item>
-          <el-menu-item index="/procurement/ap">{{ t('menu.ap') }}</el-menu-item>
+          <el-menu-item v-if="can('procurement:supplier:list')" index="/procurement/suppliers">{{ t('menu.suppliers') }}</el-menu-item>
+          <el-menu-item v-if="can('procurement:po:list')" index="/procurement/orders">{{ t('menu.purchaseOrders') }}</el-menu-item>
+          <el-menu-item v-if="can('procurement:ap:view')" index="/procurement/ap">{{ t('menu.ap') }}</el-menu-item>
         </el-sub-menu>
 
         <el-menu-item index="/demo/files">
           <el-icon><FolderIcon /></el-icon>
           <template #title>{{ t('menu.fileDemo') }}</template>
         </el-menu-item>
+
+        <el-sub-menu v-if="canSeeSystem" index="system">
+          <template #title>
+            <el-icon><SettingIcon /></el-icon>
+            <span>{{ t('menu.system') }}</span>
+          </template>
+          <el-menu-item v-if="can('system:user:list')" index="/system/users">{{ t('menu.sysUsers') }}</el-menu-item>
+          <el-menu-item v-if="can('system:role:list')" index="/system/roles">{{ t('menu.sysRoles') }}</el-menu-item>
+        </el-sub-menu>
       </el-menu>
     </el-aside>
 
@@ -187,6 +196,7 @@ import {
   Money as FinanceIcon,
   ShoppingCart as ProcurementIcon,
   CircleCheck as QcIcon,
+  Setting as SettingIcon,
   Expand as ExpandIcon,
   Fold as FoldIcon,
   ArrowDown,
@@ -194,6 +204,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { logout } from '@/api/auth'
 import { SUPPORT_LOCALES, persistLocale } from '@/i18n'
+import { hasPerm, hasAnyPerm } from '@/utils/perms'
 
 const { t, locale } = useI18n()
 const auth = useAuthStore()
@@ -202,6 +213,43 @@ const router = useRouter()
 
 const collapse = ref(false)
 const activeMenu = computed(() => route.path)
+
+// Sprint 35: each menu group is visible iff the user has at least one child perm.
+// SUPER_ADMIN bypasses (see utils/perms.js). Individual <el-menu-item> entries
+// also gate themselves via v-if=can('module:resource:list').
+const can = hasPerm
+const canMaster = computed(() => hasAnyPerm([
+  'master:crop:list','master:variety:list','master:packaging-spec:list',
+  'master:warehouse:list','master:input-item:list',
+]))
+const canProduction = computed(() => hasAnyPerm([
+  'production:plot:list','production:planting-plan:list','production:activity:list',
+  'production:harvest:list','production:batch:list',
+]))
+const canWarehouseOps = computed(() => hasAnyPerm([
+  'warehouse:inbound:list','warehouse:outbound:list','warehouse:stocktake:list',
+  'warehouse:transfer:list','warehouse:scrap:list','warehouse:report:view',
+  'master:input-stock:list','master:stock-log:list',
+]))
+const canQc = computed(() => hasAnyPerm([
+  'qc:inspection:list','qc:trace:view','qc:complaint:list','qc:recall:list','qc:gap-report:view',
+]))
+const canPackhouse = computed(() => hasAnyPerm([
+  'packhouse:packing:list','packhouse:inventory:list',
+]))
+const canSales = computed(() => hasAnyPerm([
+  'sales:customer:list','sales:order:list',
+]))
+const canOperations = computed(() => hasPerm('operations:action-board:list'))
+const canFinance = computed(() => hasAnyPerm([
+  'finance:report:view','finance:ar:view','finance:cash-flow:view','finance:monthly:view',
+]))
+const canProcurement = computed(() => hasAnyPerm([
+  'procurement:supplier:list','procurement:po:list','procurement:ap:view',
+]))
+const canSeeSystem = computed(() => hasAnyPerm([
+  'system:user:list','system:role:list',
+]))
 
 const currentLocaleLabel = computed(
   () => SUPPORT_LOCALES.find(l => l.code === locale.value)?.label || locale.value,

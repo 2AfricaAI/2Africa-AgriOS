@@ -2,18 +2,25 @@ package ai.toafrica.agrios.framework.security;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
 /**
- * 登录上下文用户信息 - 存于 SecurityContext
+ * Login context user info - stored in SecurityContext.
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class LoginUser {
     private Long userId;
     private String username;
     private String dataScope;        // self/group/all
-    private Set<String> permissions; // 权限标识集合，例 plot:list
-    private Set<String> roleCodes;   // 角色 code 集合
+    private Set<String> permissions; // perms strings, e.g. plot:list
+    private Set<String> roleCodes;   // role codes
+
+    /** Sprint 37: STAFF / PARTNER / CUSTOMER. */
+    private String userType;
+    /** Sprint 37: for CUSTOMER user_type, the customer.id this account represents. */
+    private Long linkedCustomerId;
 }

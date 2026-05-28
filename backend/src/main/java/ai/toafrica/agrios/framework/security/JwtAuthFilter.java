@@ -66,10 +66,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     ? lst.stream().map(Object::toString).collect(java.util.stream.Collectors.toSet())
                     : Collections.emptySet();
 
-            LoginUser user = new LoginUser(uid, uname, dataScope, perms, roles);
+            String userType = (String) c.getOrDefault("utype", "STAFF");
+            Long linkedCustomerId = c.get("lcid") == null ? null
+                    : Long.valueOf(c.get("lcid").toString());
+            LoginUser user = new LoginUser(uid, uname, dataScope, perms, roles,
+                    userType, linkedCustomerId);
+            // Authorities = ROLE_* prefixes (backwards-compat for hasAuthority('ROLE_XXX'))
+            // + raw perms strings (Sprint 35: hasAuthority('module:resource:action')).
+            // SUPER_ADMIN's perm list already contains every menu's perms string, so
+            // any @PreAuthorize check naturally passes for the super-admin role.
+            var authorities = new java.util.ArrayList<SimpleGrantedAuthority>();
+            roles.forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
+            perms.forEach(p -> authorities.add(new SimpleGrantedAuthority(p)));
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    user, null,
-                    roles.stream().map(r -> new SimpleGrantedAuthority("ROLE_" + r)).toList()
+                    user, null, authorities
             );
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (JwtException ex) {

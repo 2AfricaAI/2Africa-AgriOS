@@ -256,6 +256,18 @@ const routes = [
         component: () => import('@/views/FileDemo.vue'),
         meta: { titleKey: 'menu.fileDemo' },
       },
+      {
+        path: 'system/users',
+        name: 'system-users',
+        component: () => import('@/views/system/UserList.vue'),
+        meta: { titleKey: 'menu.sysUsers' },
+      },
+      {
+        path: 'system/roles',
+        name: 'system-roles',
+        component: () => import('@/views/system/RoleList.vue'),
+        meta: { titleKey: 'menu.sysRoles' },
+      },
     ],
   },
   // ---------- Mobile (PWA) ----------

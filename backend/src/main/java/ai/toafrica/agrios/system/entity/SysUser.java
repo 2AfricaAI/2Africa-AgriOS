@@ -18,6 +18,12 @@ public class SysUser {
     private String email;
     private String avatar;
     private String status;
+    /** Sprint 37: STAFF / PARTNER / CUSTOMER. */
+    private String userType;
+    /** External organization name, only meaningful for PARTNER / CUSTOMER. */
+    private String orgName;
+    /** For user_type=CUSTOMER, the customer.id this account represents. */
+    private Long linkedCustomerId;
     private LocalDateTime lastLoginAt;
     private String lastLoginIp;
 

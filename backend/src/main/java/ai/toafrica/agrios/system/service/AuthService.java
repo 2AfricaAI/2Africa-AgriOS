@@ -54,14 +54,25 @@ public class AuthService {
         }
         redis.delete(failKey);
 
-        Set<String> perms = userMapper.findPermsByUserId(user.getId());
         Set<String> roles = userMapper.findRoleCodesByUserId(user.getId());
+        // Sprint 35: SUPER_ADMIN bypasses perm checks — load every menu perm so the
+        // JWT token carries them and every hasAuthority('xxx:yyy:zzz') @PreAuthorize
+        // check naturally passes.  No code-level bypass is needed elsewhere.
+        Set<String> perms = roles.contains("SUPER_ADMIN")
+                ? userMapper.findAllMenuPerms()
+                : userMapper.findPermsByUserId(user.getId());
         String dataScope = userMapper.findMaxDataScope(user.getId());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("perms", perms);
         claims.put("roles", roles);
         claims.put("scope", dataScope == null ? "self" : dataScope);
+        // Sprint 37: stash user-type + linked customer in the JWT so SecurityUtil
+        // and CUSTOMER scope filters can read them without hitting the DB.
+        claims.put("utype", user.getUserType() == null ? "STAFF" : user.getUserType());
+        if (user.getLinkedCustomerId() != null) {
+            claims.put("lcid", user.getLinkedCustomerId());
+        }
 
         String access = jwtUtil.issueAccessToken(user.getId(), user.getUsername(), claims);
         String refresh = jwtUtil.issueRefreshToken(user.getId());
@@ -69,7 +80,17 @@ public class AuthService {
         // 更新登录时间和 IP
         userMapper.updateLastLogin(user.getId(), ip);
 
-        log.info("[登录成功] uid={} uname={} ip={} roles={}", user.getId(), user.getUsername(), ip, roles);
+        log.info("[Login OK] uid={} uname={} ip={} type={} roles={}",
+                user.getId(), user.getUsername(), ip, user.getUserType(), roles);
+
+        // Sprint 37: pick landing path by user_type. WORKER continues to use the
+        // existing isWorkerOnly check on the frontend; here we only branch on
+        // CUSTOMER / PARTNER vs default desktop.
+        String userType = user.getUserType() == null ? "STAFF" : user.getUserType();
+        String landing = switch (userType) {
+            case "CUSTOMER" -> "/portal/orders";
+            default -> "/";
+        };
 
         return LoginVO.builder()
                 .userId(user.getId())
@@ -80,6 +101,9 @@ public class AuthService {
                 .accessTokenExpiresIn(accessTtlMin * 60L)
                 .roles(roles)
                 .permissions(perms)
+                .userType(userType)
+                .landingPath(landing)
+                .linkedCustomerId(user.getLinkedCustomerId())
                 .build();
     }
 

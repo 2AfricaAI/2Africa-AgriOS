@@ -34,6 +34,11 @@ export const useAuthStore = defineStore('auth', {
         return code === 'WORKER' || code === 'ROLE_WORKER'
       })
     },
+    /** Sprint 35: true if SUPER_ADMIN (skip perm checks). */
+    isSuperAdmin: (s) => (s.roles || []).some(r => {
+      const code = (r?.code || r || '').toUpperCase()
+      return code === 'SUPER_ADMIN' || code === 'ROLE_SUPER_ADMIN'
+    }),
   },
   actions: {
     setLogin(payload) {

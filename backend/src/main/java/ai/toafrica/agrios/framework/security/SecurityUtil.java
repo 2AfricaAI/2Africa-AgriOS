@@ -30,4 +30,28 @@ public final class SecurityUtil {
             return false;
         }
     }
+
+    /** Sprint 37: STAFF / PARTNER / CUSTOMER (defaults to STAFF if not in JWT). */
+    public static String currentUserType() {
+        try {
+            String t = current().getUserType();
+            return t == null ? "STAFF" : t;
+        } catch (Exception e) {
+            return "STAFF";
+        }
+    }
+
+    /** True if the current request is from a CUSTOMER self-service account. */
+    public static boolean isCurrentCustomer() {
+        return "CUSTOMER".equals(currentUserType());
+    }
+
+    /** For CUSTOMER user_type, the customer.id this account is bound to. */
+    public static Long currentLinkedCustomerId() {
+        try {
+            return current().getLinkedCustomerId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
