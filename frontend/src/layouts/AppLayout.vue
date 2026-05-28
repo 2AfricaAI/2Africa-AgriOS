@@ -57,6 +57,7 @@
           <el-menu-item index="/warehouse/scrap">{{ t('menu.scrap') }}</el-menu-item>
           <el-menu-item index="/master/input-stock">{{ t('menu.inputStock') }}</el-menu-item>
           <el-menu-item index="/master/stock-log">{{ t('menu.stockLog') }}</el-menu-item>
+          <el-menu-item index="/warehouse/reports">{{ t('menu.warehouseReports') }}</el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="packhouse">
