@@ -60,6 +60,14 @@
           <el-menu-item index="/warehouse/reports">{{ t('menu.warehouseReports') }}</el-menu-item>
         </el-sub-menu>
 
+        <el-sub-menu index="qc">
+          <template #title>
+            <el-icon><QcIcon /></el-icon>
+            <span>{{ t('menu.qc') }}</span>
+          </template>
+          <el-menu-item index="/qc/inspections">{{ t('menu.qcInspections') }}</el-menu-item>
+        </el-sub-menu>
+
         <el-sub-menu index="packhouse">
           <template #title>
             <el-icon><BoxIcon /></el-icon>
@@ -174,6 +182,7 @@ import {
   Bell as OpsIcon,
   Money as FinanceIcon,
   ShoppingCart as ProcurementIcon,
+  CircleCheck as QcIcon,
   Expand as ExpandIcon,
   Fold as FoldIcon,
   ArrowDown,

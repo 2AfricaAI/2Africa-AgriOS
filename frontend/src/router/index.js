@@ -71,6 +71,12 @@ const routes = [
         meta: { titleKey: 'menu.outbound' },
       },
       {
+        path: 'qc/inspections',
+        name: 'qc-inspections',
+        component: () => import('@/views/qc/QcInspectionList.vue'),
+        meta: { titleKey: 'menu.qcInspections' },
+      },
+      {
         path: 'warehouse/reports',
         name: 'warehouse-reports',
         component: () => import('@/views/warehouse/WarehouseReports.vue'),
