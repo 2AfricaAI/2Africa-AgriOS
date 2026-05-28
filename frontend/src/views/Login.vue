@@ -156,8 +156,9 @@ async function onSubmit() {
 .submit-btn {
   width: 100%;
   margin-top: 8px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 6px;
+  letter-spacing: 1px;
 }
 
 .hint {
