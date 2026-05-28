@@ -264,6 +264,7 @@ const formRef = ref(null)
 const photos = ref([])
 
 const emptyForm = () => ({ planId: null, harvestDate: null, qtyKg: null, remark: '' })
+const form = reactive(emptyForm())
 
 // Sprint 23: PHI 实时检查
 const phi = reactive({ blocked: false, earliestSafeDate: null, daysRemaining: 0, blockingSprays: [] })
@@ -282,7 +283,6 @@ watch(() => [form.planId, form.harvestDate], () => {
   if (phiTimer) clearTimeout(phiTimer)
   phiTimer = setTimeout(runPhiCheck, 200)
 }, { flush: 'post' })
-const form = reactive(emptyForm())
 
 const rules = computed(() => ({
   planId:      [{ required: true, message: t('harvest.pickPlan'), trigger: 'change' }],
