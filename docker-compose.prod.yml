@@ -36,7 +36,7 @@ services:
       retries: 10
     # Do NOT expose port to host in prod. Comment out for debugging only.
     # ports:
-    #   - "127.0.0.1:3306:3306"
+    #   - "127.0.0.1:3006:3306"
 
   # ----- Redis -----
   redis:

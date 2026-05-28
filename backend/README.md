@@ -51,7 +51,7 @@ docker compose up -d
 ```
 
 会自动拉起：
-- **MySQL 8** :3306（库 `toafrica_agrios`，自动加载 `../schema.sql`）
+- **MySQL 8** :3006（库 `toafrica_agrios`，自动加载 `../schema.sql`）
 - **Redis 7** :6379（密码 `redis123`）
 - **MinIO**   :9000 / :9001（OSS 本地替代）
 

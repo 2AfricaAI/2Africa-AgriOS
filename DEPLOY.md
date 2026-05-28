@@ -366,7 +366,7 @@ Add these from the Uptime Kuma UI. All can fire alerts to email / Slack / Telegr
 | **Site SSL expiry**  | (auto)         | (built into HTTP monitor)   | -    | Alerts 14 days before expiry |
 | **Backend health**   | HTTP(s) - JSON | `https://farm.example.com/api/actuator/health` | 60s | JSON contains `"status":"UP"` |
 | **Backend live**     | HTTP(s)        | `https://farm.example.com/api/actuator/health/liveness` | 30s | Expect 200, faster recovery signal |
-| **DB port**          | TCP Port       | `127.0.0.1:3306` from the *host*, or use Docker network | 60s | Catches db crash before app does |
+| **DB port**          | TCP Port       | `127.0.0.1:3006` from the *host*, or use Docker network | 60s | Catches db crash before app does |
 | **MinIO health**     | HTTP(s)        | `https://files.farm.example.com/minio/health/live` | 120s | If MinIO is publicly served |
 | **Disk space**       | Push           | (push from cron — see below) | 5min | Custom; alerts when free space &lt; 10% |
 

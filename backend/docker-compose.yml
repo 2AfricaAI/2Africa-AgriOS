@@ -26,7 +26,7 @@ services:
       - --max-allowed-packet=64M
       - --innodb-buffer-pool-size=256M
     ports:
-      - "3306:3306"
+      - "3006:3306"
     volumes:
       - toafrica_mysql_data:/var/lib/mysql
       - ../schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
