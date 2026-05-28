@@ -23,6 +23,10 @@ public class InventoryRow {
     private BigDecimal qtyInTransit;
     private String unit;
     private LocalDate prodDate;
+    /** Best-before date — drives FEFO. */
+    private LocalDate expiryDate;
+    /** Computed in SQL: DATEDIFF(expiry_date, CURRENT_DATE). Negative = already expired. */
+    private Integer daysToExpiry;
     private String status;
     private LocalDateTime lastOpAt;
     private LocalDateTime updatedAt;

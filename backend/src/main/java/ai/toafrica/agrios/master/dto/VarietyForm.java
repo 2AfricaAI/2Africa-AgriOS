@@ -1,6 +1,7 @@
 package ai.toafrica.agrios.master.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -26,4 +27,8 @@ public class VarietyForm {
     @Size(max = 255)
     @Schema(description = "特性描述")
     private String traits;
+
+    @Min(1)
+    @Schema(description = "Override of crop shelf life (days). Leave null to use crop default.", example = "10")
+    private Integer shelfLifeDays;
 }

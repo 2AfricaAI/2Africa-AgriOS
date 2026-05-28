@@ -18,6 +18,10 @@ public class Crop {
     private String category;
     private String unit;
     private Integer cycleDays;
+
+    /** Default shelf life (days) after packing — FEFO. Variety may override. */
+    private Integer shelfLifeDays;
+
     private String remark;
 
     /** 1=启用 0=停用 */

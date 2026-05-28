@@ -23,7 +23,9 @@ public interface InventoryMapper extends BaseMapper<Inventory> {
               i.grade,
               i.location_id, lw.code AS location_code, lw.name AS location_name,
               i.qty_avail, i.qty_locked, i.qty_in_transit,
-              i.unit, i.prod_date, i.status,
+              i.unit, i.prod_date, i.expiry_date,
+              DATEDIFF(i.expiry_date, CURRENT_DATE) AS days_to_expiry,
+              i.status,
               i.last_op_at, i.updated_at,
               c.name AS crop_name,
               v.name AS variety_name
@@ -39,7 +41,8 @@ public interface InventoryMapper extends BaseMapper<Inventory> {
                                      @Param("ew") QueryWrapper<InventoryRow> wrapper);
 
     /**
-     * 拣货 FIFO 查询: 按生产日期升序 (旧批先出), id 升序 tie-break.
+     * 拣货 FEFO 查询 (Sprint 26): 按 expiry_date 升序 (最早到期先出),
+     * 回退按 prod_date / id (兼容 expiry_date 为空的遗留行).
      * 只返回 status=normal 且 qty_avail>0 的库存行.
      */
     @Select("""
@@ -47,7 +50,10 @@ public interface InventoryMapper extends BaseMapper<Inventory> {
             WHERE sku_id = #{skuId}
               AND status = 'normal'
               AND qty_avail > 0
-            ORDER BY prod_date ASC, id ASC
+            ORDER BY (expiry_date IS NULL) ASC,
+                     expiry_date ASC,
+                     prod_date ASC,
+                     id ASC
             """)
-    List<Inventory> findAvailableBySkuFifo(@Param("skuId") Long skuId);
+    List<Inventory> findAvailableBySkuFefo(@Param("skuId") Long skuId);
 }

@@ -18,6 +18,9 @@ public class Variety {
     private String name;
     private String traits;
 
+    /** Override of crop.shelf_life_days; null = use crop default. */
+    private Integer shelfLifeDays;
+
     /** 1=启用 0=停用 */
     private Integer status;
 

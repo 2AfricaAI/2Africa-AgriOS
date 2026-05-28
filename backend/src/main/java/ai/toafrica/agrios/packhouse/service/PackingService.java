@@ -5,8 +5,12 @@ import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
 import ai.toafrica.agrios.common.exception.BusinessException;
 import ai.toafrica.agrios.framework.security.SecurityUtil;
+import ai.toafrica.agrios.master.entity.Crop;
 import ai.toafrica.agrios.master.entity.PackagingSpec;
+import ai.toafrica.agrios.master.entity.Variety;
+import ai.toafrica.agrios.master.mapper.CropMapper;
 import ai.toafrica.agrios.master.mapper.PackagingSpecMapper;
+import ai.toafrica.agrios.master.mapper.VarietyMapper;
 import ai.toafrica.agrios.packhouse.dto.PackingForm;
 import ai.toafrica.agrios.packhouse.entity.Inventory;
 import ai.toafrica.agrios.packhouse.entity.InventoryAdjustLog;
@@ -51,6 +55,8 @@ public class PackingService {
     private final InventoryAdjustLogMapper adjustLogMapper;
     private final BatchMapper batchMapper;
     private final PackagingSpecMapper specMapper;
+    private final CropMapper cropMapper;
+    private final VarietyMapper varietyMapper;
     private final SkuService skuService;
 
     private static final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -156,6 +162,9 @@ public class PackingService {
             inv.setQtyInTransit(BigDecimal.ZERO);
             inv.setUnit("pack");
             inv.setProdDate(batch.getHarvestDate());
+            // Sprint 26 / FEFO: expiry_date = pack_date + shelf_life
+            // Variety override > Crop default. Null = no expiry tracking.
+            inv.setExpiryDate(resolveExpiryDate(batch.getCropId(), batch.getVarietyId(), packedDate));
             inv.setStatus("normal");
             inv.setLastOpAt(LocalDateTime.now());
             inventoryMapper.insert(inv);
@@ -187,5 +196,27 @@ public class PackingService {
                 form.getQtyUnits(), netKg.toPlainString(), newRemain.toPlainString());
 
         return pk.getId();
+    }
+
+    /**
+     * Sprint 26 / FEFO. Resolve shelf_life_days for a crop+variety, then return
+     * pack_date + shelf_life as the expiry date.
+     *
+     * Resolution order:
+     *   variety.shelf_life_days  (if set)
+     *   crop.shelf_life_days     (if set)
+     *   null                     (no expiry tracked — inventory row gets NULL expiry_date)
+     */
+    private LocalDate resolveExpiryDate(Long cropId, Long varietyId, LocalDate packDate) {
+        Integer days = null;
+        if (varietyId != null) {
+            Variety v = varietyMapper.selectById(varietyId);
+            if (v != null && v.getShelfLifeDays() != null) days = v.getShelfLifeDays();
+        }
+        if (days == null && cropId != null) {
+            Crop c = cropMapper.selectById(cropId);
+            if (c != null && c.getShelfLifeDays() != null) days = c.getShelfLifeDays();
+        }
+        return (days == null || packDate == null) ? null : packDate.plusDays(days);
     }
 }

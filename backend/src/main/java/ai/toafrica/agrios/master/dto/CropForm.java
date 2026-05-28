@@ -31,6 +31,10 @@ public class CropForm {
     @Schema(description = "生长周期(天)", example = "90")
     private Integer cycleDays;
 
+    @Min(1)
+    @Schema(description = "Default shelf life (days) after packing — drives FEFO expiry. Variety may override.", example = "7")
+    private Integer shelfLifeDays;
+
     @Size(max = 255)
     @Schema(description = "备注")
     private String remark;

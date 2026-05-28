@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "32 · Sales-Fulfillment", description = "Picking + Outbound (FIFO lock + ship + deliver)")
+@Tag(name = "32 · Sales-Fulfillment", description = "Picking + Outbound (FEFO lock + ship + deliver)")
 @RestController
 @RequestMapping("/v1/sales/fulfillments")
 @RequiredArgsConstructor
@@ -51,7 +51,7 @@ public class PickingController {
         return R.ok(pickingService.listByOrder(orderId));
     }
 
-    @Operation(summary = "Pick an order — FIFO lock inventory, create fulfillment in 'ready' status")
+    @Operation(summary = "Pick an order — FEFO lock inventory (earliest-expiry first), create fulfillment in 'ready' status")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
                   "hasAuthority('ROLE_PACKHOUSE') or hasAuthority('ROLE_SALES')")
     @PostMapping("/pick/{orderId}")

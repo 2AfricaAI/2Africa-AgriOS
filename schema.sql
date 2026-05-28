@@ -143,26 +143,28 @@ CREATE TABLE `sys_code_rule` (
 -- ============================================================================
 
 CREATE TABLE `crop` (
-  `id`         BIGINT       PRIMARY KEY AUTO_INCREMENT,
-  `code`       VARCHAR(32)  NOT NULL UNIQUE,
-  `name`       VARCHAR(64)  NOT NULL,
-  `category`   VARCHAR(32)  COMMENT '叶菜/果蔬/根茎...',
-  `unit`       VARCHAR(8)   NOT NULL DEFAULT 'kg',
-  `cycle_days` INT          COMMENT '常规生长周期',
-  `remark`     VARCHAR(255),
-  `status`     TINYINT(1)   NOT NULL DEFAULT 1,
-  `created_at` DATETIME     DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+  `id`              BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `code`            VARCHAR(32)  NOT NULL UNIQUE,
+  `name`            VARCHAR(64)  NOT NULL,
+  `category`        VARCHAR(32)  COMMENT '叶菜/果蔬/根茎...',
+  `unit`            VARCHAR(8)   NOT NULL DEFAULT 'kg',
+  `cycle_days`      INT          COMMENT '常规生长周期',
+  `shelf_life_days` INT          NULL DEFAULT NULL COMMENT 'Default shelf life (days) after packing — FEFO',
+  `remark`          VARCHAR(255),
+  `status`          TINYINT(1)   NOT NULL DEFAULT 1,
+  `created_at`      DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`      DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB COMMENT='作物';
 
 CREATE TABLE `variety` (
-  `id`         BIGINT       PRIMARY KEY AUTO_INCREMENT,
-  `crop_id`    BIGINT       NOT NULL,
-  `code`       VARCHAR(32)  NOT NULL,
-  `name`       VARCHAR(64)  NOT NULL,
-  `traits`     VARCHAR(255) COMMENT '特性',
-  `status`     TINYINT(1)   NOT NULL DEFAULT 1,
-  `created_at` DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  `id`              BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `crop_id`         BIGINT       NOT NULL,
+  `code`            VARCHAR(32)  NOT NULL,
+  `name`            VARCHAR(64)  NOT NULL,
+  `traits`          VARCHAR(255) COMMENT '特性',
+  `shelf_life_days` INT          NULL DEFAULT NULL COMMENT 'Override of crop.shelf_life_days; NULL = use crop default',
+  `status`          TINYINT(1)   NOT NULL DEFAULT 1,
+  `created_at`      DATETIME     DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_crop_code` (`crop_id`,`code`),
   KEY `idx_crop` (`crop_id`)
 ) ENGINE=InnoDB COMMENT='品种';
@@ -464,6 +466,7 @@ CREATE TABLE `inventory` (
   `qty_in_transit`  DECIMAL(12,3) NOT NULL DEFAULT 0 COMMENT '在途',
   `unit`            VARCHAR(8)    NOT NULL DEFAULT 'pack',
   `prod_date`       DATE          NOT NULL COMMENT '生产日期（继承批次）',
+  `expiry_date`     DATE          NULL DEFAULT NULL COMMENT 'Best-before = pack_date + shelf_life; drives FEFO',
   `status`          VARCHAR(16)   NOT NULL DEFAULT 'normal'
                     COMMENT 'normal/frozen/lost',
   `version`         INT           NOT NULL DEFAULT 0 COMMENT '乐观锁版本',
@@ -473,7 +476,8 @@ CREATE TABLE `inventory` (
   UNIQUE KEY `uk_sku_batch_loc` (`sku_id`,`batch_id`,`grade`,`location_id`),
   KEY `idx_sku_avail` (`sku_id`,`qty_avail`),
   KEY `idx_batch` (`batch_id`),
-  KEY `idx_prod_date` (`prod_date`)
+  KEY `idx_prod_date` (`prod_date`),
+  KEY `idx_expiry` (`expiry_date`)
 ) ENGINE=InnoDB COMMENT='库存 - 经营节点';
 
 CREATE TABLE `inventory_adjust_log` (

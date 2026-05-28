@@ -37,14 +37,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 拣货 - 销售链 Sprint 9.3
+ * 拣货 - 销售链 Sprint 9.3, FEFO 升级 Sprint 26
  *
  * Picking 与 Outbound 共享 fulfillment 表(状态机):
- *   pick(orderId)  → 创建 fulfillment(status=ready), FIFO 锁 inventory, order.status→locked
+ *   pick(orderId)  → 创建 fulfillment(status=ready), FEFO 锁 inventory, order.status→locked
  *   后续 Sprint 9.4 的 ship() 会把 status 推到 shipped, 并真正扣 qty_locked
  *
- * FIFO 规则:
- *   - 按 inventory.prod_date ASC, id ASC 排序(旧批先出)
+ * FEFO 规则 (Sprint 26 替换 FIFO):
+ *   - 按 inventory.expiry_date ASC, prod_date ASC, id ASC 排序 (最早到期先出)
+ *   - expiry_date 为空 (遗留行) 排在末尾, 兼容 FIFO 回退
  *   - 同一行库存按需精确切片 (qty_avail 不够则跨多行库存合并)
  *   - 任意一个订单行库存不够 → 整个事务回滚
  *
@@ -153,7 +154,8 @@ public class PickingService {
         // 3. 逐行 FIFO 拣货
         for (OrderItem item : items) {
             BigDecimal needed = item.getQty();
-            List<Inventory> available = inventoryMapper.findAvailableBySkuFifo(item.getSkuId());
+            // Sprint 26: FEFO replaces FIFO — pick earliest-expiry first.
+            List<Inventory> available = inventoryMapper.findAvailableBySkuFefo(item.getSkuId());
 
             for (Inventory inv : available) {
                 if (needed.signum() <= 0) break;

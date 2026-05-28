@@ -25,6 +25,9 @@
           </el-select>
         </el-form-item>
         <el-form-item>
+          <el-checkbox v-model="query.nearExpiryOnly">{{ t('inv.nearExpiryOnly') }}</el-checkbox>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" :icon="SearchIcon" @click="reload(1)">{{ t('common.search') }}</el-button>
           <el-button :icon="RefreshIcon" @click="onReset">{{ t('common.reset') }}</el-button>
         </el-form-item>
@@ -69,6 +72,23 @@
         </el-table-column>
         <el-table-column :label="t('inv.unit')" prop="unit" width="70" align="center" />
         <el-table-column :label="t('inv.prodDate')" prop="prodDate" width="110" />
+        <el-table-column :label="t('inv.expiryDate')" prop="expiryDate" width="160">
+          <template #default="{ row }">
+            <div v-if="row.expiryDate">
+              <span>{{ row.expiryDate }}</span>
+              <el-tag
+                v-if="row.daysToExpiry != null"
+                :type="expiryTag(row.daysToExpiry)"
+                size="small"
+                effect="dark"
+                style="margin-left: 4px"
+              >
+                {{ expiryLabel(row.daysToExpiry) }}
+              </el-tag>
+            </div>
+            <span v-else class="dim small">-</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('inv.status')" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="statusTag(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
@@ -105,6 +125,20 @@ import { listWarehouses } from '@/api/warehouse'
 const { t } = useI18n()
 
 function gradeTag(g) { return g === 'A' ? 'success' : g === 'B' ? 'warning' : 'info' }
+
+// Sprint 26 / FEFO — days-to-expiry color + label
+function expiryTag(d) {
+  if (d < 0) return 'danger'        // already expired
+  if (d <= 3) return 'danger'        // critical
+  if (d <= 7) return 'warning'       // warning
+  return 'success'                   // healthy
+}
+function expiryLabel(d) {
+  if (d < 0)  return t('inv.expiredDays',   { n: Math.abs(d) })
+  if (d === 0) return t('inv.expiresToday')
+  return t('inv.daysLeft', { n: d })
+}
+
 function statusLabel(s) {
   return {
     normal: t('status.normal'),
@@ -133,18 +167,35 @@ const list = ref([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
-const query = reactive({ locationId: null, grade: '', status: '' })
+const query = reactive({ locationId: null, grade: '', status: '', nearExpiryOnly: false })
 
 async function reload(toPage) {
   if (toPage) page.value = toPage
   loading.value = true
   try {
-    const data = await listInventory({ ...query, page: page.value, size: pageSize.value })
-    list.value = data.list
+    // Backend doesn't yet filter on near-expiry — do it client-side after fetch.
+    const data = await listInventory({
+      locationId: query.locationId,
+      grade: query.grade,
+      status: query.status,
+      page: page.value,
+      size: pageSize.value,
+    })
+    let rows = data.list
+    if (query.nearExpiryOnly) {
+      rows = rows.filter(r => r.daysToExpiry != null && r.daysToExpiry <= 3)
+    }
+    list.value = rows
     total.value = data.total
   } finally { loading.value = false }
 }
-function onReset() { query.locationId = null; query.grade = ''; query.status = ''; reload(1) }
+function onReset() {
+  query.locationId = null
+  query.grade = ''
+  query.status = ''
+  query.nearExpiryOnly = false
+  reload(1)
+}
 function onPageChange(p) { page.value = p; reload() }
 function onSizeChange(s) { pageSize.value = s; reload(1) }
 

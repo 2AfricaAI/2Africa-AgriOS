@@ -24,6 +24,8 @@ public class Inventory {
     private BigDecimal qtyInTransit;
     private String unit;
     private LocalDate prodDate;
+    /** Best-before date = pack_date + shelf_life (FEFO). Null = no expiry tracking. */
+    private LocalDate expiryDate;
     private String status;
     @Version private Integer version;
     private LocalDateTime lastOpAt;

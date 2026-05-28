@@ -56,6 +56,12 @@
         <el-table-column prop="code" :label="t('variety.code')" width="120" />
         <el-table-column prop="name" :label="t('variety.name')" min-width="140" />
         <el-table-column prop="traits" :label="t('variety.traits')" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="shelfLifeDays" :label="t('variety.shelfLifeDays')" width="120" align="center">
+          <template #default="{ row }">
+            <span v-if="row.shelfLifeDays">{{ row.shelfLifeDays }} d</span>
+            <span v-else class="dim small">{{ t('variety.useCropDefault') }}</span>
+          </template>
+        </el-table-column>
         <el-table-column :label="t('common.status')" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
@@ -125,6 +131,10 @@
         </el-form-item>
         <el-form-item :label="t('variety.traits')">
           <el-input v-model="form.traits" type="textarea" :rows="2" maxlength="255" show-word-limit />
+        </el-form-item>
+        <el-form-item :label="t('variety.shelfLifeDays')">
+          <el-input-number v-model="form.shelfLifeDays" :min="1" :max="365" controls-position="right" />
+          <span class="dim small" style="margin-left:8px">{{ t('variety.shelfLifeHint') }}</span>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -225,7 +235,7 @@ const editing = ref(null)
 const saving = ref(false)
 const formRef = ref(null)
 
-const emptyForm = () => ({ cropId: null, code: '', name: '', traits: '' })
+const emptyForm = () => ({ cropId: null, code: '', name: '', traits: '', shelfLifeDays: null })
 const form = reactive(emptyForm())
 
 const rules = computed(() => ({
@@ -253,6 +263,7 @@ function onEdit(row) {
     code: row.code,
     name: row.name,
     traits: row.traits || '',
+    shelfLifeDays: row.shelfLifeDays,
   })
   dialogVisible.value = true
 }

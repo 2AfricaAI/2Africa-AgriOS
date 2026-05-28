@@ -38,6 +38,12 @@
         <el-table-column prop="category" :label="t('crop.category')" width="100" />
         <el-table-column prop="unit" :label="t('crop.unit')" width="80" align="center" />
         <el-table-column prop="cycleDays" :label="t('crop.cycleDays')" width="100" align="center" />
+        <el-table-column prop="shelfLifeDays" :label="t('crop.shelfLifeDays')" width="110" align="center">
+          <template #default="{ row }">
+            <span v-if="row.shelfLifeDays">{{ row.shelfLifeDays }} d</span>
+            <span v-else class="dim">-</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="remark" :label="t('common.remark')" min-width="160" show-overflow-tooltip />
         <el-table-column :label="t('common.status')" width="100" align="center">
           <template #default="{ row }">
@@ -99,6 +105,10 @@
         </el-form-item>
         <el-form-item :label="t('crop.cycleDays')">
           <el-input-number v-model="form.cycleDays" :min="0" :max="9999" controls-position="right" />
+        </el-form-item>
+        <el-form-item :label="t('crop.shelfLifeDays')">
+          <el-input-number v-model="form.shelfLifeDays" :min="1" :max="365" controls-position="right" />
+          <span class="dim small" style="margin-left:8px">{{ t('crop.shelfLifeHint') }}</span>
         </el-form-item>
         <el-form-item :label="t('common.remark')">
           <el-input v-model="form.remark" type="textarea" :rows="2" maxlength="255" show-word-limit />
@@ -196,6 +206,7 @@ const emptyForm = () => ({
   category: '',
   unit: 'kg',
   cycleDays: null,
+  shelfLifeDays: null,
   remark: '',
 })
 const form = reactive(emptyForm())
@@ -225,6 +236,7 @@ function onEdit(row) {
     category: row.category || '',
     unit: row.unit || 'kg',
     cycleDays: row.cycleDays,
+    shelfLifeDays: row.shelfLifeDays,
     remark: row.remark || '',
   })
   dialogVisible.value = true
