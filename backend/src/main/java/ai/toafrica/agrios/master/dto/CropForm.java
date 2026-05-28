@@ -32,4 +32,10 @@ public class CropForm {
     private Integer cycleDays;
 
     @Min(1)
-    @Schema(description = "Default shelf
+    @Schema(description = "Default shelf life (days) - drives FEFO expiry. Variety may override.", example = "7")
+    private Integer shelfLifeDays;
+
+    @Size(max = 255)
+    @Schema(description = "Remark")
+    private String remark;
+}

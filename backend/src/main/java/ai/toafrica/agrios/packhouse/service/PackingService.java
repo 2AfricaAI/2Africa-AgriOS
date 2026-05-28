@@ -176,22 +176,22 @@ public class PackingService {
             inventoryMapper.updateById(inv);
         }
 
-        // 9) 写 adjust_log
-        InventoryAdjustLog log = new InventoryAdjustLog();
-        log.setInventoryId(inv.getId());
-        log.setAdjustType("in");
-        log.setReasonCode("packing");
-        log.setQtyBefore(qtyBefore);
-        log.setQtyChange(qtyChange);
-        log.setQtyAfter(qtyAfter);
-        log.setFieldName("qty_avail");
-        log.setRefType("packing");
-        log.setRefId(pk.getId());
-        log.setRemark("Packing " + code);
-        log.setOperatorId(SecurityUtil.currentUserId());
-        adjustLogMapper.insert(log);
+        // 9) Write adjust_log
+        InventoryAdjustLog adjustLog = new InventoryAdjustLog();
+        adjustLog.setInventoryId(inv.getId());
+        adjustLog.setAdjustType("in");
+        adjustLog.setReasonCode("packing");
+        adjustLog.setQtyBefore(qtyBefore);
+        adjustLog.setQtyChange(qtyChange);
+        adjustLog.setQtyAfter(qtyAfter);
+        adjustLog.setFieldName("qty_avail");
+        adjustLog.setRefType("packing");
+        adjustLog.setRefId(pk.getId());
+        adjustLog.setRemark("Packing " + code);
+        adjustLog.setOperatorId(SecurityUtil.currentUserId());
+        adjustLogMapper.insert(adjustLog);
 
-        PackingService.log.info("[包装完成] code={} batch={} sku={} units={} netKg={} 新余量={}",
+        PackingService.log.info("[Packing done] code={} batch={} sku={} units={} netKg={} newRemain={}",
                 code, batch.getCode(), sku.getCode(),
                 form.getQtyUnits(), netKg.toPlainString(), newRemain.toPlainString());
 
@@ -201,11 +201,6 @@ public class PackingService {
     /**
      * Sprint 26 / FEFO. Resolve shelf_life_days for a crop+variety, then return
      * pack_date + shelf_life as the expiry date.
-     *
-     * Resolution order:
-     *   variety.shelf_life_days  (if set)
-     *   crop.shelf_life_days     (if set)
-     *   null                     (no expiry tracked — inventory row gets NULL expiry_date)
      */
     private LocalDate resolveExpiryDate(Long cropId, Long varietyId, LocalDate packDate) {
         Integer days = null;

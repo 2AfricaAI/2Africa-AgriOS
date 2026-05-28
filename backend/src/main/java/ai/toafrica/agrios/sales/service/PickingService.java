@@ -282,22 +282,20 @@ public class PickingService {
         f.setStatus("cancelled");
         fulfillmentMapper.updateById(f);
 
-        // 订单回到 confirmed, 可以重新拣货
+        // Order returns to confirmed, can be re-picked
         if (order != null && "locked".equals(order.getStatus())) {
             order.setStatus("confirmed");
             orderMapper.updateById(order);
         }
 
-        log.info("[Picking cancelled] fulfillment={} released {} lock rows", f.getCode(), locks.size());
+        log.info("[Picking cancelled] fulfillment={}", f.getCode());
     }
 
-    // ============================================================
-    // 内部工具
-    // ============================================================
-    private long countActiveFulfillment(Long orderId) {
-        QueryWrapper<Fulfillment> q = new QueryWrapper<>();
-        q.eq("order_id", orderId);
-        q.notIn("status", List.of("cancelled"));
-        return fulfillmentMapper.selectCount(q);
+    /** Count non-cancelled fulfillments on an order (used for dedup before picking). */
+    private Long countActiveFulfillment(Long orderId) {
+        return fulfillmentMapper.selectCount(
+                new LambdaQueryWrapper<Fulfillment>()
+                        .eq(Fulfillment::getOrderId, orderId)
+                        .ne(Fulfillment::getStatus, "cancelled"));
     }
 }

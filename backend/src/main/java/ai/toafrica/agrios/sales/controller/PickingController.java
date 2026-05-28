@@ -45,41 +45,37 @@ public class PickingController {
         return R.ok(pickingService.detail(id));
     }
 
-    @Operation(summary = "List all fulfillments for an order (used in OrderDetail page)")
+    @Operation(summary = "List all fulfillments for an order")
     @GetMapping("/by-order/{orderId}")
     public R<List<FulfillmentVO>> listByOrder(@PathVariable Long orderId) {
         return R.ok(pickingService.listByOrder(orderId));
     }
 
-    @Operation(summary = "Pick an order — FEFO lock inventory (earliest-expiry first), create fulfillment in 'ready' status")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
-                  "hasAuthority('ROLE_PACKHOUSE') or hasAuthority('ROLE_SALES')")
+    @Operation(summary = "Pick an order - FEFO lock inventory (earliest-expiry first)")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_PACKHOUSE') or hasAuthority('ROLE_SALES')")
     @PostMapping("/pick/{orderId}")
     public R<Long> pick(@PathVariable Long orderId) {
         return R.ok(pickingService.pick(orderId));
     }
 
-    @Operation(summary = "Cancel picking — release locks, fulfillment → cancelled, order → confirmed")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
-                  "hasAuthority('ROLE_PACKHOUSE')")
+    @Operation(summary = "Cancel picking - release locks, fulfillment -> cancelled")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_PACKHOUSE')")
     @PostMapping("/{id}/cancel")
     public R<Void> cancel(@PathVariable Long id) {
         pickingService.cancel(id);
         return R.ok();
     }
 
-    @Operation(summary = "Ship — fulfillment 'ready' → 'shipped', deduct qty_locked, generate Revenue rows")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
-                  "hasAuthority('ROLE_PACKHOUSE') or hasAuthority('ROLE_SALES')")
+    @Operation(summary = "Ship - fulfillment 'ready' -> 'shipped', deduct qty_locked, generate Revenue rows")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_PACKHOUSE') or hasAuthority('ROLE_SALES')")
     @PostMapping("/{id}/ship")
     public R<Void> ship(@PathVariable Long id, @Valid @RequestBody(required = false) ShipForm form) {
         outboundService.ship(id, form);
         return R.ok();
     }
 
-    @Operation(summary = "Mark delivered (customer signed) — 'shipped' → 'delivered'")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
-                  "hasAuthority('ROLE_SALES')")
+    @Operation(summary = "Mark delivered (customer signed) - 'shipped' -> 'delivered'")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_SALES')")
     @PostMapping("/{id}/deliver")
     public R<Void> deliver(@PathVariable Long id) {
         outboundService.deliver(id);

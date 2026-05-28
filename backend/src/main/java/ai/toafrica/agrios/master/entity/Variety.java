@@ -21,7 +21,7 @@ public class Variety {
     /** Override of crop.shelf_life_days; null = use crop default. */
     private Integer shelfLifeDays;
 
-    /** 1=启用 0=停用 */
+    /** 1=enabled, 0=disabled */
     private Integer status;
 
     private LocalDateTime createdAt;

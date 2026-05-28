@@ -25,4 +25,10 @@ public class VarietyForm {
     private String name;
 
     @Size(max = 255)
- 
+    @Schema(description = "Traits")
+    private String traits;
+
+    @Min(1)
+    @Schema(description = "Override of crop shelf life (days). Leave null to use crop default.", example = "10")
+    private Integer shelfLifeDays;
+}

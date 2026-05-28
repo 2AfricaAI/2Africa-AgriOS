@@ -40,11 +40,6 @@ public interface InventoryMapper extends BaseMapper<Inventory> {
     IPage<InventoryRow> pageWithJoin(Page<InventoryRow> page,
                                      @Param("ew") QueryWrapper<InventoryRow> wrapper);
 
-    /**
-     * 拣货 FEFO 查询 (Sprint 26): 按 expiry_date 升序 (最早到期先出),
-     * 回退按 prod_date / id (兼容 expiry_date 为空的遗留行).
-     * 只返回 status=normal 且 qty_avail>0 的库存行.
-     */
     @Select("""
             SELECT * FROM inventory
             WHERE sku_id = #{skuId}
