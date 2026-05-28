@@ -137,6 +137,36 @@
             style="width: 100%"
           />
         </el-form-item>
+
+        <!-- Sprint 23 / Phase 5: PHI banner -->
+        <el-alert
+          v-if="phi.blocked"
+          :title="t('phi.blockedTitle', { date: phi.earliestSafeDate, days: phi.daysRemaining })"
+          type="error"
+          :closable="false"
+          show-icon
+          style="margin: 0 0 16px 100px; width: calc(100% - 100px)"
+        >
+          <template #default>
+            <div style="font-size: 12px; line-height: 1.5">
+              {{ t('phi.blockedDetail', {
+                code: phi.blockingSprays?.[0]?.inputItemCode,
+                ingredient: phi.blockingSprays?.[0]?.activeIngredient || '-',
+                phiDays: phi.blockingSprays?.[0]?.phiDays,
+                sprayDate: phi.blockingSprays?.[0]?.sprayDate
+              }) }}
+            </div>
+          </template>
+        </el-alert>
+        <el-alert
+          v-else-if="phi.earliestSafeDate"
+          :title="t('phi.safeTitle', { date: phi.earliestSafeDate })"
+          type="success"
+          :closable="false"
+          show-icon
+          style="margin: 0 0 16px 100px; width: calc(100% - 100px)"
+        />
+
         <el-form-item :label="t('harvest.qty')" prop="qtyKg">
           <el-input-number
             v-model="form.qtyKg"
@@ -182,6 +212,7 @@ import {
 } from '@element-plus/icons-vue'
 import { listHarvests, createHarvest, deleteHarvest } from '@/api/harvest'
 import { listPlantingPlans } from '@/api/plantingPlan'
+import { checkPhi } from '@/api/phi'
 import FileUploader from '@/components/FileUploader.vue'
 
 const { t } = useI18n()
@@ -233,6 +264,24 @@ const formRef = ref(null)
 const photos = ref([])
 
 const emptyForm = () => ({ planId: null, harvestDate: null, qtyKg: null, remark: '' })
+
+// Sprint 23: PHI 实时检查
+const phi = reactive({ blocked: false, earliestSafeDate: null, daysRemaining: 0, blockingSprays: [] })
+let phiTimer = null
+async function runPhiCheck() {
+  if (!form.planId || !form.harvestDate) {
+    Object.assign(phi, { blocked: false, earliestSafeDate: null, daysRemaining: 0, blockingSprays: [] })
+    return
+  }
+  try {
+    const data = await checkPhi(form.planId, form.harvestDate)
+    Object.assign(phi, data)
+  } catch (e) { console.warn('[PHI]', e) }
+}
+watch(() => [form.planId, form.harvestDate], () => {
+  if (phiTimer) clearTimeout(phiTimer)
+  phiTimer = setTimeout(runPhiCheck, 200)
+}, { flush: 'post' })
 const form = reactive(emptyForm())
 
 const rules = computed(() => ({

@@ -264,6 +264,12 @@ export default {
     confirmToggle: 'Confirm to {action} input "{name}"?',
   },
 
+  phi: {
+    blockedTitle: 'PHI block — earliest safe harvest: {date} (wait {days} more days)',
+    blockedDetail: 'Last spray of {code} (active: {ingredient}, PHI {phiDays} days) on {sprayDate}. Cannot harvest until safety interval has elapsed.',
+    safeTitle: 'Pre-harvest interval OK — earliest safe date: {date}',
+  },
+
   inputStock: {
     title: 'Input Stock',
     item: 'Item',

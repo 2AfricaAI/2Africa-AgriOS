@@ -253,6 +253,12 @@ export default {
     confirmToggle: '确认{action}投入品「{name}」?',
   },
 
+  phi: {
+    blockedTitle: 'PHI 阻断 — 最早可采收: {date} (还需等 {days} 天)',
+    blockedDetail: '最近一次喷 {code} (有效成分: {ingredient}, PHI {phiDays} 天) 在 {sprayDate}。安全间隔期未过不能采收。',
+    safeTitle: 'PHI 安全期已过 — 最早可采日: {date}',
+  },
+
   inputStock: {
     title: '投入品库存',
     item: '物料',

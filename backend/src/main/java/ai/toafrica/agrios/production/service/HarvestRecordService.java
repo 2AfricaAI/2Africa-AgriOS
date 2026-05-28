@@ -16,6 +16,8 @@ import ai.toafrica.agrios.production.mapper.PlantingPlanMapper;
 import ai.toafrica.agrios.production.mapper.PlotMapper;
 import ai.toafrica.agrios.production.vo.HarvestRecordVO;
 import ai.toafrica.agrios.production.vo.HarvestRow;
+import ai.toafrica.agrios.qc.service.PhiCheckService;
+import ai.toafrica.agrios.qc.vo.PhiCheckVO;
 import ai.toafrica.agrios.system.service.FileService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -43,6 +45,7 @@ public class HarvestRecordService {
     private final PlantingPlanMapper planMapper;
     private final PlotMapper plotMapper;
     private final FileService fileService;
+    private final PhiCheckService phiCheckService;        // Sprint 23 / Phase 5
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -93,6 +96,21 @@ public class HarvestRecordService {
         if (plan == null) throw new BusinessException("Planting plan not found");
         Plot plot = plotMapper.selectById(plan.getPlotId());
         if (plot == null) throw new BusinessException("Plot not found");
+
+        // 2.5) Sprint 23 / Phase 5: PHI 安全期阻断
+        PhiCheckVO phi = phiCheckService.checkPlan(form.getPlanId(), form.getHarvestDate());
+        if (phi.isBlocked()) {
+            var first = phi.getBlockingSprays().get(0);
+            throw new BusinessException(String.format(
+                "PHI block: cannot harvest until %s. " +
+                "Last spray of %s (PHI %d days) on %s — wait %d more days.",
+                phi.getEarliestSafeDate(),
+                first.getInputItemCode(),
+                first.getPhiDays(),
+                first.getSprayDate(),
+                phi.getDaysRemaining()
+            ));
+        }
 
         Long varietyId = form.getVarietyId() != null ? form.getVarietyId() : plan.getVarietyId();
 
