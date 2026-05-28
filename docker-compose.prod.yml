@@ -1,0 +1,145 @@
+# ============================================================================
+# 2Africa AgriOS — production docker-compose (Sprint 29).
+#
+# Single-VPS / smoke-test deployment that mirrors the k8s topology:
+#   mysql + redis + minio + backend + frontend (nginx)
+#
+# Usage:
+#   1. cp .env.example .env.prod
+#   2. Fill real secrets in .env.prod
+#   3. docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#   4. docker compose -f docker-compose.prod.yml logs -f
+#
+# For Kubernetes deployment use the manifests in k8s/ (Sprint 30, coming next).
+# ============================================================================
+
+services:
+  # ----- MySQL -----
+  mysql:
+    image: mysql:8.0
+    container_name: agrios-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: Asia/Shanghai
+    volumes:
+      - agrios_mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/00-schema.sql:ro
+      - ./demo-data.sql:/docker-entrypoint-initdb.d/01-demo.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # Do NOT expose port to host in prod. Comment out for debugging only.
+    # ports:
+    #   - "127.0.0.1:3306:3306"
+
+  # ----- Redis -----
+  redis:
+    image: redis:7-alpine
+    container_name: agrios-redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes"]
+    volumes:
+      - agrios_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----- MinIO (object storage) -----
+  minio:
+    image: minio/minio:latest
+    container_name: agrios-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - agrios_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  # ----- Backend (Spring Boot) -----
+  # Default: pull pre-built image from GHCR (set BACKEND_IMAGE in .env.prod).
+  # To build locally instead, comment out the `image:` line and uncomment `build:`.
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/2africaai/2africa-agrios-backend:latest}
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    container_name: agrios-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # DB
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      # Object storage
+      OSS_ENDPOINT: http://minio:9000
+      OSS_PUBLIC_ENDPOINT: ${OSS_PUBLIC_ENDPOINT}
+      OSS_AK: ${OSS_AK}
+      OSS_SK: ${OSS_SK}
+      OSS_BUCKET: ${OSS_BUCKET}
+      # CORS
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      # Timezone
+      TZ: Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ----- Frontend (Nginx) -----
+  # Default: pull pre-built image from GHCR.
+  # Local build alternative is commented out below.
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/2africaai/2africa-agrios-frontend:latest}
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     VITE_PUBLIC_BASE_URL: ${VITE_PUBLIC_BASE_URL}
+    container_name: agrios-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  agrios_mysql_data:
+  agrios_redis_data:
+  agrios_minio_data:

@@ -1,0 +1,21 @@
+# ============================================================================
+# 2Africa AgriOS - daily backup cron (Sprint 32).
+# Install with:
+#   sudo cp ops/cron.agrios-backup /etc/cron.d/agrios-backup
+#   sudo chown root:root /etc/cron.d/agrios-backup
+#   sudo chmod 644 /etc/cron.d/agrios-backup
+# Logs:
+#   /var/log/agrios-backup.log
+#   /var/log/agrios-minio-backup.log
+# Replace /opt/agrios with the actual checkout path on the server.
+# ============================================================================
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=""
+
+# DB backup every day at 03:00 server-local time
+0  3 * * *  root  cd /opt/agrios && bin/backup-db.sh    >> /var/log/agrios-backup.log 2>&1
+
+# MinIO backup every day at 03:30 (after DB backup finishes)
+30 3 * * *  root  cd /opt/agrios && bin/backup-minio.sh >> /var/log/agrios-minio-backup.log 2>&1

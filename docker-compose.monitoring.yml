@@ -1,0 +1,36 @@
+# ============================================================================
+# 2Africa AgriOS - monitoring stack (Sprint 33).
+#
+# Uptime Kuma — self-hosted status page + alerting. Lightweight: ~80 MB RAM.
+#
+# Independent from the main stack: you can up/down this file without touching
+# backend/frontend/mysql. Lives on its own network to avoid name collisions.
+#
+# Usage:
+#   docker compose -f docker-compose.monitoring.yml up -d
+#   docker compose -f docker-compose.monitoring.yml logs -f
+#
+# Then open http://<host>:3001 (or set up a subdomain like status.farm.example.com).
+# First-visit prompts you to create an admin user — DO IT IMMEDIATELY before
+# exposing the port to the public internet.
+# ============================================================================
+
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: agrios-uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - agrios_uptime_kuma_data:/app/data
+    ports:
+      # Bind to localhost only — front it with the host's Nginx if you want a
+      # public status page. Change to "3001:3001" to expose directly.
+      - "127.0.0.1:3001:3001"
+    healthcheck:
+      test: ["CMD", "node", "extra/healthcheck.js"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  agrios_uptime_kuma_data:

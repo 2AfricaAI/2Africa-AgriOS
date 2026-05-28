@@ -35,6 +35,35 @@ mybatis-plus:
       logic-delete-value: NOW()
       logic-not-delete-value: 'NULL'
 
+# Actuator — exposed under /api/actuator (context-path inherited). Only health + info
+# are public; everything else stays disabled.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never        # don't leak DB / disk paths to anonymous callers
+      probes:
+        enabled: true            # adds /actuator/health/liveness + /readiness
+  info:
+    env:
+      enabled: true
+    git:
+      mode: simple
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+
+info:
+  app:
+    name: ${spring.application.name}
+    version: '@project.version@'
+    profile: ${spring.profiles.active}
+
 # 业务配置
 agrios:
   jwt:

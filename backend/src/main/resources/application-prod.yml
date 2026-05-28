@@ -1,0 +1,74 @@
+# ============================================================================
+# Production profile (Sprint 29).
+# All secrets and connection strings are loaded from environment variables.
+# Set these via Kubernetes Secret / ConfigMap or docker-compose --env-file.
+#
+# Required env vars (no sensible defaults):
+#   DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD
+#   REDIS_HOST REDIS_PORT REDIS_PASSWORD
+#   JWT_SECRET
+#   OSS_ENDPOINT OSS_PUBLIC_ENDPOINT OSS_AK OSS_SK OSS_BUCKET
+#   CORS_ALLOWED_ORIGINS   (comma-separated; e.g. https://farm.example.com)
+# ============================================================================
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME:toafrica_agrios}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:30}
+      minimum-idle: ${DB_POOL_MIN:5}
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 30000
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DB:0}
+      timeout: 5s
+      lettuce:
+        pool:
+          max-active: 30
+          max-idle: 10
+          min-idle: 2
+
+redisson:
+  address: redis://${REDIS_HOST}:${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD}
+  database: ${REDIS_DB:0}
+
+# Production CORS — narrow allow-list, comma-separated.
+# Example: CORS_ALLOWED_ORIGINS=https://farm.example.com,https://app.example.com
+agrios:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+
+# Production logging — INFO root, no SQL noise. Logs go to stdout for kubectl logs / Loki.
+logging:
+  level:
+    root: INFO
+    ai.toafrica.agrios: INFO
+    org.springframework.security: WARN
+    org.mybatis: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ""   # disable file logging in prod; container stdout is captured by the platform
+
+# Swagger off in production
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+# MyBatis-Plus: turn off SQL logging in prod
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl

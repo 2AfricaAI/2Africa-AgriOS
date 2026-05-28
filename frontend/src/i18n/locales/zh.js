@@ -185,7 +185,7 @@ export default {
 
   home: {
     title: '运营看板',
-    subtitle: '欢迎使用 {brand} · 非洲 AI 农业管理 OS',
+    subtitle: '欢迎使用 {brand}',
     kpiActivePlans: '进行中计划',
     kpiActivePlansFoot: '已排期 / 种植中',
     kpiPendingActivities: '待审核农事',

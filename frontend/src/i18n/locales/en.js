@@ -196,7 +196,7 @@ export default {
   // ---------- Home Dashboard ----------
   home: {
     title: 'Dashboard',
-    subtitle: 'Welcome to {brand} · AI Farm Management OS for Africa',
+    subtitle: 'Welcome to {brand}',
     kpiActivePlans: 'Active Plans',
     kpiActivePlansFoot: 'Scheduled / planted',
     kpiPendingActivities: 'Pending Activities',
