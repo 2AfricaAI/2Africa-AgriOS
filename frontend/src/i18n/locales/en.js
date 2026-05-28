@@ -13,7 +13,7 @@ export default {
     crops: 'Crops',
     varieties: 'Varieties',
     packagingSpecs: 'Packaging Specs',
-    warehouses: 'Location Management',
+    warehouses: 'Warehouse Setting',
     inputItems: 'Input Items',
     warehouseOps: 'Warehouse',
     inbound: 'Inbound Management',
