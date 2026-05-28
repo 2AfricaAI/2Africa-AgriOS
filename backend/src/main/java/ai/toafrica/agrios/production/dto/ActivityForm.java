@@ -85,4 +85,29 @@ public class ActivityForm {
     @Schema(description = "关联电费 PO 行 (可选)")    private Long electricityPoItemId;
     @Schema(description = "关联肥料 PO 行 (可选)")    private Long fertilizerPoItemId;
     @Schema(description = "关联其他 PO 行 (可选)")    private Long otherPoItemId;
+
+    // ====== Sprint 23f - 投入品明细 (PHI 检查依赖) ======
+    @Schema(description = "投入品明细: 该活动用了什么物料/多少量")
+    private List<InputLine> inputs;
+
+    @Data
+    public static class InputLine {
+        @NotNull
+        @Schema(description = "input_item.id", example = "4")
+        private Long inputItemId;
+
+        @NotNull
+        @DecimalMin(value = "0.001", message = "qty must be > 0")
+        @Schema(description = "用量", example = "0.5")
+        private BigDecimal qty;
+
+        @NotBlank
+        @Size(max = 16)
+        @Schema(description = "单位 (kg / L / pack)", example = "L")
+        private String unit;
+
+        @DecimalMin(value = "0", inclusive = true)
+        @Schema(description = "成本 (可选)", example = "200")
+        private BigDecimal cost;
+    }
 }

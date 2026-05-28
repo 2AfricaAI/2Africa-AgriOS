@@ -7,9 +7,12 @@ import ai.toafrica.agrios.common.exception.BusinessException;
 import ai.toafrica.agrios.framework.security.SecurityUtil;
 import ai.toafrica.agrios.production.dto.ActivityForm;
 import ai.toafrica.agrios.production.entity.Activity;
+import ai.toafrica.agrios.production.entity.ActivityInput;
 import ai.toafrica.agrios.production.entity.PlantingPlan;
+import ai.toafrica.agrios.production.mapper.ActivityInputMapper;
 import ai.toafrica.agrios.production.mapper.ActivityMapper;
 import ai.toafrica.agrios.production.mapper.PlantingPlanMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import ai.toafrica.agrios.production.vo.ActivityRow;
 import ai.toafrica.agrios.production.vo.ActivityVO;
 import ai.toafrica.agrios.system.service.FileService;
@@ -37,6 +40,7 @@ import java.util.Set;
 public class ActivityService {
 
     private final ActivityMapper activityMapper;
+    private final ActivityInputMapper activityInputMapper;  // Sprint 23f
     private final PlantingPlanMapper plantingPlanMapper;
     private final FileService fileService;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -117,10 +121,31 @@ public class ActivityService {
         if (a.getPhotos() == null) a.setPhotos(Collections.emptyList());
         activityMapper.insert(a);
 
-        log.info("[新建农事] id={} plan={} type={} date={} photos={}",
+        // Sprint 23f: 写投入品明细 (PHI 检查依赖)
+        saveInputs(a.getId(), form.getInputs());
+
+        log.info("[新建农事] id={} plan={} type={} date={} photos={} inputs={}",
                 a.getId(), a.getPlanId(), a.getActivityType(), a.getOccurDate(),
-                a.getPhotos().size());
+                a.getPhotos().size(),
+                form.getInputs() != null ? form.getInputs().size() : 0);
         return a.getId();
+    }
+
+    /** Sprint 23f: 批量写 activity_input (先清空再插, 简单可靠) */
+    private void saveInputs(Long activityId, List<ActivityForm.InputLine> lines) {
+        // 先清旧的 (update 场景)
+        activityInputMapper.delete(new LambdaQueryWrapper<ActivityInput>().eq(ActivityInput::getActivityId, activityId));
+        if (lines == null || lines.isEmpty()) return;
+        for (ActivityForm.InputLine line : lines) {
+            if (line.getInputItemId() == null || line.getQty() == null) continue;
+            ActivityInput ai = new ActivityInput();
+            ai.setActivityId(activityId);
+            ai.setInputItemId(line.getInputItemId());
+            ai.setQty(line.getQty());
+            ai.setUnit(line.getUnit() != null ? line.getUnit() : "");
+            ai.setCost(line.getCost());
+            activityInputMapper.insert(ai);
+        }
     }
 
     // ============================================================
@@ -139,6 +164,9 @@ public class ActivityService {
         a.setPlotId(plan.getPlotId());
         if (a.getPhotos() == null) a.setPhotos(Collections.emptyList());
         activityMapper.updateById(a);
+
+        // Sprint 23f: 投入品明细 (清空重写)
+        saveInputs(a.getId(), form.getInputs());
     }
 
     // ============================================================

@@ -241,6 +241,51 @@
           </el-form-item>
         </div>
 
+        <!-- Sprint 23f: 投入品明细 (PHI 检查依赖, 喷药/施肥时重要) -->
+        <el-form-item :label="t('activity.inputs')">
+          <div style="width: 100%">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
+              <span style="font-size: 12px; color: #909399">{{ t('activity.inputsHint') }}</span>
+              <el-button link type="primary" size="small"
+                @click="form.inputs.push({ inputItemId: null, qty: 1, unit: 'L', cost: 0 })">
+                + {{ t('activity.addInput') }}
+              </el-button>
+            </div>
+            <el-table v-if="form.inputs.length" :data="form.inputs" border size="small">
+              <el-table-column :label="t('inputItem.name')" min-width="200">
+                <template #default="{ $index }">
+                  <el-select v-model="form.inputs[$index].inputItemId" filterable size="small" style="width: 100%">
+                    <el-option v-for="ii in inputItems" :key="ii.id" :value="ii.id"
+                      :label="`${ii.code} · ${ii.nameEn || ii.name}${ii.phiDays > 0 ? ' (PHI ' + ii.phiDays + 'd)' : ''}`" />
+                  </el-select>
+                </template>
+              </el-table-column>
+              <el-table-column :label="t('activity.qty')" width="100">
+                <template #default="{ $index }">
+                  <el-input-number v-model="form.inputs[$index].qty" :min="0.001" :precision="3"
+                    :controls="false" size="small" style="width: 100%" />
+                </template>
+              </el-table-column>
+              <el-table-column :label="t('activity.unit')" width="80">
+                <template #default="{ $index }">
+                  <el-input v-model="form.inputs[$index].unit" size="small" maxlength="16" />
+                </template>
+              </el-table-column>
+              <el-table-column :label="t('activity.cost')" width="100">
+                <template #default="{ $index }">
+                  <el-input-number v-model="form.inputs[$index].cost" :min="0" :precision="2"
+                    :controls="false" size="small" style="width: 100%" />
+                </template>
+              </el-table-column>
+              <el-table-column width="50" align="center">
+                <template #default="{ $index }">
+                  <el-button link type="danger" size="small" @click="form.inputs.splice($index, 1)">×</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-form-item>
+
         <el-form-item :label="t('activity.photos')">
           <FileUploader
             v-model="photos"
@@ -277,6 +322,7 @@ import {
   deleteActivity,
 } from '@/api/activity'
 import { listPlantingPlans } from '@/api/plantingPlan'
+import { listInputItems } from '@/api/inputItem'
 import { listAvailablePoItems } from '@/api/purchaseOrder'
 import FileUploader from '@/components/FileUploader.vue'
 
@@ -314,6 +360,15 @@ const plans = ref([])
 async function loadPlans() {
   const data = await listPlantingPlans({ page: 1, size: 500 })
   plans.value = data.list
+}
+
+// Sprint 23f: input items dropdown
+const inputItems = ref([])
+async function loadInputItems() {
+  try {
+    const data = await listInputItems({ status: 'active', page: 1, size: 500 })
+    inputItems.value = data.list || []
+  } catch {/* ignore */}
 }
 
 // ============================================================
@@ -375,6 +430,7 @@ function onSizeChange(s) { pageSize.value = s; reload(1) }
 
 onMounted(async () => {
   await loadPlans()
+  loadInputItems()
   await reload(1)
 })
 
@@ -407,6 +463,8 @@ const emptyForm = () => ({
   electricityPoItemId: null,
   fertilizerPoItemId: null,
   otherPoItemId: null,
+  // Sprint 23f - 投入品明细 (PHI 检查依赖)
+  inputs: [],
 })
 
 // ============================================================
