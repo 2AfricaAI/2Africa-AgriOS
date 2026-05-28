@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "23 · 主数据-仓库库位", description = "仓库/库位列表 / 详情")
+@Tag(name = "23 · Master-Warehouses", description = "Warehouse / location list / detail")
 @RestController
 @RequestMapping("/v1/master/warehouses")
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class LocationWarehouseController {
 
     private final LocationWarehouseService warehouseService;
 
-    @Operation(summary = "仓库/库位列表(分页 + 过滤)")
+    @Operation(summary = "Warehouse / location list (paginated + filtered)")
     @GetMapping
     public R<PageResult<LocationWarehouse>> list(
             @Parameter(description = "Name fuzzy")  @RequestParam(required = false) String name,
@@ -47,20 +47,20 @@ public class LocationWarehouseController {
         return R.ok(warehouseService.page(name, code, type, purpose, level, parentId, status, pq));
     }
 
-    @Operation(summary = "仓库/库位详情")
+    @Operation(summary = "Warehouse / location detail")
     @GetMapping("/{id}")
     public R<LocationWarehouse> detail(@PathVariable Long id) {
         return R.ok(warehouseService.detail(id));
     }
 
-    @Operation(summary = "新建仓库/库位")
+    @Operation(summary = "Create warehouse / location")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody WarehouseForm form) {
         return R.ok(warehouseService.create(form));
     }
 
-    @Operation(summary = "修改仓库/库位")
+    @Operation(summary = "Update warehouse / location")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody WarehouseForm form) {
@@ -68,7 +68,7 @@ public class LocationWarehouseController {
         return R.ok();
     }
 
-    @Operation(summary = "启用 / 停用 (status: 1=启用 0=停用)")
+    @Operation(summary = "Enable / disable (status: 1=enabled, 0=disabled)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/status/{status}")
     public R<Void> changeStatus(@PathVariable Long id, @PathVariable Integer status) {

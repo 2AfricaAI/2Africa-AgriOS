@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "22 · 主数据-包装规格", description = "包装规格列表 / 详情")
+@Tag(name = "22 · Master-Packaging Specs", description = "Packaging spec list / detail")
 @RestController
 @RequestMapping("/v1/master/packaging-specs")
 @RequiredArgsConstructor
@@ -29,30 +29,30 @@ public class PackagingSpecController {
 
     private final PackagingSpecService packagingSpecService;
 
-    @Operation(summary = "包装规格列表(分页 + 过滤)")
+    @Operation(summary = "Packaging spec list (paginated + filtered)")
     @GetMapping
     public R<PageResult<PackagingSpec>> list(
-            @Parameter(description = "名称模糊查询") @RequestParam(required = false) String name,
-            @Parameter(description = "编码模糊查询") @RequestParam(required = false) String code,
-            @Parameter(description = "状态 1=启用 0=停用") @RequestParam(required = false) Integer status,
+            @Parameter(description = "Name fuzzy match") @RequestParam(required = false) String name,
+            @Parameter(description = "Code fuzzy match") @RequestParam(required = false) String code,
+            @Parameter(description = "Status: 1=enabled, 0=disabled") @RequestParam(required = false) Integer status,
             PageQuery pq) {
         return R.ok(packagingSpecService.page(name, code, status, pq));
     }
 
-    @Operation(summary = "包装规格详情")
+    @Operation(summary = "Packaging spec detail")
     @GetMapping("/{id}")
     public R<PackagingSpec> detail(@PathVariable Long id) {
         return R.ok(packagingSpecService.detail(id));
     }
 
-    @Operation(summary = "新建包装规格")
+    @Operation(summary = "Create packaging spec")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody PackagingSpecForm form) {
         return R.ok(packagingSpecService.create(form));
     }
 
-    @Operation(summary = "修改包装规格")
+    @Operation(summary = "Update packaging spec")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody PackagingSpecForm form) {
@@ -60,7 +60,7 @@ public class PackagingSpecController {
         return R.ok();
     }
 
-    @Operation(summary = "启用 / 停用 (status: 1=启用 0=停用)")
+    @Operation(summary = "Enable / disable (status: 1=enabled, 0=disabled)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/status/{status}")
     public R<Void> changeStatus(@PathVariable Long id, @PathVariable Integer status) {

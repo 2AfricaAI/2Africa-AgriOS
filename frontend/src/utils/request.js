@@ -35,7 +35,7 @@ request.interceptors.response.use(
         try {
           const text = await data.text()
           const json = JSON.parse(text)
-          ElMessage.error(json.msg || `下载失败 (code=${json.code})`)
+          ElMessage.error(json.msg || `Download failed (code=${json.code})`)
           return Promise.reject(new Error(json.msg || `code=${json.code}`))
         } catch {/* 解析失败就当 PDF 处理 */}
       }
@@ -50,7 +50,7 @@ request.interceptors.response.use(
       return data.data
     }
     // 业务失败 (HTTP 200 但 body code 不是 200)
-    ElMessage.error(data.msg || `请求失败 (code=${data.code})`)
+    ElMessage.error(data.msg || `Request failed (code=${data.code})`)
     return Promise.reject(new Error(data.msg || `code=${data.code}`))
   },
   async (error) => {
@@ -66,13 +66,13 @@ request.interceptors.response.use(
       // token 失效 / 权限不足
       const auth = useAuthStore()
       auth.clear()
-      ElMessage.warning(body?.msg || '登录已过期,请重新登录')
+      ElMessage.warning(body?.msg || 'Session expired, please log in again')
       router.push({
         path: '/login',
         query: { redirect: router.currentRoute.value.fullPath },
       })
     } else {
-      ElMessage.error(body?.msg || error.message || '网络错误')
+      ElMessage.error(body?.msg || error.message || 'Network error')
     }
     return Promise.reject(error)
   },

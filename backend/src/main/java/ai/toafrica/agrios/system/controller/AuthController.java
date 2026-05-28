@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "01 · 认证", description = "登录 / 登出 / 当前用户")
+@Tag(name = "01 · Auth", description = "Login / logout / current user")
 @RestController
 @RequestMapping("/v1/auth")
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(summary = "用户名密码登录")
+    @Operation(summary = "Username + password login")
     @PostMapping("/login")
     public R<LoginVO> login(@Valid @RequestBody LoginDTO dto, HttpServletRequest req) {
         return R.ok(authService.login(dto, getClientIp(req)));
@@ -39,7 +39,7 @@ public class AuthController {
         return req.getRemoteAddr();
     }
 
-    @Operation(summary = "登出")
+    @Operation(summary = "Logout")
     @PostMapping("/logout")
     public R<Void> logout(HttpServletRequest req) {
         String header = req.getHeader("Authorization");
@@ -49,7 +49,7 @@ public class AuthController {
         return R.ok();
     }
 
-    @Operation(summary = "当前用户信息")
+    @Operation(summary = "Current user info")
     @GetMapping("/me")
     public R<Object> me() {
         return R.ok(SecurityUtil.current());

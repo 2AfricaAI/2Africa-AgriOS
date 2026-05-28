@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.Map;
 
-@Tag(name = "12 · 生产-农事记录", description = "在种植计划上记一次播种/施肥/打药等农事事件,支持照片 + 审核流")
+@Tag(name = "12 · Production-Activity", description = "Field activity events on a planting plan (sow/fertilize/spray etc.), with photos + approval flow")
 @RestController
 @RequestMapping("/v1/production/activities")
 @RequiredArgsConstructor
@@ -34,32 +34,32 @@ public class ActivityController {
 
     private final ActivityService activityService;
 
-    @Operation(summary = "农事记录列表(分页 + 过滤)")
+    @Operation(summary = "Activity list (paginated + filtered)")
     @GetMapping
     public R<PageResult<ActivityVO>> list(
-            @Parameter(description = "按地块 ID 过滤") @RequestParam(required = false) Long plotId,
-            @Parameter(description = "按计划 ID 过滤") @RequestParam(required = false) Long planId,
-            @Parameter(description = "活动类型 sow/fertilize/spray/weed/water/prune/other")
+            @Parameter(description = "Filter by plot id") @RequestParam(required = false) Long plotId,
+            @Parameter(description = "Filter by plan id") @RequestParam(required = false) Long planId,
+            @Parameter(description = "Activity type sow/fertilize/spray/weed/water/prune/other")
                 @RequestParam(required = false) String activityType,
-            @Parameter(description = "occur_date 起 (含)")
+            @Parameter(description = "occur_date start (inclusive)")
                 @RequestParam(required = false)
                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @Parameter(description = "occur_date 止 (含)")
+            @Parameter(description = "occur_date end (inclusive)")
                 @RequestParam(required = false)
                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-            @Parameter(description = "审核状态 pending/approved/rejected")
+            @Parameter(description = "Review status: pending/approved/rejected")
                 @RequestParam(required = false) String auditStatus,
             PageQuery pq) {
         return R.ok(activityService.page(plotId, planId, activityType, dateFrom, dateTo, auditStatus, pq));
     }
 
-    @Operation(summary = "农事记录详情")
+    @Operation(summary = "Activity detail")
     @GetMapping("/{id}")
     public R<ActivityVO> detail(@PathVariable Long id) {
         return R.ok(activityService.detail(id));
     }
 
-    @Operation(summary = "新建农事记录 (含工人移动端)")
+    @Operation(summary = "Create activity (also from worker mobile)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
                   "hasAuthority('ROLE_LEADER') or hasAuthority('ROLE_WORKER')")
     @PostMapping
@@ -67,7 +67,7 @@ public class ActivityController {
         return R.ok(activityService.create(form));
     }
 
-    @Operation(summary = "修改农事记录")
+    @Operation(summary = "Update activity")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_LEADER')")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody ActivityForm form) {
@@ -75,7 +75,7 @@ public class ActivityController {
         return R.ok();
     }
 
-    @Operation(summary = "审核 (approved / rejected / pending)")
+    @Operation(summary = "Review (approved / rejected / pending)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/audit")
     public R<Void> audit(@PathVariable Long id, @RequestBody Map<String, String> body) {
@@ -83,7 +83,7 @@ public class ActivityController {
         return R.ok();
     }
 
-    @Operation(summary = "删除 (慎用 - 农事记录通常为审计目的不删)")
+    @Operation(summary = "Delete (use with care - activities are usually kept for audit)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {

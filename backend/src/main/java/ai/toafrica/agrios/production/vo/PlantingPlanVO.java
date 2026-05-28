@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 种植计划列表 VO - 包含 JOIN 出来的地块/作物/品种名称
  */
 @Data
-@Schema(description = "种植计划展示对象")
+@Schema(description = "Planting plan display object")
 public class PlantingPlanVO {
     private Long id;
     private String code;

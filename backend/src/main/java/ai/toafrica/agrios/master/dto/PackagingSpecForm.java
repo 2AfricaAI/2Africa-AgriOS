@@ -10,28 +10,28 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-@Schema(description = "包装规格 - 创建/修改表单")
+@Schema(description = "Packaging spec - create/update form")
 public class PackagingSpecForm {
     @NotBlank
     @Size(max = 32)
-    @Schema(description = "编码", example = "SP-2KG")
+    @Schema(description = "Code", example = "SP-2KG")
     private String code;
 
     @NotBlank
     @Size(max = 64)
-    @Schema(description = "名称", example = "2kg 礼盒")
+    @Schema(description = "Name", example = "2kg gift box")
     private String name;
 
     @NotNull
     @DecimalMin(value = "0.001", inclusive = true)
-    @Schema(description = "单件净重 (kg)", example = "2.000")
+    @Schema(description = "Per-unit net weight (kg)", example = "2.000")
     private BigDecimal unitNetKg;
 
     @DecimalMin(value = "0.001", inclusive = true)
-    @Schema(description = "单件毛重 (kg)", example = "2.150")
+    @Schema(description = "Per-unit gross weight (kg)", example = "2.150")
     private BigDecimal unitGrossKg;
 
     @Size(max = 64)
-    @Schema(description = "材质", example = "纸盒+衬")
+    @Schema(description = "Material", example = "Cardboard + liner")
     private String material;
 }

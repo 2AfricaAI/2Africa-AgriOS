@@ -4,7 +4,7 @@
 -- ============================================================================
 
 ALTER TABLE `activity`
-  ADD COLUMN `water_cost`       DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '水费' AFTER `labor_cost`,
-  ADD COLUMN `electricity_cost` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '电费' AFTER `water_cost`,
-  ADD COLUMN `fertilizer_cost`  DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '肥料成本' AFTER `electricity_cost`,
+  ADD COLUMN `water_cost`       DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Water cost' AFTER `labor_cost`,
+  ADD COLUMN `electricity_cost` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Electricity cost' AFTER `water_cost`,
+  ADD COLUMN `fertilizer_cost`  DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Fertilizer cost' AFTER `electricity_cost`,
   DROP COLUMN `utility_cost`;

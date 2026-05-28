@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Data
 @Builder
-@Schema(description = "登录响应")
+@Schema(description = "Login response")
 public class LoginVO {
     private Long userId;
     private String username;

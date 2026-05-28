@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "21 · 主数据-品种", description = "品种列表 / 详情")
+@Tag(name = "21 · Master-Varieties", description = "Varieties list / detail")
 @RestController
 @RequestMapping("/v1/master/varieties")
 @RequiredArgsConstructor
@@ -29,31 +29,31 @@ public class VarietyController {
 
     private final VarietyService varietyService;
 
-    @Operation(summary = "品种列表(分页 + 过滤)")
+    @Operation(summary = "Variety list (paginated + filtered)")
     @GetMapping
     public R<PageResult<Variety>> list(
-            @Parameter(description = "按作物 ID 过滤") @RequestParam(required = false) Long cropId,
-            @Parameter(description = "名称模糊查询") @RequestParam(required = false) String name,
-            @Parameter(description = "编码模糊查询") @RequestParam(required = false) String code,
-            @Parameter(description = "状态 1=启用 0=停用") @RequestParam(required = false) Integer status,
+            @Parameter(description = "Filter by crop id") @RequestParam(required = false) Long cropId,
+            @Parameter(description = "Name fuzzy match") @RequestParam(required = false) String name,
+            @Parameter(description = "Code fuzzy match") @RequestParam(required = false) String code,
+            @Parameter(description = "Status: 1=enabled, 0=disabled") @RequestParam(required = false) Integer status,
             PageQuery pq) {
         return R.ok(varietyService.page(cropId, name, code, status, pq));
     }
 
-    @Operation(summary = "品种详情")
+    @Operation(summary = "Variety detail")
     @GetMapping("/{id}")
     public R<Variety> detail(@PathVariable Long id) {
         return R.ok(varietyService.detail(id));
     }
 
-    @Operation(summary = "新建品种")
+    @Operation(summary = "Create variety")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody VarietyForm form) {
         return R.ok(varietyService.create(form));
     }
 
-    @Operation(summary = "修改品种")
+    @Operation(summary = "Update variety")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody VarietyForm form) {
@@ -61,7 +61,7 @@ public class VarietyController {
         return R.ok();
     }
 
-    @Operation(summary = "启用 / 停用 (status: 1=启用 0=停用)")
+    @Operation(summary = "Enable / disable (status: 1=enabled, 0=disabled)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/status/{status}")
     public R<Void> changeStatus(@PathVariable Long id, @PathVariable Integer status) {

@@ -5,8 +5,9 @@
 --                             (pack_date + resolved_shelf_life)
 -- 4) Backfill existing inventory.expiry_date using prod_date + 7d as a safe default.
 --    Real values are written as new packings happen.
-
-USE agrios;
+--
+-- NOTE: target database is selected via the mysql CLI / connection — no USE statement here,
+-- so this script is portable across dev (toafrica_agrios) and any future deployment.
 
 -- ------------------------------------------------------------
 -- crop: per-crop default shelf life

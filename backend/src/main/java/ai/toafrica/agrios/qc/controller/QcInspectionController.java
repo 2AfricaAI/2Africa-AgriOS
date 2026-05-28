@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
-@Tag(name = "41 · QC-质检单", description = "Quality Control inspections (Sprint 24 / Phase 5)")
+@Tag(name = "41 · QC-Inspections", description = "Quality Control inspections (Sprint 24 / Phase 5)")
 @RestController
 @RequestMapping("/v1/qc/inspections")
 @RequiredArgsConstructor

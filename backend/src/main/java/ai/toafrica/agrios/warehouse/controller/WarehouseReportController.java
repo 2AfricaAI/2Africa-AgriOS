@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-@Tag(name = "35 · 仓库作业-报表", description = "仓库作业聚合报表")
+@Tag(name = "35 · Warehouse Ops-Reports", description = "Warehouse operations aggregated reports")
 @RestController
 @RequestMapping("/v1/warehouse/reports")
 @RequiredArgsConstructor

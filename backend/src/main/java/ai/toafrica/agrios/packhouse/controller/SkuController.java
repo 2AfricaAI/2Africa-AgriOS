@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "17 · Packhouse-SKU", description = "SKU 商品 (crop+variety+grade+spec 唯一)")
+@Tag(name = "17 · Packhouse-SKU", description = "SKU products (unique by crop+variety+grade+spec)")
 @RestController
 @RequestMapping("/v1/packhouse/skus")
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class SkuController {
 
     private final SkuService skuService;
 
-    @Operation(summary = "SKU 列表")
+    @Operation(summary = "SKU list")
     @GetMapping
     public R<PageResult<Sku>> list(
             @RequestParam(required = false) String code,

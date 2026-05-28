@@ -7,19 +7,19 @@
 
 CREATE TABLE IF NOT EXISTS `payment` (
   `id`              BIGINT        PRIMARY KEY AUTO_INCREMENT,
-  `code`            VARCHAR(32)   COMMENT 'PAY-yyyyMMdd-NNN (可空, 第三方回调可能没有)',
+  `code`            VARCHAR(32)   COMMENT 'PAY-yyyyMMdd-NNN (nullable; some third-party callbacks omit it)',
   `order_id`        BIGINT        NOT NULL,
   `customer_id`     BIGINT        NOT NULL,
   `amount`          DECIMAL(14,2) NOT NULL,
   `currency`        VARCHAR(8)    NOT NULL DEFAULT 'KES',
-  `fx_rate`         DECIMAL(12,6) DEFAULT 1.0 COMMENT '对 KES 换算汇率',
-  `amount_kes`      DECIMAL(14,2) NOT NULL COMMENT '本位币 KES 金额',
+  `fx_rate`         DECIMAL(12,6) DEFAULT 1.0 COMMENT 'FX rate to KES',
+  `amount_kes`      DECIMAL(14,2) NOT NULL COMMENT 'Amount in functional currency KES',
   `method`          VARCHAR(16)   NOT NULL COMMENT 'cash / m-pesa / bank / cheque',
   `payment_date`    DATE          NOT NULL,
-  `reference_no`    VARCHAR(64)   COMMENT 'M-Pesa 回执号 / 银行流水 / 支票号',
+  `reference_no`    VARCHAR(64)   COMMENT 'M-Pesa receipt / bank reference / cheque no.',
   `status`          VARCHAR(16)   NOT NULL DEFAULT 'cleared'
                     COMMENT 'pending / partial / cleared / bad_debt / reversed',
-  `reconciled_by`   BIGINT        COMMENT '对账人',
+  `reconciled_by`   BIGINT        COMMENT 'Reconciler',
   `reconciled_at`   DATETIME,
   `remark`          VARCHAR(255),
   `created_at`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -30,4 +30,4 @@ CREATE TABLE IF NOT EXISTS `payment` (
   KEY `idx_method` (`method`),
   KEY `idx_status` (`status`),
   KEY `idx_ref` (`reference_no`)
-) ENGINE=InnoDB COMMENT='回款流水 - 含 M-Pesa / 银行 / 现金 / 支票';
+) ENGINE=InnoDB COMMENT='Payment receipt log - cash / bank / cheque / M-Pesa';

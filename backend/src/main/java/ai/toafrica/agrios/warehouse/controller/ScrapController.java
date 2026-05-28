@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Tag(name = "34 · 仓库作业-报废", description = "报废单 创建/确认/取消")
+@Tag(name = "34 · Warehouse Ops-Scrap", description = "Scrap create/confirm/cancel")
 @RestController
 @RequestMapping("/v1/warehouse/scrap")
 @RequiredArgsConstructor

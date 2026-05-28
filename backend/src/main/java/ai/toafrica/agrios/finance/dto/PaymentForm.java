@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-@Schema(description = "回款录入")
+@Schema(description = "Payment receipt entry")
 public class PaymentForm {
     @NotNull
     private Long orderId;
@@ -38,11 +38,11 @@ public class PaymentForm {
     private String referenceNo;
 
     @Size(max = 64)
-    @Schema(description = "POS 终端号 (loop_pos 时填)")
+    @Schema(description = "POS terminal id (set when method = loop_pos)")
     private String posTerminalId;
 
     @Size(max = 32)
-    @Schema(description = "Loop 内部通道: mpesa / card / bank (一般由 Loop webhook 写)")
+    @Schema(description = "Loop internal channel: mpesa / card / bank (usually written by Loop webhook)")
     private String channel;
 
     @Size(max = 255)

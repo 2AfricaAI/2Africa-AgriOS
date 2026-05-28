@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@Schema(description = "催收跟催记录列表行 (含客户/订单 join)")
+@Schema(description = "Collection log row (with customer / order joins)")
 public class CollectionLogVO {
     private Long id;
 

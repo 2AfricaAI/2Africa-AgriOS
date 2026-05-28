@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Schema(description = "采收记录展示对象")
+@Schema(description = "Harvest record display object")
 public class HarvestRecordVO {
     private Long id;
     private String code;

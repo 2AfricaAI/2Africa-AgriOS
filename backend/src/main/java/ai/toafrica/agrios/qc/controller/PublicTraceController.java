@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * 返回与内部 trace 同一份 VO; 前端公开页面可决定屏蔽 GPS / operator 等敏感字段.
  */
-@Tag(name = "43 · 公开-追溯链", description = "Public batch trace (no auth)")
+@Tag(name = "43 · Public-Trace", description = "Public batch trace (no auth)")
 @RestController
 @RequestMapping("/v1/public/trace")
 @RequiredArgsConstructor

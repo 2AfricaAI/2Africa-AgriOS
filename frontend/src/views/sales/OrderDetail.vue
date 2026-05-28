@@ -23,6 +23,9 @@
           type="warning" :icon="CloseIcon" @click="onCancel">
           {{ t('order.cancel') }}
         </el-button>
+        <el-button type="danger" plain :icon="WarningIcon" @click="onSubmitComplaint">
+          {{ t('complaint.submitForOrder') }}
+        </el-button>
       </div>
     </div>
 
@@ -261,6 +264,7 @@ import {
   Tickets,
   List,
   Van,
+  Warning as WarningIcon,
 } from '@element-plus/icons-vue'
 import { getOrderDetail, confirmOrder, cancelOrder } from '@/api/salesOrder'
 import {
@@ -359,6 +363,27 @@ async function onCancel() {
     ElMessage.success(t('order.statusChanged', { label: t('orderStatus.cancelled') }))
     await load()
   } catch {}
+}
+
+// ---- Submit complaint for this order ----
+function onSubmitComplaint() {
+  // Try to pre-fill batch if order is single-batch (via first fulfillment item)
+  const o = data.value?.order
+  if (!o) return
+  // Pull the most common batch from fulfillment items if we have them loaded
+  let batchId = null
+  const fulfillments = data.value?.fulfillments || []
+  if (fulfillments.length === 1 && fulfillments[0].items?.length === 1) {
+    batchId = fulfillments[0].items[0].batchId
+  }
+  router.push({
+    path: '/qc/complaints',
+    query: {
+      prefillOrder: o.id,
+      prefillCustomer: o.customerId,
+      ...(batchId ? { prefillBatch: batchId } : {}),
+    },
+  })
 }
 
 // ---- Picking ----

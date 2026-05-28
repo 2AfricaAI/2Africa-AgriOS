@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@Schema(description = "批次展示对象 - 全链路追溯主键")
+@Schema(description = "Batch display object - full-chain traceability key")
 public class BatchVO {
     private Long id;
     private String code;

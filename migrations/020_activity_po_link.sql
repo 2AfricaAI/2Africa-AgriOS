@@ -6,11 +6,11 @@
 -- ============================================================================
 
 ALTER TABLE `activity`
-  ADD COLUMN `labor_po_item_id`       BIGINT NULL COMMENT '关联人工 PO 行'  AFTER `labor_cost`,
-  ADD COLUMN `water_po_item_id`       BIGINT NULL COMMENT '关联水费 PO 行'  AFTER `water_cost`,
-  ADD COLUMN `electricity_po_item_id` BIGINT NULL COMMENT '关联电费 PO 行'  AFTER `electricity_cost`,
-  ADD COLUMN `fertilizer_po_item_id`  BIGINT NULL COMMENT '关联肥料 PO 行'  AFTER `fertilizer_cost`,
-  ADD COLUMN `other_po_item_id`       BIGINT NULL COMMENT '关联其他 PO 行'  AFTER `other_cost`;
+  ADD COLUMN `labor_po_item_id`       BIGINT NULL COMMENT 'Related labor PO line'  AFTER `labor_cost`,
+  ADD COLUMN `water_po_item_id`       BIGINT NULL COMMENT 'Related water-fee PO line'  AFTER `water_cost`,
+  ADD COLUMN `electricity_po_item_id` BIGINT NULL COMMENT 'Related electricity PO line'  AFTER `electricity_cost`,
+  ADD COLUMN `fertilizer_po_item_id`  BIGINT NULL COMMENT 'Related fertilizer PO line'  AFTER `fertilizer_cost`,
+  ADD COLUMN `other_po_item_id`       BIGINT NULL COMMENT 'Related misc PO line'  AFTER `other_cost`;
 
 CREATE INDEX `idx_activity_fertilizer_po` ON `activity`(`fertilizer_po_item_id`);
 CREATE INDEX `idx_activity_labor_po`      ON `activity`(`labor_po_item_id`);

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "16 · Packhouse-库存", description = "经营节点库存 - 按 (SKU+batch+grade+location) 维度")
+@Tag(name = "16 · Packhouse-Inventory", description = "Operational inventory keyed by (SKU+batch+grade+location) 维度")
 @RestController
 @RequestMapping("/v1/packhouse/inventory")
 @RequiredArgsConstructor
@@ -22,13 +22,13 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
-    @Operation(summary = "库存列表")
+    @Operation(summary = "Inventory list")
     @GetMapping
     public R<PageResult<InventoryRow>> list(
             @RequestParam(required = false) Long skuId,
             @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) Long locationId,
-            @Parameter(description = "等级 A/B/C")
+            @Parameter(description = "Grade A/B/C")
                 @RequestParam(required = false) String grade,
             @Parameter(description = "normal/frozen/lost")
                 @RequestParam(required = false) String status,

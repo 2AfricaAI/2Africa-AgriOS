@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Tag(name = "31 · 仓库作业-出库", description = "出库单列表/详情/拣货/确认/取消")
+@Tag(name = "31 · Warehouse Ops-Outbound", description = "Outbound list/detail/pick/confirm/cancel")
 @RestController
 @RequestMapping("/v1/warehouse/outbound")
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class OutboundController {
 
     private final WarehouseOutboundService outboundService;
 
-    @Operation(summary = "出库单列表")
+    @Operation(summary = "Outbound list")
     @GetMapping
     public R<PageResult<OutboundVO>> list(
             @RequestParam(required = false) String status,
@@ -34,13 +34,13 @@ public class OutboundController {
         return R.ok(outboundService.page(status, warehouseId, sourceType, pq));
     }
 
-    @Operation(summary = "出库单详情 (含明细行)")
+    @Operation(summary = "Outbound detail (with line items)")
     @GetMapping("/{id}")
     public R<OutboundDetailVO> detail(@PathVariable Long id) {
         return R.ok(outboundService.detail(id));
     }
 
-    @Operation(summary = "拣货 (填 picked_qty)")
+    @Operation(summary = "Pick (fill picked_qty)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_WORKER')")
     @PostMapping("/{id}/pick")
     public R<Void> pick(@PathVariable Long id, @RequestBody PickRequest req) {
@@ -51,7 +51,7 @@ public class OutboundController {
         return R.ok();
     }
 
-    @Operation(summary = "确认出库 (扣库存)")
+    @Operation(summary = "Confirm outbound (deduct inventory)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/confirm")
     public R<Void> confirm(@PathVariable Long id) {
@@ -59,7 +59,7 @@ public class OutboundController {
         return R.ok();
     }
 
-    @Operation(summary = "取消出库单")
+    @Operation(summary = "Cancel outbound")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/cancel")
     public R<Void> cancel(@PathVariable Long id) {
@@ -67,7 +67,7 @@ public class OutboundController {
         return R.ok();
     }
 
-    @Operation(summary = "手工创建出库单")
+    @Operation(summary = "Manually create outbound")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@RequestBody CreateOutboundRequest req) {

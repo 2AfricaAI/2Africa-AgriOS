@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `revenue` (
   `fulfillment_id`   BIGINT        NOT NULL,
   `sku_id`           BIGINT        NOT NULL,
   `customer_id`      BIGINT        NOT NULL,
-  `batch_id`         BIGINT        NULL COMMENT '主要批次 (多批合并发货时存第一批)',
+  `batch_id`         BIGINT        NULL COMMENT 'Primary batch (first batch when multi-batch shipment)',
   `qty`              DECIMAL(12,3) NOT NULL,
   `gross_amount`     DECIMAL(14,2) NOT NULL,
   `tax`              DECIMAL(14,2) NOT NULL DEFAULT 0,
@@ -28,4 +28,4 @@ CREATE TABLE IF NOT EXISTS `revenue` (
   KEY `idx_customer_date` (`customer_id`, `recognition_date`),
   KEY `idx_sku_date` (`sku_id`, `recognition_date`),
   KEY `idx_date` (`recognition_date`)
-) ENGINE=InnoDB COMMENT='收入流水 - V2.0 P&L 事实表';
+) ENGINE=InnoDB COMMENT='Revenue log - V2.0 P&L fact table';

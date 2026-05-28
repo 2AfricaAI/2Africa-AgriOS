@@ -83,6 +83,18 @@ const routes = [
         meta: { titleKey: 'menu.qcTrace' },
       },
       {
+        path: 'qc/complaints',
+        name: 'qc-complaints',
+        component: () => import('@/views/qc/ComplaintList.vue'),
+        meta: { titleKey: 'menu.complaints' },
+      },
+      {
+        path: 'qc/recalls',
+        name: 'qc-recalls',
+        component: () => import('@/views/qc/RecallList.vue'),
+        meta: { titleKey: 'menu.recalls' },
+      },
+      {
         path: 'warehouse/reports',
         name: 'warehouse-reports',
         component: () => import('@/views/warehouse/WarehouseReports.vue'),

@@ -10,12 +10,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-@Schema(description = "催收跟催记录录入")
+@Schema(description = "Collection log entry")
 public class CollectionLogForm {
     @NotNull
     private Long customerId;
 
-    @Schema(description = "可选: 针对具体订单跟催")
+    @Schema(description = "Optional: target a specific order")
     private Long orderId;
 
     @NotNull
@@ -34,7 +34,7 @@ public class CollectionLogForm {
              message = "outcome must be promised / refused / no_answer / disputed / paid / other")
     private String outcome;
 
-    @Schema(description = "客户承诺还款日 (outcome=promised 必填)")
+    @Schema(description = "Customer-promised payment date (required when outcome=promised)")
     private LocalDate promisedDate;
 
     private BigDecimal promisedAmount;

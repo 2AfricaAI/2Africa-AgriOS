@@ -67,6 +67,8 @@
           </template>
           <el-menu-item index="/qc/inspections">{{ t('menu.qcInspections') }}</el-menu-item>
           <el-menu-item index="/qc/trace">{{ t('menu.qcTrace') }}</el-menu-item>
+          <el-menu-item index="/qc/complaints">{{ t('menu.complaints') }}</el-menu-item>
+          <el-menu-item index="/qc/recalls">{{ t('menu.recalls') }}</el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="packhouse">

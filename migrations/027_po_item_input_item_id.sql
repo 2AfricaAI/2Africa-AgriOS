@@ -19,7 +19,7 @@ USE toafrica_agrios;
 -- 1) 加列
 ALTER TABLE `purchase_order_item`
   ADD COLUMN `input_item_id` BIGINT NULL
-    COMMENT 'FK -> input_item.id (软外键, 历史数据可空)'
+    COMMENT 'FK -> input_item.id (soft FK; legacy rows may be null)'
   AFTER `po_id`;
 
 -- 2) 索引(配合后续报表查询: 按物料统计采购量/采购成本)

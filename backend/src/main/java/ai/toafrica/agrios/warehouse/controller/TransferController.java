@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Tag(name = "33 · 仓库作业-调拨", description = "调拨单 创建/确认/取消")
+@Tag(name = "33 · Warehouse Ops-Transfer", description = "Transfer create/confirm/cancel")
 @RestController
 @RequestMapping("/v1/warehouse/transfer")
 @RequiredArgsConstructor

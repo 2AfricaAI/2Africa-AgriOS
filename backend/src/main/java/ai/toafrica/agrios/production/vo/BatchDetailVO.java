@@ -7,17 +7,17 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@Schema(description = "批次详情 - 含父/子/包装单的完整溯源")
+@Schema(description = "Batch detail - parent/children/packings full chain")
 public class BatchDetailVO {
-    @Schema(description = "本批次")
+    @Schema(description = "This batch")
     private BatchVO batch;
 
-    @Schema(description = "父批次(本批次是从它拆出来的);为 null 则本批次是根")
+    @Schema(description = "Parent batch (this batch was split from it); null = this is the root batch")
     private BatchVO parent;
 
-    @Schema(description = "子批次(本批次拆出来的);可能为空")
+    @Schema(description = "Children (batches split from this one); may be empty")
     private List<BatchVO> children;
 
-    @Schema(description = "本批次相关的包装单 (按 packed_at desc)")
+    @Schema(description = "Packings linked to this batch (ordered by packed_at desc)")
     private List<PackingRow> packings;
 }

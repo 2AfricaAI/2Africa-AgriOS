@@ -12,24 +12,24 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-@Schema(description = "批次拆分 - 表单")
+@Schema(description = "Batch split - form")
 public class BatchSplitForm {
 
     @NotEmpty(message = "At least one child batch is required")
     @Valid
-    @Schema(description = "子批次列表(每个含拆出的 kg + 备注)")
+    @Schema(description = "Children list (each with split kg + remark)")
     private List<Child> children;
 
     @Data
-    @Schema(description = "拆出的子批次")
+    @Schema(description = "Split-off children")
     public static class Child {
         @NotNull
         @DecimalMin(value = "0.001", inclusive = true, message = "qtyKg must be > 0")
-        @Schema(description = "拆出的 kg")
+        @Schema(description = "Split-off kg")
         private BigDecimal qtyKg;
 
         @Size(max = 255)
-        @Schema(description = "备注")
+        @Schema(description = "Remark")
         private String remark;
     }
 }

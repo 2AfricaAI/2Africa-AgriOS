@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS `action_item` (
   `owner_role`      VARCHAR(32)  COMMENT 'sales / packhouse / qc / finance / ceo / production',
   `ref_type`        VARCHAR(32)  COMMENT 'inventory / customer / batch / order / sku / plot',
   `ref_id`          BIGINT,
-  `ref_code`        VARCHAR(64)  COMMENT '冗余 - 业务编码, 加速展示',
+  `ref_code`        VARCHAR(64)  COMMENT 'Denormalized business code for fast display',
   `status`          VARCHAR(16)  NOT NULL DEFAULT 'open'
                     COMMENT 'open / done / dismissed / auto_resolved',
   `due_date`        DATE,
-  `data_snapshot`   JSON COMMENT '触发数据快照 - 调试 + 解释性展示',
+  `data_snapshot`   JSON COMMENT 'Trigger data snapshot - for debugging + explainability',
   `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`      DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `resolved_at`     DATETIME,
@@ -30,4 +30,4 @@ CREATE TABLE IF NOT EXISTS `action_item` (
   KEY `idx_status_category` (`status`, `category`),
   KEY `idx_owner_role` (`owner_role`),
   KEY `idx_severity` (`severity`)
-) ENGINE=InnoDB COMMENT='经营行动清单 - Sprint 10 决策中心';
+) ENGINE=InnoDB COMMENT='Action items - Sprint 10 decision center';

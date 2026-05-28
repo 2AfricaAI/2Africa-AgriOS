@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 批次完整追溯链 - 内部页面 (Sprint 25).
  * 公开扫码版本在 PublicTraceController.
  */
-@Tag(name = "42 · QC-追溯链", description = "Batch full traceability (internal)")
+@Tag(name = "42 · QC-Trace", description = "Batch full traceability (internal)")
 @RestController
 @RequestMapping("/v1/qc/trace")
 @RequiredArgsConstructor

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "11 · 生产-种植计划", description = "种植计划: 把地块/作物/品种/时间串起来的核心业务对象")
+@Tag(name = "11 · Production-Planting Plans", description = "Planting plan: core business object linking plot/crop/variety/time")
 @RestController
 @RequestMapping("/v1/production/planting-plans")
 @RequiredArgsConstructor
@@ -30,31 +30,31 @@ public class PlantingPlanController {
 
     private final PlantingPlanService plantingPlanService;
 
-    @Operation(summary = "种植计划列表(分页 + 过滤)")
+    @Operation(summary = "Planting plan list (paginated + filtered)")
     @GetMapping
     public R<PageResult<PlantingPlanVO>> list(
-            @Parameter(description = "按地块 ID 过滤") @RequestParam(required = false) Long plotId,
-            @Parameter(description = "按作物 ID 过滤") @RequestParam(required = false) Long cropId,
-            @Parameter(description = "按状态过滤") @RequestParam(required = false) String status,
-            @Parameter(description = "编码模糊查询") @RequestParam(required = false) String code,
+            @Parameter(description = "Filter by plot id") @RequestParam(required = false) Long plotId,
+            @Parameter(description = "Filter by crop id") @RequestParam(required = false) Long cropId,
+            @Parameter(description = "Filter by status") @RequestParam(required = false) String status,
+            @Parameter(description = "Code fuzzy match") @RequestParam(required = false) String code,
             PageQuery pq) {
         return R.ok(plantingPlanService.page(plotId, cropId, status, code, pq));
     }
 
-    @Operation(summary = "种植计划详情")
+    @Operation(summary = "Planting plan detail")
     @GetMapping("/{id}")
     public R<PlantingPlanVO> detail(@PathVariable Long id) {
         return R.ok(plantingPlanService.detail(id));
     }
 
-    @Operation(summary = "新建种植计划")
+    @Operation(summary = "Create planting plan")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody PlantingPlanForm form) {
         return R.ok(plantingPlanService.create(form));
     }
 
-    @Operation(summary = "修改种植计划")
+    @Operation(summary = "Update planting plan")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody PlantingPlanForm form) {
@@ -62,7 +62,7 @@ public class PlantingPlanController {
         return R.ok();
     }
 
-    @Operation(summary = "切换状态 (draft/planned/in_progress/harvested/completed/cancelled)")
+    @Operation(summary = "Change status (draft/planned/in_progress/harvested/completed/cancelled)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/status/{status}")
     public R<Void> changeStatus(@PathVariable Long id, @PathVariable String status) {
@@ -70,7 +70,7 @@ public class PlantingPlanController {
         return R.ok();
     }
 
-    @Operation(summary = "删除 (软删)")
+    @Operation(summary = "Delete (soft delete)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "28 · 仓库-出入库流水", description = "出入库流水日志 (只读, 审计)")
+@Tag(name = "28 · Warehouse-Stock Log", description = "Stock movement log (read-only, audit)")
 @RestController
 @RequestMapping("/v1/warehouse/stock-log")
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class InputStockLogController {
 
     private final InputStockLogService logService;
 
-    @Operation(summary = "出入库流水列表 (分页 + 过滤)")
+    @Operation(summary = "Stock movement log (paginated + filtered)")
     @GetMapping
     public R<PageResult<InputStockLogVO>> list(
             @Parameter(description = "Filter by input_item.id")

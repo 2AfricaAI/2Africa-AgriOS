@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-@Tag(name = "40 · QC-PHI 安全期检查", description = "Pre-Harvest Interval check (Sprint 23 / Phase 5)")
+@Tag(name = "40 · QC-PHI Check", description = "Pre-Harvest Interval check (Sprint 23 / Phase 5)")
 @RestController
 @RequestMapping("/v1/qc/phi")
 @RequiredArgsConstructor

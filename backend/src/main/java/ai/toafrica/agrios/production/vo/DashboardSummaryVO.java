@@ -8,33 +8,33 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@Schema(description = "Dashboard 首页摘要 - 一次返回所有 KPI 和列表")
+@Schema(description = "Dashboard home summary - all KPIs and lists in one call")
 public class DashboardSummaryVO {
 
     // 顶部 4 个 KPI
-    @Schema(description = "进行中(planned/in_progress) 计划数")
+    @Schema(description = "Active (planned/in_progress) plan count")
     private long activePlanCount;
 
-    @Schema(description = "待审核农事数")
+    @Schema(description = "Activities awaiting review count")
     private long pendingActivityCount;
 
-    @Schema(description = "今日采收量 (kg)")
+    @Schema(description = "Today's harvest qty (kg)")
     private BigDecimal todayHarvestKg;
 
-    @Schema(description = "待处理 batch 数")
+    @Schema(description = "Pending batch count")
     private long pendingBatchCount;
 
     // 趋势
-    @Schema(description = "近 7 天每日采收量 [{date, qty}]")
+    @Schema(description = "Daily harvest qty over the last 7 days [{date, qty}]")
     private List<Map<String, Object>> harvest7Days;
 
-    @Schema(description = "按作物分组采收量 [{cropName, qty}]")
+    @Schema(description = "Harvest qty grouped by crop [{cropName, qty}]")
     private List<Map<String, Object>> harvestByCrop;
 
     // 列表
-    @Schema(description = "待审核农事 Top 5")
+    @Schema(description = "Top 5 activities awaiting review")
     private List<Map<String, Object>> pendingActivities;
 
-    @Schema(description = "最近采收 Top 5")
+    @Schema(description = "Top 5 recent harvests")
     private List<Map<String, Object>> recentHarvests;
 }

@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "投入品主数据 (Phase 4)")
+@Tag(name = "24 · Master-Input Items (Phase 4)")
 @RestController
 @RequestMapping("/v1/master/input-items")
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class InputItemController {
 
     private final InputItemService service;
 
-    @Operation(summary = "投入品列表 (分页 + 过滤)")
+    @Operation(summary = "Input item list (paginated + filtered)")
     @GetMapping
     public R<PageResult<InputItemVO>> list(
             @Parameter @RequestParam(required = false) String code,
@@ -36,20 +36,20 @@ public class InputItemController {
         return R.ok(service.page(code, name, inputType, supplierId, status, pq));
     }
 
-    @Operation(summary = "投入品详情")
+    @Operation(summary = "Input item detail")
     @GetMapping("/{id}")
     public R<InputItemVO> detail(@PathVariable Long id) {
         return R.ok(service.detail(id));
     }
 
-    @Operation(summary = "新建投入品")
+    @Operation(summary = "Create input item")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody InputItemForm form) {
         return R.ok(service.create(form));
     }
 
-    @Operation(summary = "修改投入品")
+    @Operation(summary = "Update input item")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @Valid @RequestBody InputItemForm form) {
@@ -57,7 +57,7 @@ public class InputItemController {
         return R.ok();
     }
 
-    @Operation(summary = "启用/停用 (active|inactive)")
+    @Operation(summary = "Enable / disable (active|inactive)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/status/{status}")
     public R<Void> toggleStatus(@PathVariable Long id, @PathVariable String status) {
@@ -65,7 +65,7 @@ public class InputItemController {
         return R.ok();
     }
 
-    @Operation(summary = "删除投入品 (仅 SUPER_ADMIN)")
+    @Operation(summary = "Delete input item (SUPER_ADMIN only)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {

@@ -8,24 +8,24 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-@Schema(description = "发送 SMS / WhatsApp 请求")
+@Schema(description = "Send SMS / WhatsApp request")
 public class SmsSendForm {
 
     @NotNull
     private Long customerId;
 
-    @Schema(description = "可选: 针对具体订单 (用于 {orderCode} {amount} {dueDate} {daysOverdue} 占位符)")
+    @Schema(description = "Optional: target a specific order (used for {orderCode} {amount} {dueDate} {daysOverdue} placeholders)")
     private Long orderId;
 
     @NotBlank
-    @Schema(description = "模板编码: AR_PRE_REMIND / AR_OVERDUE / AR_PROMISE_DUE")
+    @Schema(description = "Template code: AR_PRE_REMIND / AR_OVERDUE / AR_PROMISE_DUE")
     private String templateCode;
 
     @Pattern(regexp = "^(sms|whatsapp)$", message = "channel must be sms or whatsapp")
-    @Schema(description = "默认走模板的 channel; 此处可覆盖")
+    @Schema(description = "Defaults to the template channel; can be overridden here")
     private String channel;
 
     @Size(max = 32)
-    @Schema(description = "覆盖目标手机 (默认取 customer.contact_phone)")
+    @Schema(description = "Override target phone (defaults to customer.contact_phone)")
     private String phoneOverride;
 }

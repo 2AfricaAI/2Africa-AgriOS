@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-@Schema(description = "VendorPayment - 付供应商款录入")
+@Schema(description = "VendorPayment - vendor payment entry")
 public class VendorPaymentForm {
     @NotNull
     private Long poId;

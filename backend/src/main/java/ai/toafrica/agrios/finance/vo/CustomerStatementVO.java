@@ -13,7 +13,7 @@ import java.util.List;
  *   余额公式: closingBalance = openingBalance + periodSales - periodPayments
  */
 @Data
-@Schema(description = "客户对账单 (Statement of Account)")
+@Schema(description = "Customer Statement of Account")
 public class CustomerStatementVO {
     // ---- 客户信息 ----
     private Long customerId;

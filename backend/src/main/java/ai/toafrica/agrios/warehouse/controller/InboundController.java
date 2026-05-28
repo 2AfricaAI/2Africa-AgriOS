@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Tag(name = "30 · 仓库作业-入库", description = "入库单列表/详情/确认/取消")
+@Tag(name = "30 · Warehouse Ops-Inbound", description = "Inbound list/detail/confirm/cancel")
 @RestController
 @RequestMapping("/v1/warehouse/inbound")
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class InboundController {
 
     private final InboundService inboundService;
 
-    @Operation(summary = "入库单列表")
+    @Operation(summary = "Inbound list")
     @GetMapping
     public R<PageResult<InboundVO>> list(
             @RequestParam(required = false) String status,
@@ -35,13 +35,13 @@ public class InboundController {
         return R.ok(inboundService.page(status, warehouseId, sourceType, pq));
     }
 
-    @Operation(summary = "入库单详情 (含明细行)")
+    @Operation(summary = "Inbound detail (with line items)")
     @GetMapping("/{id}")
     public R<InboundDetailVO> detail(@PathVariable Long id) {
         return R.ok(inboundService.detail(id));
     }
 
-    @Operation(summary = "手工新建入库单")
+    @Operation(summary = "Manually create inbound")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping
     public R<Long> create(@RequestBody CreateInboundRequest req) {
@@ -51,7 +51,7 @@ public class InboundController {
         return R.ok(inboundService.createManual(req.getWarehouseId(), req.getSourceType(), items, req.getRemark()));
     }
 
-    @Operation(summary = "确认入库 (仓库人员填写实际数量)")
+    @Operation(summary = "Confirm inbound (warehouse staff fills actual qty)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/confirm")
     public R<Void> confirm(@PathVariable Long id, @RequestBody ConfirmRequest req) {
@@ -62,7 +62,7 @@ public class InboundController {
         return R.ok();
     }
 
-    @Operation(summary = "取消入库单 (仅 draft)")
+    @Operation(summary = "Cancel inbound (draft only)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @PostMapping("/{id}/cancel")
     public R<Void> cancel(@PathVariable Long id) {

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "52 · Finance Collections", description = "AR 催收跟催记录")
+@Tag(name = "52 · Finance Collections", description = "AR collection follow-up records")
 @RestController
 @RequestMapping("/v1/finance/collections")
 @RequiredArgsConstructor

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "27 · 仓库-投入品库存", description = "投入品库存查询 (只读)")
+@Tag(name = "27 · Warehouse-Input Stock", description = "Input stock query (read-only)")
 @RestController
 @RequestMapping("/v1/warehouse/input-stock")
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class InputStockController {
 
     private final InputStockService stockService;
 
-    @Operation(summary = "投入品库存列表 (分页 + 过滤)")
+    @Operation(summary = "Input stock list (paginated + filtered)")
     @GetMapping
     public R<PageResult<InputStockVO>> list(
             @Parameter(description = "Filter by input_item.id")

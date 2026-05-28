@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Schema(description = "农事记录展示对象")
+@Schema(description = "Activity display object")
 public class ActivityVO {
     private Long id;
     private String clientUuid;

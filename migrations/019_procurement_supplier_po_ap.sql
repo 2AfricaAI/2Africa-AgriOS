@@ -11,21 +11,21 @@
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `supplier` (
   `id`             BIGINT       PRIMARY KEY AUTO_INCREMENT,
-  `code`           VARCHAR(32)  NOT NULL UNIQUE        COMMENT 'SUP-NNNNN 自动生成',
+  `code`           VARCHAR(32)  NOT NULL UNIQUE        COMMENT 'SUP-NNNNN auto-generated',
   `name`           VARCHAR(120) NOT NULL,
   `type`           VARCHAR(32)  NOT NULL
                    COMMENT 'input_dealer / labor_contractor / utility / equipment / service / logistics / other',
-  `tax_id`         VARCHAR(64)                         COMMENT '税号 / KRA PIN',
+  `tax_id`         VARCHAR(64)                         COMMENT 'Tax id / KRA PIN',
   `contact_name`   VARCHAR(80),
   `contact_phone`  VARCHAR(32),
   `contact_email`  VARCHAR(120),
   `address`        VARCHAR(255),
 
   `credit_days`    INT          NOT NULL DEFAULT 0
-                   COMMENT '账期天数: 0=COD, 7=周结, 30=月结',
-  `payment_terms`  VARCHAR(32)                         COMMENT '账期 label',
+                   COMMENT 'Credit term days: 0=COD, 7=Weekly, 30=Monthly',
+  `payment_terms`  VARCHAR(32)                         COMMENT 'Payment terms label',
 
-  `since_date`     DATE                                COMMENT '建立合作日',
+  `since_date`     DATE                                COMMENT 'Partnership start date',
   `status`         VARCHAR(16)  NOT NULL DEFAULT 'active'
                    COMMENT 'active / inactive',
 
@@ -33,11 +33,11 @@ CREATE TABLE IF NOT EXISTS `supplier` (
   `created_at`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by`     BIGINT,
   `updated_at`     DATETIME                            ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at`     DATETIME                            COMMENT '软删',
+  `deleted_at`     DATETIME                            COMMENT 'Soft delete',
 
   KEY `idx_status`  (`status`),
   KEY `idx_type`    (`type`)
-) ENGINE=InnoDB COMMENT='供应商主数据 - Sprint 17';
+) ENGINE=InnoDB COMMENT='Supplier master data - Sprint 17';
 
 -- ----------------------------------------------------------------------------
 -- 2. 采购订单 (头)
@@ -45,35 +45,35 @@ CREATE TABLE IF NOT EXISTS `supplier` (
 CREATE TABLE IF NOT EXISTS `purchase_order` (
   `id`              BIGINT       PRIMARY KEY AUTO_INCREMENT,
   `code`            VARCHAR(32)  NOT NULL UNIQUE
-                    COMMENT 'PO-YYYYMMDD-NNNN 自动生成',
+                    COMMENT 'PO-YYYYMMDD-NNNN auto-generated',
   `supplier_id`     BIGINT       NOT NULL,
   `order_date`      DATE         NOT NULL,
-  `expected_date`   DATE                                 COMMENT '预计到货日',
+  `expected_date`   DATE                                 COMMENT 'Expected delivery date',
 
   `currency`        VARCHAR(8)   NOT NULL DEFAULT 'KES',
   `fx_rate`         DECIMAL(12,6) NOT NULL DEFAULT 1.0   COMMENT 'to KES',
-  `total_amount`    DECIMAL(14,2) NOT NULL DEFAULT 0     COMMENT '订单金额 (currency)',
+  `total_amount`    DECIMAL(14,2) NOT NULL DEFAULT 0     COMMENT 'Order amount (currency)',
 
   `status`          VARCHAR(16)  NOT NULL DEFAULT 'draft'
                     COMMENT 'draft / confirmed / partial_received / received / cancelled',
 
   `payment_status`  VARCHAR(16)  NOT NULL DEFAULT 'unpaid'
-                    COMMENT 'unpaid / partial / paid (由 VendorPaymentService 自动维护)',
+                    COMMENT 'unpaid / partial / paid (maintained by VendorPaymentService)',
   `paid_amount`     DECIMAL(14,2) NOT NULL DEFAULT 0
-                    COMMENT '累计已付款 (KES 本位币)',
-  `due_date`        DATE                                 COMMENT '应付日 = order_date + supplier.credit_days',
+                    COMMENT 'Cumulative paid amount (KES functional currency)',
+  `due_date`        DATE                                 COMMENT 'Due date = order_date + supplier.credit_days',
 
   `remark`          VARCHAR(500),
   `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by`      BIGINT,
   `updated_at`      DATETIME                             ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at`      DATETIME                             COMMENT '软删',
+  `deleted_at`      DATETIME                             COMMENT 'Soft delete',
 
   KEY `idx_supplier`  (`supplier_id`),
   KEY `idx_status`    (`status`),
   KEY `idx_payment_status_due` (`payment_status`, `due_date`),
   KEY `idx_order_date` (`order_date`)
-) ENGINE=InnoDB COMMENT='采购订单头 - Sprint 17';
+) ENGINE=InnoDB COMMENT='Purchase order header - Sprint 17';
 
 -- ----------------------------------------------------------------------------
 -- 3. 采购订单明细
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `purchase_order_item` (
 
   `input_type`   VARCHAR(32)  NOT NULL
                  COMMENT 'labor / water / electricity / fertilizer / seed / pesticide / equipment / service / other',
-  `description`  VARCHAR(255) NOT NULL                COMMENT '例: NPK 17:17:17 fertilizer 50kg',
+  `description`  VARCHAR(255) NOT NULL                COMMENT 'e.g. NPK 17:17:17 fertilizer 50kg',
 
   `quantity`     DECIMAL(14,3) NOT NULL,
   `unit`         VARCHAR(16)  NOT NULL                COMMENT 'bag / kg / L / hour / person-day / lump-sum',
@@ -92,14 +92,14 @@ CREATE TABLE IF NOT EXISTS `purchase_order_item` (
   `amount`       DECIMAL(14,2) NOT NULL                COMMENT '= quantity × unit_price',
 
   `received_qty` DECIMAL(14,3) NOT NULL DEFAULT 0
-                 COMMENT '已收数量 (部分到货支持)',
+                 COMMENT 'Received qty (supports partial deliveries)',
 
   `remark`       VARCHAR(255),
   `created_at`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   KEY `idx_po`         (`po_id`),
   KEY `idx_input_type` (`input_type`)
-) ENGINE=InnoDB COMMENT='采购订单明细 - Sprint 17';
+) ENGINE=InnoDB COMMENT='Purchase order lines - Sprint 17';
 
 -- ----------------------------------------------------------------------------
 -- 4. 付供应商款 (镜像 payment 表)
@@ -113,13 +113,13 @@ CREATE TABLE IF NOT EXISTS `vendor_payment` (
   `amount`          DECIMAL(14,2) NOT NULL,
   `currency`        VARCHAR(8)   NOT NULL DEFAULT 'KES',
   `fx_rate`         DECIMAL(12,6) NOT NULL DEFAULT 1.0,
-  `amount_kes`      DECIMAL(14,2) NOT NULL              COMMENT '本位币金额',
+  `amount_kes`      DECIMAL(14,2) NOT NULL              COMMENT 'Amount in functional currency',
 
   `method`          VARCHAR(16)  NOT NULL
                     COMMENT 'cash / bank / cheque / loop_online / loop_pos',
   `payment_date`    DATE         NOT NULL,
-  `reference_no`    VARCHAR(64)                         COMMENT '银行流水 / 支票号 / Loop 回执',
-  `pos_terminal_id` VARCHAR(64)                         COMMENT 'loop_pos 终端号',
+  `reference_no`    VARCHAR(64)                         COMMENT 'Bank reference / cheque no. / Loop receipt',
+  `pos_terminal_id` VARCHAR(64)                         COMMENT 'loop_pos terminal id',
   `channel`         VARCHAR(32)                         COMMENT 'mpesa / card / bank',
 
   `status`          VARCHAR(16)  NOT NULL DEFAULT 'cleared'
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `vendor_payment` (
   KEY `idx_po`       (`po_id`),
   KEY `idx_supplier` (`supplier_id`, `payment_date`),
   KEY `idx_status`   (`status`)
-) ENGINE=InnoDB COMMENT='付供应商款 - Sprint 17';
+) ENGINE=InnoDB COMMENT='Vendor payment - Sprint 17';
 
 -- ----------------------------------------------------------------------------
 -- 5. 预置 5 条演示供应商 (可选, 方便联调)

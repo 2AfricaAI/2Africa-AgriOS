@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "02 · 文件", description = "文件上传 / 下载 / 删除")
+@Tag(name = "02 · Files", description = "File upload / download / delete")
 @RestController
 @RequestMapping("/v1/files")
 @RequiredArgsConstructor
@@ -27,30 +27,30 @@ public class FileController {
 
     private final FileService fileService;
 
-    @Operation(summary = "上传文件 (后端代传)")
+    @Operation(summary = "Upload file (proxied via backend)")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<FileVO> upload(
-            @Parameter(description = "文件", required = true)
+            @Parameter(description = "File", required = true)
             @RequestPart("file") MultipartFile file,
-            @Parameter(description = "业务分类, 例如 avatar / crop_image / activity_photo")
+            @Parameter(description = "Business category, e.g. avatar / crop_image / activity_photo")
             @RequestParam(value = "bizType", required = false)
             @Schema(example = "avatar") String bizType) {
         return R.ok(fileService.upload(file, bizType));
     }
 
-    @Operation(summary = "取文件元数据 (含预签名下载 URL)")
+    @Operation(summary = "Get file metadata (with presigned download URL)")
     @GetMapping("/{id}")
     public R<FileVO> get(@PathVariable Long id) {
         return R.ok(fileService.get(id));
     }
 
-    @Operation(summary = "重新生成预签名下载 URL (仅返回 URL 字符串)")
+    @Operation(summary = "Regenerate presigned download URL (returns URL string only)")
     @GetMapping("/{id}/download-url")
     public R<String> downloadUrl(@PathVariable Long id) {
         return R.ok(fileService.presignedDownloadUrl(id));
     }
 
-    @Operation(summary = "删除文件 (软删元数据 + 真删对象)")
+    @Operation(summary = "Delete file (soft-delete metadata + hard-delete object)")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {
         fileService.delete(id);

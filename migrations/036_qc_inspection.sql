@@ -29,9 +29,9 @@ CREATE TABLE IF NOT EXISTS `qc_inspection` (
   `inspector_id`    BIGINT        NULL COMMENT 'FK -> sys_user.id',
 
   `result`          VARCHAR(20)   NOT NULL DEFAULT 'pending' COMMENT 'pending / pass / conditional_pass / fail',
-  `result_remark`   VARCHAR(500)  NULL COMMENT '总体结论备注',
+  `result_remark`   VARCHAR(500)  NULL COMMENT 'Overall conclusion remark',
 
-  `photo_ids`       JSON          NULL COMMENT '附件照片 sys_file.id 数组',
+  `photo_ids`       JSON          NULL COMMENT 'Attached photo sys_file.id array',
   `remark`          VARCHAR(500)  NULL,
 
   `created_at`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS `qc_inspection_item` (
   `id`              BIGINT         PRIMARY KEY AUTO_INCREMENT,
   `inspection_id`   BIGINT         NOT NULL,
 
-  `check_point`     VARCHAR(64)    NOT NULL COMMENT '检查项 (外观/重量/水分/残留量...)',
-  `expected_value`  VARCHAR(128)   NULL COMMENT '期望值/范围 (e.g., 8-10% 水分)',
-  `actual_value`    VARCHAR(128)   NULL COMMENT '实测值',
+  `check_point`     VARCHAR(64)    NOT NULL COMMENT 'Check item (appearance / weight / moisture / residue ...)',
+  `expected_value`  VARCHAR(128)   NULL COMMENT 'Expected value / range (e.g. 8-10% moisture)',
+  `actual_value`    VARCHAR(128)   NULL COMMENT 'Measured value',
   `result`          VARCHAR(8)     NULL DEFAULT 'pending' COMMENT 'pass / fail / pending',
   `remark`          VARCHAR(255)   NULL,
 

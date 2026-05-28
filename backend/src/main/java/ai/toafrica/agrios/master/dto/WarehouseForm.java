@@ -10,16 +10,16 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-@Schema(description = "仓库/库位 - 创建/修改表单")
+@Schema(description = "Warehouse / location - create/update form")
 public class WarehouseForm {
     @NotBlank
     @Size(max = 32)
-    @Schema(description = "编码", example = "W03")
+    @Schema(description = "Code", example = "W03")
     private String code;
 
     @NotBlank
     @Size(max = 64)
-    @Schema(description = "名称", example = "二号包装仓")
+    @Schema(description = "Name", example = "Packing warehouse #2")
     private String name;
 
     @NotBlank
@@ -50,6 +50,6 @@ public class WarehouseForm {
     private Long parentId;
 
     @DecimalMin(value = "0.00", inclusive = true)
-    @Schema(description = "容量 (kg)", example = "5000")
+    @Schema(description = "Capacity (kg)", example = "5000")
     private BigDecimal capacityKg;
 }

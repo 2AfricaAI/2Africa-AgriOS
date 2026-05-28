@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "15 · Packhouse-包装单", description = "包装单创建驱动: 扣 batch 余量 + 加 inventory + 写库存调整日志")
+@Tag(name = "15 · Packhouse-Packing", description = "Packing creation transaction: decrement batch remaining + add inventory + write adjust log")
 @RestController
 @RequestMapping("/v1/packhouse/packings")
 @RequiredArgsConstructor
@@ -27,19 +27,19 @@ public class PackingController {
 
     private final PackingService packingService;
 
-    @Operation(summary = "包装单列表")
+    @Operation(summary = "Packing list")
     @GetMapping
     public R<PageResult<PackingRow>> list(
             @RequestParam(required = false) Long batchId,
             @RequestParam(required = false) Long skuId,
             @RequestParam(required = false) Long locationId,
-            @Parameter(description = "等级 A/B/C")
+            @Parameter(description = "Grade A/B/C")
                 @RequestParam(required = false) String grade,
             PageQuery pq) {
         return R.ok(packingService.page(batchId, skuId, locationId, grade, pq));
     }
 
-    @Operation(summary = "新建包装单 (扣 batch + 加 inventory)")
+    @Operation(summary = "Create packing (decrement batch + add inventory)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_PACKHOUSE')")
     @PostMapping
     public R<Long> create(@Valid @RequestBody PackingForm form) {

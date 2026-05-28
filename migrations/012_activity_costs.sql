@@ -11,7 +11,7 @@ ALTER TABLE `activity_input`
 
 -- 2. activity: 加人工 / 水电 / 其他成本 + 货币
 ALTER TABLE `activity`
-  ADD COLUMN `labor_cost`     DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '人工成本' AFTER `remark`,
-  ADD COLUMN `utility_cost`   DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '水电成本' AFTER `labor_cost`,
-  ADD COLUMN `other_cost`     DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '其他成本' AFTER `utility_cost`,
-  ADD COLUMN `cost_currency`  VARCHAR(8)    NOT NULL DEFAULT 'KES' COMMENT 'labor/utility/other 通用货币' AFTER `other_cost`;
+  ADD COLUMN `labor_cost`     DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Labor cost' AFTER `remark`,
+  ADD COLUMN `utility_cost`   DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Utility cost' AFTER `labor_cost`,
+  ADD COLUMN `other_cost`     DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Other cost' AFTER `utility_cost`,
+  ADD COLUMN `cost_currency`  VARCHAR(8)    NOT NULL DEFAULT 'KES' COMMENT 'Currency for labor/utility/other generic costs' AFTER `other_cost`;

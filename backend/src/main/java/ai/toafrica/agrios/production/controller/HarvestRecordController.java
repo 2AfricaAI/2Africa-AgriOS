@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-@Tag(name = "13 · 生产-采收记录", description = "采收事件 - 创建时自动产生批次(全链路追溯主键)")
+@Tag(name = "13 · Production-Harvests", description = "Harvest events - auto-create a batch (full-chain traceability key) on creation")
 @RestController
 @RequestMapping("/v1/production/harvests")
 @RequiredArgsConstructor
@@ -32,22 +32,22 @@ public class HarvestRecordController {
 
     private final HarvestRecordService harvestService;
 
-    @Operation(summary = "采收记录列表")
+    @Operation(summary = "Harvest record list")
     @GetMapping
     public R<PageResult<HarvestRecordVO>> list(
             @RequestParam(required = false) Long plotId,
             @RequestParam(required = false) Long planId,
-            @Parameter(description = "采收日期起 (含)")
+            @Parameter(description = "Harvest date start (inclusive)")
                 @RequestParam(required = false)
                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @Parameter(description = "采收日期止 (含)")
+            @Parameter(description = "Harvest date end (inclusive)")
                 @RequestParam(required = false)
                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
             PageQuery pq) {
         return R.ok(harvestService.page(plotId, planId, dateFrom, dateTo, pq));
     }
 
-    @Operation(summary = "新建采收记录 (自动产生 batch, 含工人移动端)")
+    @Operation(summary = "Create harvest record (auto-creates batch, also from worker mobile)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or " +
                   "hasAuthority('ROLE_LEADER') or hasAuthority('ROLE_WORKER')")
     @PostMapping
@@ -55,7 +55,7 @@ public class HarvestRecordController {
         return R.ok(harvestService.create(form));
     }
 
-    @Operation(summary = "删除采收记录 (同时软删对应 batch)")
+    @Operation(summary = "Delete harvest record (also soft-deletes the corresponding batch)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER')")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {

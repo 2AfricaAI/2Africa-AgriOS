@@ -8,6 +8,6 @@
 
 ALTER TABLE `payment`
   ADD COLUMN `pos_terminal_id` VARCHAR(64) NULL
-    COMMENT 'POS 机标识 / Till Number (loop_pos 才有值)' AFTER `reference_no`,
+    COMMENT 'POS identifier / Till Number (set only when loop_pos)' AFTER `reference_no`,
   ADD COLUMN `channel` VARCHAR(32) NULL
-    COMMENT 'Loop 聚合后的实际通道: mpesa / card / bank, webhook 写入' AFTER `pos_terminal_id`;
+    COMMENT 'Loop aggregated channel: mpesa / card / bank — written by webhook' AFTER `pos_terminal_id`;
