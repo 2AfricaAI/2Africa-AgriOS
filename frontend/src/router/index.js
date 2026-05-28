@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/layouts/AppLayout.vue'
 import MobileLayout from '@/layouts/MobileLayout.vue'
+import PortalLayout from '@/layouts/PortalLayout.vue'
 import i18n from '@/i18n'
 
 const routes = [
@@ -309,6 +310,21 @@ const routes = [
       },
     ],
   },
+  // ---------- Customer Portal (Sprint 37) ----------
+  {
+    path: '/portal',
+    component: PortalLayout,
+    meta: { portal: true },
+    children: [
+      { path: '', redirect: '/portal/orders' },
+      {
+        path: 'orders',
+        name: 'portal-orders',
+        component: () => import('@/views/portal/PortalOrders.vue'),
+        meta: { titleKey: 'portal.myOrders', portal: true },
+      },
+    ],
+  },
   // ---------- Public trace (QR scan landing, no auth, no layout) ----------
   {
     path: '/trace/:code',
@@ -335,13 +351,18 @@ router.beforeEach((to) => {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
   if (to.name === 'login' && auth.isLoggedIn) {
-    // 20.8: worker 登录后直接进移动端, 其他角色去桌面
-    return { path: auth.isWorkerOnly ? '/m/' : '/' }
+    // Sprint 37: CUSTOMER -> /portal, WORKER -> /m, else use landingPath or /
+    if (auth.isCustomer) return { path: '/portal/orders' }
+    if (auth.isWorkerOnly) return { path: '/m/' }
+    return { path: auth.landingPath || '/' }
   }
-  // 20.8: 工人角色尝试访问桌面端 (非 /m/* 路由) -> 强制跳回移动端
-  // 公开追溯页 (扫码落地) 例外, 任何人都允许访问
+  // Sprint 20.8: WORKER role locked to /m  (public trace exempt)
   if (auth.isLoggedIn && auth.isWorkerOnly && !to.meta.mobile && !to.meta.public && to.name !== 'login') {
     return { path: '/m/' }
+  }
+  // Sprint 37: CUSTOMER role locked to /portal
+  if (auth.isLoggedIn && auth.isCustomer && !to.meta.portal && !to.meta.public && to.name !== 'login') {
+    return { path: '/portal/orders' }
   }
 })
 
