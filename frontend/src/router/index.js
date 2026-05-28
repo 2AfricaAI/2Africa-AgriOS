@@ -95,6 +95,12 @@ const routes = [
         meta: { titleKey: 'menu.recalls' },
       },
       {
+        path: 'qc/gap-reports',
+        name: 'qc-gap-reports',
+        component: () => import('@/views/qc/GapReports.vue'),
+        meta: { titleKey: 'menu.gapReports' },
+      },
+      {
         path: 'warehouse/reports',
         name: 'warehouse-reports',
         component: () => import('@/views/warehouse/WarehouseReports.vue'),

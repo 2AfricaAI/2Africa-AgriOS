@@ -7,6 +7,17 @@
         <el-button type="info" plain :icon="LocationFilled" @click="openTrace">
           {{ t('menu.qcTrace') }}
         </el-button>
+        <el-dropdown trigger="click" @command="onGapExport">
+          <el-button type="warning" plain :icon="DownloadIcon">
+            {{ t('gap.exportBatch') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="pdf">{{ t('gap.asPdf') }}</el-dropdown-item>
+              <el-dropdown-item command="xlsx">{{ t('gap.asXlsx') }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
         <el-button type="success" @click="pnlVisible = true">
           {{ t('pnl.viewPnl') }}
         </el-button>
@@ -298,8 +309,11 @@ import {
   Delete,
   Plus,
   LocationFilled,
+  Download as DownloadIcon,
+  ArrowDown,
 } from '@element-plus/icons-vue'
 import { getBatchDetail, splitBatch } from '@/api/batch'
+import { downloadBatchPdf, downloadBatchXlsx } from '@/api/gapReport'
 import PnLDialog from '@/components/PnLDialog.vue'
 
 // Sprint 12 - P&L dialog state (uses ref from existing vue import)
@@ -364,6 +378,22 @@ function goBack() {
 function openTrace() {
   if (!data.value?.batch?.code) return
   router.push({ path: '/qc/trace', query: { code: data.value.batch.code } })
+}
+
+// ----- GAP report export -----
+async function onGapExport(format) {
+  const code = data.value?.batch?.code
+  if (!code) return
+  const fn = format === 'pdf' ? downloadBatchPdf : downloadBatchXlsx
+  const ext = format === 'pdf' ? 'pdf' : 'xlsx'
+  const blob = await fn(code)
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `GAP-${code}.${ext}`
+  a.click()
+  window.URL.revokeObjectURL(url)
+  ElMessage.success(t('gap.downloadSuccess'))
 }
 
 // ----- 拆分对话框 -----

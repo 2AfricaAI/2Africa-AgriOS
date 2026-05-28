@@ -157,7 +157,14 @@
             <version>1.0.10</version>
         </dependency>
 
-        <!-- ===== 测试 ===== -->
+        <!-- ===== Excel (Apache POI for GAP / HACCP reports - Sprint 28) ===== -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
+        <!-- ===== Tests ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

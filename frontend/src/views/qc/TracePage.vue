@@ -45,6 +45,17 @@
             <canvas ref="qrCanvas" width="140" height="140"></canvas>
             <el-button link type="primary" size="small" @click="downloadQr">{{ t('trace.downloadQr') }}</el-button>
             <div class="qr-url">{{ qrUrl }}</div>
+            <el-dropdown trigger="click" @command="onGapExport" style="margin-top: 8px">
+              <el-button size="small" type="warning" plain>
+                {{ t('gap.exportBatch') }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="pdf">{{ t('gap.asPdf') }}</el-dropdown-item>
+                  <el-dropdown-item command="xlsx">{{ t('gap.asXlsx') }}</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </div>
       </el-card>
@@ -201,9 +212,10 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search as SearchIcon, LocationFilled, Box, Sunny, Wallet,
-  InfoFilled, CircleCheckFilled } from '@element-plus/icons-vue'
+  InfoFilled, CircleCheckFilled, ArrowDown } from '@element-plus/icons-vue'
 import QRCode from 'qrcode'
 import { getTrace, getPublicTrace } from '@/api/trace'
+import { downloadBatchPdf, downloadBatchXlsx } from '@/api/gapReport'
 
 // Custom icon stub (lucide Wheat doesn't exist in Element Plus, use Sunny again)
 const Wheat = Sunny
@@ -259,6 +271,21 @@ function downloadQr() {
   link.href = qrCanvas.value.toDataURL('image/png')
   link.download = `qr-${trace.value.batch.code}.png`
   link.click()
+}
+
+async function onGapExport(format) {
+  const code = trace.value?.batch?.code
+  if (!code) return
+  const fn = format === 'pdf' ? downloadBatchPdf : downloadBatchXlsx
+  const ext = format === 'pdf' ? 'pdf' : 'xlsx'
+  const blob = await fn(code)
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `GAP-${code}.${ext}`
+  a.click()
+  window.URL.revokeObjectURL(url)
+  ElMessage.success(t('gap.downloadSuccess'))
 }
 
 onMounted(() => {

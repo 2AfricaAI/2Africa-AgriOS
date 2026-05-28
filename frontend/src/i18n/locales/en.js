@@ -27,6 +27,7 @@ export default {
     qcTrace: 'Traceability',
     complaints: 'Complaints',
     recalls: 'Recalls',
+    gapReports: 'GAP Reports',
     inputStock: 'Inventory Management',
     stockLog: 'Stock Movements',
     production: 'Production',
@@ -420,6 +421,25 @@ export default {
     st_quarantined: 'Quarantined',
     st_customers_notified: 'Customers Notified',
     st_closed: 'Closed',
+  },
+
+  gap: {
+    title: 'GAP / HACCP Audit Reports',
+    subtitle: 'Export compliance reports for GlobalG.A.P / KEPHIS auditors.',
+    from: 'From',
+    to: 'To',
+    crop: 'Crop',
+    downloadXlsx: 'Download Excel',
+    downloadSuccess: 'Download started',
+    dateRequired: 'Please choose at least a From or To date',
+    exportBatch: 'Export GAP',
+    asPdf: 'Detailed report (PDF)',
+    asXlsx: 'Audit workbook (Excel)',
+    howItWorks: 'How it works',
+    step1: 'Pick a date range (and optionally a crop) above, then click Download Excel.',
+    step2: 'Each batch in the range becomes a row with compliance verdict, PHI status, QC counts, complaints and recalls.',
+    step3: 'Compliance verdict: COMPLIANT / FLAGGED / NON_COMPLIANT, derived from PHI, QC pass/fail and active recalls.',
+    perBatchHint: 'For a single-batch deep report, open a batch and use Export GAP → PDF or Excel.',
   },
 
   inputStock: {

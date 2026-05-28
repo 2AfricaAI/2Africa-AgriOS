@@ -25,6 +25,7 @@ export default {
     qcTrace: '批次追溯',
     complaints: '投诉',
     recalls: '召回',
+    gapReports: 'GAP 报告',
     inputStock: '库存管理',
     stockLog: '出入库流水',
     production: '生产',
@@ -409,6 +410,25 @@ export default {
     st_quarantined: '已隔离',
     st_customers_notified: '客户已通知',
     st_closed: '已关闭',
+  },
+
+  gap: {
+    title: 'GAP / HACCP 审计报告',
+    subtitle: '为 GlobalG.A.P / KEPHIS 审计员导出合规报告。',
+    from: '起',
+    to: '止',
+    crop: '作物',
+    downloadXlsx: '下载 Excel',
+    downloadSuccess: '下载已开始',
+    dateRequired: '请至少选择起或止日期',
+    exportBatch: '导出 GAP',
+    asPdf: '完整报告 (PDF)',
+    asXlsx: '审计工作簿 (Excel)',
+    howItWorks: '使用说明',
+    step1: '上方选时间段(可选作物),点 "下载 Excel"。',
+    step2: '区间内每个批次为一行,含合规结论、PHI、QC 通过/失败、投诉、召回。',
+    step3: '合规结论 COMPLIANT / FLAGGED / NON_COMPLIANT,由 PHI、QC、活跃召回综合判定。',
+    perBatchHint: '查看单批次完整报告: 打开批次详情 → 导出 GAP → 选择 PDF 或 Excel。',
   },
 
   inputStock: {
