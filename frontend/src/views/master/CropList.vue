@@ -29,7 +29,16 @@
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
         <el-button type="primary" :icon="PlusIcon" @click="onCreate">{{ t('crop.new') }}</el-button>
+        <el-button :icon="UploadFilled" @click="importOpen = true">{{ t('import.button') }}</el-button>
       </div>
+
+      <ImportDialog
+        v-model="importOpen"
+        :title="t('menu.crops')"
+        template-url="/v1/master/crops/import/template"
+        import-url="/v1/master/crops/import"
+        @imported="reload(1)"
+      />
 
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
         <el-table-column prop="id" label="ID" width="70" align="center" />
@@ -130,6 +139,7 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Plus as PlusIcon,
+  UploadFilled,
 } from '@element-plus/icons-vue'
 import {
   listCrops,
@@ -137,8 +147,10 @@ import {
   updateCrop,
   changeCropStatus,
 } from '@/api/crop'
+import ImportDialog from '@/components/ImportDialog.vue'
 
 const { t } = useI18n()
+const importOpen = ref(false)
 
 // ============================================================
 // 列表 / 分页 / 过滤

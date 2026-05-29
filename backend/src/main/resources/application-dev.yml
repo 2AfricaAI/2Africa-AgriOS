@@ -1,9 +1,17 @@
+# =============================================================================
+# DEVELOPMENT profile - default credentials for local docker-compose stack.
+# These are NOT secrets. The dev MySQL / Redis are bound to localhost only and
+# the same default values are baked into docker-compose.yml so the stack just
+# works out of the box.
+#
+# DO NOT use this profile in production. Use application-prod.yml + env vars.
+# =============================================================================
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3006/toafrica_agrios?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
-    username: alberts
-    password: alberts123
+    username: ${DEV_DB_USER:alberts}
+    password: ${DEV_DB_PASSWORD:alberts123}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -15,7 +23,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: redis123
+      password: ${DEV_REDIS_PASSWORD:redis123}
       database: 0
       timeout: 5s
       lettuce:
@@ -24,10 +32,10 @@ spring:
           max-idle: 10
           min-idle: 2
 
-# Redisson 配置
+# Redisson — uses the same dev default credentials as above
 redisson:
   address: redis://localhost:6379
-  password: redis123
+  password: ${DEV_REDIS_PASSWORD:redis123}
   database: 0
 
 # 开发期跨域全开

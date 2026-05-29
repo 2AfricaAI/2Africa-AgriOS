@@ -35,6 +35,20 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
+      <div class="toolbar" style="margin-bottom: 12px">
+        <el-button :icon="UploadFilled" @click="importOpen = true">
+          {{ t('inv.importOpening') }}
+        </el-button>
+      </div>
+
+      <ImportDialog
+        v-model="importOpen"
+        :title="t('inv.openingBalance')"
+        template-url="/v1/packhouse/inventory/import/template"
+        import-url="/v1/packhouse/inventory/import"
+        @imported="reload(1)"
+      />
+
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
         <el-table-column :label="t('inv.sku')" min-width="220">
           <template #default="{ row }">
@@ -118,11 +132,14 @@ import { useI18n } from 'vue-i18n'
 import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
+  UploadFilled,
 } from '@element-plus/icons-vue'
 import { listInventory } from '@/api/inventory'
 import { listWarehouses } from '@/api/warehouse'
+import ImportDialog from '@/components/ImportDialog.vue'
 
 const { t } = useI18n()
+const importOpen = ref(false)
 
 function gradeTag(g) { return g === 'A' ? 'success' : g === 'B' ? 'warning' : 'info' }
 

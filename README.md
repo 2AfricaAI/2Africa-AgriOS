@@ -1,89 +1,132 @@
 # 2Africa AgriOS
 
-> AI 驱动的农场运营操作系统。
-> 覆盖种植 → 采收 → 销售 → 财务 → 决策的完整业务闭环。
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-3.0.0-green.svg)](CHANGELOG.md)
+[![Built for Kenya](https://img.shields.io/badge/built%20for-Kenya%20%F0%9F%87%B0%F0%9F%87%AA-orange.svg)](#)
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green)](#)
-[![Vue 3](https://img.shields.io/badge/Vue-3-brightgreen)](#)
-[![Java 17](https://img.shields.io/badge/Java-17-orange)](#)
-[![MySQL 8](https://img.shields.io/badge/MySQL-8-blue)](#)
+**An open-source, offline-first farm operating system, designed for African agriculture.**
 
-## 核心模块
+AgriOS digitizes the day-to-day operations of a single farm — from planting and harvesting to packing, sales, finance, and quality compliance. It runs locally on your own server, requires no internet to function, and never sends your data anywhere by default.
 
-- **生产**：种植计划 / 农事 / 采收 / 批次（支持拆分）
-- **打包**：SKU 自动建表 / Packing 事务核心 / 多维库存
-- **销售**：客户（账期）/ 订单 / 拣货 FIFO / 出库
-- **财务**：5 种付款 / AR 账龄 / 5 维 P&L / 13 周现金流 / 月报
-- **采购**：供应商 / PO / AP 账龄 / Activity↔PO 真实成本
-- **决策中心**：11 条规则引擎自动生成 4 类行动清单
-- **移动端**：PWA H5（记农事 / 记采收 / 任务）+ GPS + 拍照
-- **仓库管理**：投入品/成品分仓 + 4 级层级 + 8 类用途 + GAP 红线
+If you choose, AgriOS can federate with **2Africa AgriCloud** (a separate platform) via the **2Africa OpenAPI** to unlock network effects: peer benchmarks, market price discovery, bulk procurement, credit packs for banks, and more — all opt-in, field-by-field.
 
-## 仓库管理设计宪法
+---
 
-详细方案见 `农场仓库管理设计方案_V1.0.docx`。系统所有仓库相关功能必须遵循以下原则。
+## Why AgriOS?
 
-### 四个"一"原则
+- **Your code.** Apache 2.0 licensed. Read it, modify it, ship your own variant.
+- **Your data.** Everything stays on your machine. No telemetry by default.
+- **Your network.** Works fully offline. Internet is an enhancement, not a requirement.
+- **Your terms.** Use commercially. Integrate into proprietary systems. Charge for support.
 
-| 原则 | 含义 |
-|---|---|
-| 一物一编码 | 所有投入品、包装、工具、备件、成品 SKU 都有唯一编码（避免同物异名） |
-| 一批一来源 | 每批采购/采收/包装必须有批次号，可追溯供应商/地块/蘑菇房/采收人 |
-| 一动一单 | 入库、出库、调拨、领料、退料、报损都必须有单据（杜绝口头出货） |
-| 一件可追溯 | 客户订单中每件产品可倒查到生产源头 |
+---
 
-### 仓库编码规则
+## What's inside
 
-3 字母前缀 + 库区 + 货架 + 层 + 库位：
+AgriOS covers eleven business modules out of the box:
 
-```
-AGW = Agricultural Warehouse (投入品)
-  AGW-FER  化肥        AGW-SEE  种子        AGW-CHE  农药/化学品
-  AGW-CON  钢构物料    AGW-PKG  包装耗材    AGW-MSH  蘑菇物料
+| Module | Highlights |
+| --- | --- |
+| **Production** | Plots, planting plans, activities, harvests with GPS + photos |
+| **Packhouse** | FEFO inventory, shelf-life tracking, batch traceability |
+| **Quality** | QC inspections, PHI blocking, GAP reports, complaints, recalls |
+| **Sales** | Customers, orders, AR aging, customer statements (PDF) |
+| **Procurement** | Suppliers, POs, AP aging, vendor payments |
+| **Finance** | P&L by plot/SKU/customer, cash flow forecast, monthly close |
+| **Warehouse** | Inbound, outbound, stocktake, transfers, scrap |
+| **People & RBAC** | Fine-grained module × tier permissions, partner & customer portals |
+| **Mobile PWA** | Offline activity & harvest recording with GPS + photos (English / 中文 / Swahili) |
+| **Action Board** | Rule-driven action items: payment overdue, FEFO near-expiry, stock low, etc. |
+| **Trace** | Public QR-code batch traceability page for buyers and consumers |
 
-TLW = Tools & Spare Parts (工具备件)
-  TLW-TOL  工具间      TLW-SPT  配件柜
+---
 
-CLD = Cold Storage (成品冷藏)
-  CLD-IQC  待检        CLD-PRE  预冷        CLD-UGR  未分级
-  CLD-GRD  已分级      CLD-FGP  已包装      CLD-ORD  订单暂存
-  CLD-RTN  退货异常
+## Quick start (local development)
 
-FRZ = Frozen Storage    PKH = Packing House    RTN = Returns
-```
-
-库位完整格式：`仓库 - 库区 - 货架 - 层 - 箱位`，例如 `AGW-SEE-R01-L02-B03`。
-大件地堆型可省略货架/层，直接 `AGW-FER-F01`。
-
-### 8 条仓库管理红线（违反必整改）
-
-1. 农药、除草剂、消毒剂必须**单独库区 + 上锁 + 独立台账**，严禁与种子/包装/成品混放
-2. **无单不入库、无单不出库、无单不领料**（含口头通融也算违规）
-3. 客户退货必须经 QC 判定才回库，**不得直接进可销售库存**
-4. 销售人员**不得绕过仓库**私自拿货
-5. 仓库人员**不得自批**报损或库存调整
-6. 冷藏成品**必须有采收日期 + 批次 + 等级**才能出库
-7. 订单暂存区货品**不得被非授权人员挪用**
-8. 农药账实差异必须查明原因后**才能调账**
-
-## 技术栈
-
-后端 Spring Boot 3.2 + Java 17 + MyBatis-Plus + Spring Security JWT
-前端 Vue 3 + Vite + Pinia + Element Plus + ECharts + i18n
-存储 MySQL 8 + Redis 7 + MinIO；PDF OpenHtmlToPdf；部署 Docker Compose
-
-## 快速启动
+Prerequisites: Docker, Docker Compose, Node 20+, Java 17 (for IDE only).
 
 ```bash
-# 后端
-cd backend && docker compose up -d
-# 前端
-cd frontend && npm install && npm run dev
-# 默认账号 admin / Admin@123456
+git clone https://github.com/2AfricaAI/2Africa-AgriOS.git
+cd 2Africa-AgriOS
+
+# Backend (MySQL + Redis + MinIO + API)
+cd backend
+docker compose up -d --build
+docker compose logs -f backend
+
+# Wait for "Started AgriOsApplication" then in another terminal:
+cd ../frontend
+npm install
+npm run dev
 ```
 
-访问：前端 http://localhost:5173 · 移动端 http://localhost:5173/m/ · Swagger http://localhost:8080/api/swagger-ui.html
+Open http://localhost:5173 and log in with `admin` / `admin123`.
+
+API docs: http://localhost:8080/api/swagger-ui/index.html
+
+For production deployment see [DEPLOY.md](DEPLOY.md).
+
+---
+
+## Architecture
+
+```
+            ┌─────────────────────┐
+  Mobile ──▶│   Frontend (Vue 3)  │
+            └──────────┬──────────┘
+                       │
+            ┌──────────▼──────────┐
+            │  Backend (Spring 3) │ ── MySQL
+            │  + JWT + RBAC       │ ── Redis
+            │  + Rule engine      │ ── MinIO
+            └──────────┬──────────┘
+                       │  (optional)
+            ┌──────────▼──────────┐
+            │  2Africa OpenAPI    │ ── 2Africa AgriCloud
+            └─────────────────────┘
+```
+
+- **Backend**: Java 17, Spring Boot 3, MyBatis-Plus, Apache POI, OpenHtmlToPdf
+- **Frontend**: Vue 3, Vite, Element Plus, ECharts, Pinia, vue-i18n
+- **Storage**: MySQL 8, MinIO (S3-compatible), Redis 7
+- **Deployment**: Docker Compose (default), Nginx reverse proxy, GitHub Container Registry
+
+---
+
+## The 2Africa product family
+
+AgriOS is part of a three-product family:
+
+- **2Africa AgriOS** *(this repo, Apache 2.0)* — single-farm operating system
+- **2Africa AgriCloud** *(proprietary SaaS)* — multi-tenant industry platform
+- **2Africa OpenAPI** *(CC-BY 4.0 spec, Apache 2.0 SDKs)* — federation protocol
+
+AgriOS runs perfectly on its own. Connecting to AgriCloud is opt-in and unlocks network features like peer benchmarks and marketplace sourcing.
+
+---
+
+## Contributing
+
+We welcome bug reports, feature requests, translations, and pull requests. Please read:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards
+- [SECURITY.md](SECURITY.md) for reporting security issues
+
+All contributions are licensed under Apache 2.0 with a DCO sign-off.
+
+---
 
 ## License
 
-Proprietary © 2026 2Africa.AI. 由 [@2AfricaAI](https://github.com/2AfricaAI) 开发。
+Copyright 2026 2Africa AI and contributors
+
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE) for third-party attributions.
+
+---
+
+## Status
+
+AgriOS is **production-ready** for single-farm deployment, currently piloting in Kenya. The roadmap targets v3.1 (M-Pesa real integration), v3.2 (onboarding wizard), and v3.3 (worker mobile v2) in the next quarter.
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.

@@ -37,7 +37,16 @@
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
         <el-button type="primary" :icon="PlusIcon" @click="onCreate">{{ t('customer.new') }}</el-button>
+        <el-button :icon="UploadFilled" @click="importOpen = true">{{ t('import.button') }}</el-button>
       </div>
+
+      <ImportDialog
+        v-model="importOpen"
+        :title="t('menu.customers')"
+        template-url="/v1/sales/customers/import/template"
+        import-url="/v1/sales/customers/import"
+        @imported="reload(1)"
+      />
 
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
         <el-table-column prop="id" label="ID" width="60" align="center">
@@ -236,7 +245,9 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Plus as PlusIcon,
+  UploadFilled,
 } from '@element-plus/icons-vue'
+import ImportDialog from '@/components/ImportDialog.vue'
 import {
   listCustomers,
   createCustomer,
@@ -247,6 +258,7 @@ import {
 import { downloadStatementPdf } from '@/api/finance'
 
 const { t } = useI18n()
+const importOpen = ref(false)
 
 const TYPE_OPTIONS = computed(() => [
   { value: 'supermarket', label: t('customer.typeSupermarket') },

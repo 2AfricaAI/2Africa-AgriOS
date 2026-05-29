@@ -27,7 +27,16 @@
     <el-card shadow="never" class="table-card">
       <div class="toolbar">
         <el-button type="primary" :icon="PlusIcon" @click="onCreate">{{ t('plot.new') }}</el-button>
+        <el-button :icon="UploadFilled" @click="importOpen = true">{{ t('import.button') }}</el-button>
       </div>
+
+      <ImportDialog
+        v-model="importOpen"
+        :title="t('menu.plots')"
+        template-url="/v1/production/plots/import/template"
+        import-url="/v1/production/plots/import"
+        @imported="reload(1)"
+      />
 
       <el-table :data="list" v-loading="loading" border stripe row-key="id">
         <el-table-column prop="id" label="ID" width="60" align="center">
@@ -200,7 +209,9 @@ import {
   Refresh as RefreshIcon,
   Plus as PlusIcon,
   ArrowDown,
+  UploadFilled,
 } from '@element-plus/icons-vue'
+import ImportDialog from '@/components/ImportDialog.vue'
 import {
   listPlots,
   getPlot,
@@ -213,6 +224,7 @@ import { listCrops } from '@/api/crop'
 import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
+const importOpen = ref(false)
 const auth = useAuthStore()
 
 const STATUS_TAG = { active: 'success', inactive: 'info', fallow: 'warning' }

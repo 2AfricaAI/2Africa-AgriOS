@@ -1,0 +1,54 @@
+2Africa AgriOS
+Copyright 2026 2Africa AI and contributors
+
+This product includes software developed by 2Africa AI
+(https://github.com/2AfricaAI).
+
+------------------------------------------------------------
+Third-party components used by AgriOS (notable dependencies):
+------------------------------------------------------------
+
+This product includes software developed by The Apache Software Foundation
+(http://www.apache.org/), licensed under the Apache License 2.0:
+  - Apache POI (poi-ooxml) — Excel xlsx generation
+  - Apache Tomcat (embedded via Spring Boot)
+  - Apache Commons (logging, IO)
+  - Spring Framework, Spring Boot, Spring Security
+  - MyBatis-Plus
+  - Lombok
+
+This product includes software licensed under the MIT License:
+  - Vue.js — © Evan You
+  - Element Plus — © Element Team
+  - ECharts (Apache 2.0) — © The Apache Software Foundation
+  - Pinia — © Eduardo San Martin Morote
+  - vue-i18n — © kazuya kawaguchi
+  - vue-router — © Evan You
+  - Axios — © Matt Zabriskie
+
+This product includes software licensed under the BSD License:
+  - PostgreSQL JDBC driver (BSD 2-clause)
+  - jsoup HTML parser (MIT)
+
+This product uses MinIO Java SDK, licensed under the Apache License 2.0:
+  - © MinIO, Inc.
+
+This product uses Redisson, licensed under the Apache License 2.0:
+  - © Nikita Koksharov
+
+This product uses iText (LGPL / AGPL dual-licensed for Open Source use):
+  - © iText Group NV
+  Note: iText 7 Community is AGPL. Commercial deployments redistributing
+  AgriOS Object form should evaluate iText commercial license terms.
+
+This product uses OpenHtmlToPdf, licensed under the LGPL 2.1:
+  - © Open HTML to PDF contributors
+
+This product uses MySQL Connector/J, licensed under the GPL with FOSS Exception:
+  - © Oracle Corporation
+
+This product uses the Apache Commons Logging library, licensed under
+the Apache License 2.0.
+
+For the complete list of dependencies and their respective licenses,
+see backend/pom.xml and frontend/package.json.

@@ -3,16 +3,24 @@ package ai.toafrica.agrios.sales.controller;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
+import ai.toafrica.agrios.framework.importer.ImportResult;
+import ai.toafrica.agrios.framework.importer.ImportRunner;
 import ai.toafrica.agrios.sales.dto.CustomerForm;
 import ai.toafrica.agrios.sales.entity.Customer;
 import ai.toafrica.agrios.sales.service.CustomerService;
+import ai.toafrica.agrios.sales.service.importer.CustomerImportTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "30 · Sales-Customer", description = "Customer master data")
 @RestController
@@ -21,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final ImportRunner importRunner;
+    private final CustomerImportTemplate customerImportTemplate;
 
     @Operation(summary = "List customers (paginated)")
     @GetMapping
@@ -70,5 +80,29 @@ public class CustomerController {
     public R<Void> delete(@PathVariable Long id) {
         customerService.delete(id);
         return R.ok();
+    }
+
+    // ============================================================
+    // Sprint 38f - Excel bulk import
+    // ============================================================
+
+    @Operation(summary = "Download a blank import template (xlsx)")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_SALES')")
+    @GetMapping("/import/template")
+    public ResponseEntity<ByteArrayResource> importTemplate() {
+        byte[] bytes = importRunner.buildTemplate(customerImportTemplate);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=customers_import_template.xlsx")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new ByteArrayResource(bytes));
+    }
+
+    @Operation(summary = "Bulk import customers from xlsx")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_SALES')")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R<ImportResult> importCustomers(@RequestPart("file") MultipartFile file) {
+        return R.ok(importRunner.run(customerImportTemplate, file));
     }
 }
