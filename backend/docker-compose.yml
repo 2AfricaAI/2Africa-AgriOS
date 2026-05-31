@@ -7,6 +7,13 @@
 #   docker compose down -v         # stop & wipe volumes (RESET DB)
 # ============================================================================
 
+# Pin the Compose project name independent of the host directory.  Without
+# this, renaming the local folder (e.g. "Albert's Farm" -> "2Africa AgriOS")
+# silently orphans existing volumes because Compose derives the project name
+# from the directory.  Locking it to "agrios" keeps volume names stable
+# regardless of where the repo is cloned.
+name: agrios
+
 services:
   mysql:
     image: mysql:8.0
