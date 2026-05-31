@@ -13,6 +13,42 @@ Roadmap targets:
 - v3.4: Worker mobile v2 (my today / week / month views)
 - v3.5: OpenAPI client (AgriOS to AgriCloud federation)
 
+## [3.1.0] - 2026-06-01
+
+Customer Service module — verified release. Same scope as 3.1.0-rc1 plus
+one infrastructure fix below; no AgriOS application code changes.
+
+### Fixed (Sprint 40h)
+
+- **Chatwoot worker restart loop**. The original `docker-compose.yml`
+  overrode Chatwoot's built-in entrypoint with `entrypoint: sh -c`,
+  bypassing the wait-for-postgres / wait-for-redis / bundle-setup logic
+  that ships in the upstream image. The worker container then crashed in
+  a tight restart loop on first boot. Fix:
+  - Removed `entrypoint: sh -c` override on `chatwoot-web` and
+    `chatwoot-worker`. Upstream entrypoint now handles dependency waits.
+  - Added a one-shot `chatwoot-db-prepare` service that runs
+    `rails db:chatwoot_prepare` and exits. Web and worker depend on its
+    successful completion, so they never race the schema migration.
+  - Loosened the `chatwoot-web` healthcheck so a 302 redirect from `/`
+    no longer marks the container unhealthy.
+
+### Verified on a fresh stack (Sprint 40h–40k)
+
+- 8 containers all `healthy` / `Up` after `docker compose up -d`
+- AgriOS backend `/v1/service/health` reports `enabled=true, reachable=true`
+  with the new Chatwoot API token
+- AI Agent diagnostic endpoint
+  (`POST /v1/service/ai-agent/diagnose`) returns a non-empty OpenAI
+  `gpt-4o-mini` reply in ~3 seconds — provider abstraction works
+  end-to-end
+
+### Deferred to v3.1.1
+
+- Email Inbox setup with Google Workspace (runtime configuration, not a
+  code change; will follow once the Workspace account is provisioned)
+- Real-world end-to-end test (external email → Chatwoot → AI reply)
+
 ## [3.1.0-rc1] - 2026-05-31
 
 Customer Service module via Chatwoot integration. Sprint 40.

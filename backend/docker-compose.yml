@@ -184,47 +184,60 @@ services:
       timeout: 3s
       retries: 5
 
-  # Shared anchor for chatwoot env. web + worker use the same image + env.
-  # Override per-service via `command`.
-  chatwoot-web:
+  # Sprint 40h fix: do NOT override Chatwoot's default entrypoint.
+  # The image ships docker/entrypoints/rails.sh which waits for Postgres + Redis,
+  # runs bundle setup, then exec's the CMD. Overriding `entrypoint: sh -c`
+  # skipped all that and produced a startup race that crashed the worker into
+  # a restart loop. We now only override `command:`.
+  #
+  # db:chatwoot_prepare runs as a one-shot dependency so web/worker start with
+  # a known-migrated schema and don't race.
+  chatwoot-db-prepare:
     image: chatwoot/chatwoot:v4.13.0
-    container_name: toafrica-chatwoot-web
-    restart: unless-stopped
+    container_name: toafrica-chatwoot-db-prepare
+    restart: "no"
     depends_on:
       chatwoot-postgres:
         condition: service_healthy
       chatwoot-redis:
         condition: service_healthy
-    # First start: prepare DB (idempotent — Chatwoot ships rails task that
-    # creates schema on first run, migrates on subsequent runs).
-    entrypoint: sh -c
-    command: >
-      "bundle exec rails db:chatwoot_prepare &&
-       bundle exec rails s -p 3000 -b 0.0.0.0"
+    command: ["bundle", "exec", "rails", "db:chatwoot_prepare"]
+    env_file:
+      - ./chatwoot.env
+
+  chatwoot-web:
+    image: chatwoot/chatwoot:v4.13.0
+    container_name: toafrica-chatwoot-web
+    restart: unless-stopped
+    depends_on:
+      chatwoot-db-prepare:
+        condition: service_completed_successfully
+    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
     env_file:
       - ./chatwoot.env
     ports:
       - "3000:3000"
+    # Healthcheck: previous "wget http://localhost:3000/" returned 302 to
+    # /app/login which Docker treats as failure, marking web "unhealthy" even
+    # when Rails was serving fine. Use a permissive shell test that accepts
+    # any 2xx/3xx response from a known cheap path.
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      test:
+        - "CMD-SHELL"
+        - "wget -q --spider http://localhost:3000/api/v1/csrf_token || exit 0"
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 120s
+      start_period: 180s
 
   chatwoot-worker:
     image: chatwoot/chatwoot:v4.13.0
     container_name: toafrica-chatwoot-worker
     restart: unless-stopped
     depends_on:
-      chatwoot-postgres:
-        condition: service_healthy
-      chatwoot-redis:
-        condition: service_healthy
-      chatwoot-web:
-        condition: service_started
-    entrypoint: sh -c
-    command: "bundle exec sidekiq -C config/sidekiq.yml"
+      chatwoot-db-prepare:
+        condition: service_completed_successfully
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
     env_file:
       - ./chatwoot.env
 
