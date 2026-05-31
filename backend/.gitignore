@@ -9,5 +9,7 @@ logs/
 .DS_Store
 .env
 .env.local
+chatwoot.env.local
+chatwoot.env.prod
 *.log
 docker-data/

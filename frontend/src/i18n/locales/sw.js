@@ -61,6 +61,20 @@ export default {
     mustBePositive: '{field} lazima iwe > 0',
   },
 
+  // Sprint 40e: Customer Service page
+  menu: {
+    customerService: 'Huduma kwa Wateja',
+  },
+  service: {
+    title: 'Eneo la Huduma kwa Wateja',
+    poweredBy: 'Chatwoot',
+    reload: 'Onyesha upya',
+    openInNewTab: 'Fungua katika kichupo kipya',
+    iframeHintTitle: 'Paneli haifunguliki?',
+    iframeHintBody:
+      'Ikiwa eneo la juu liko tupu, kivinjari au Chatwoot inazuia uingizaji. Bofya hapa chini kufungua katika kichupo kipya — kazi sawa, bila vikwazo.',
+  },
+
   // ---------- Input Items (Phase 4) ----------
   inputItem: {
     title: 'Pembejeo',

@@ -51,6 +51,14 @@ backups/
 *.sql.gz
 *.dump
 
+# Business operational data spreadsheets / documents that live in the repo root
+# (Albert's Farm operational reports, sales ledgers, customer-facing proposals
+# — not source code). Excludes them at the repo root only; code-related XLSX
+# under backend/ / frontend/ are still tracked normally.
+/*.xlsx
+/*.docx
+/.~lock.*#
+
 # OS / IDE
 .DS_Store
 Thumbs.db

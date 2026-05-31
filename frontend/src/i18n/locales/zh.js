@@ -54,9 +54,21 @@ export default {
     purchaseOrders: '采购订单',
     ap: '应付账款',
     fileDemo: '文件上传演示',
+    customerService: '客服中心',
     system: '系统管理',
     sysUsers: '用户管理',
     sysRoles: '角色列表',
+  },
+
+  // Sprint 40e: Customer Service page (Chatwoot embed)
+  service: {
+    title: '客服工作台',
+    poweredBy: 'Chatwoot',
+    reload: '刷新',
+    openInNewTab: '在新标签页打开',
+    iframeHintTitle: '客服面板没有加载?',
+    iframeHintBody:
+      '如果上方区域空白, 多半是浏览器或 Chatwoot 阻止了嵌入。点击下面在新标签页打开, 体验完全一致。',
   },
 
   common: {

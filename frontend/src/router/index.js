@@ -258,6 +258,13 @@ const routes = [
         meta: { titleKey: 'menu.fileDemo' },
       },
       {
+        // Sprint 40e: Customer Service module - embeds Chatwoot UI.
+        path: 'service',
+        name: 'customer-service',
+        component: () => import('@/views/service/CustomerService.vue'),
+        meta: { titleKey: 'menu.customerService' },
+      },
+      {
         path: 'system/users',
         name: 'system-users',
         component: () => import('@/views/system/UserList.vue'),

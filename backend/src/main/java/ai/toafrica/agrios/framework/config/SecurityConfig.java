@@ -59,7 +59,9 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/actuator/health",
-                    "/v1/public/**"   // Sprint 25: public trace endpoint (QR scan)
+                    "/v1/public/**",          // Sprint 25: public trace endpoint (QR scan)
+                    "/v1/service/health",     // Sprint 40c: service-module connectivity probe
+                    "/v1/service/webhook/**"  // Sprint 40d: Chatwoot inbound webhook (HMAC-guarded)
                 ).permitAll()
                 .anyRequest().authenticated()
             )

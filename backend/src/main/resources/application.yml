@@ -96,6 +96,34 @@ agrios:
     access-key: ${OSS_AK:}
     secret-key: ${OSS_SK:}
     bucket: ${OSS_BUCKET:2africa-agrios}
+  # Sprint 40: AgriOS <-> Chatwoot bridge for the Service module.
+  # Leave api-token blank to disable the integration entirely (AgriOS keeps running).
+  chatwoot:
+    base-url: ${CHATWOOT_BASE_URL:http://chatwoot-web:3000}
+    api-token: ${CHATWOOT_API_TOKEN:}
+    account-id: ${CHATWOOT_ACCOUNT_ID:1}
+    timeout-ms: 10000
+    # Sprint 40d: shared secret for inbound webhook HMAC verification.
+    # Leave blank for dev. In production, generate with: openssl rand -hex 32
+    # then paste into Chatwoot Settings -> Integrations -> Webhooks -> HMAC.
+    webhook-secret: ${CHATWOOT_WEBHOOK_SECRET:}
+    # Sprint 40f: AI Agent. Provider-pluggable — set provider=claude|openai.
+    # Disabled by default — set AI_AGENT_ENABLED=true and the matching
+    # api key (ANTHROPIC_API_KEY for claude, OPENAI_API_KEY for openai).
+    ai-agent:
+      enabled: ${AI_AGENT_ENABLED:false}
+      provider: ${AI_AGENT_PROVIDER:claude}
+      # Claude (Anthropic)
+      anthropic-api-key: ${ANTHROPIC_API_KEY:}
+      # OpenAI / Azure / OpenAI-compatible gateway
+      openai-api-key: ${OPENAI_API_KEY:}
+      openai-base-url: ${OPENAI_BASE_URL:}
+      openai-organization: ${OPENAI_ORGANIZATION:}
+      # Shared
+      model: ${AI_AGENT_MODEL:claude-haiku-4-5}
+      max-tokens: ${AI_AGENT_MAX_TOKENS:400}
+      temperature: ${AI_AGENT_TEMPERATURE:0.4}
+      reply-public: ${AI_AGENT_REPLY_PUBLIC:false}
 
 # Swagger / OpenAPI
 springdoc:

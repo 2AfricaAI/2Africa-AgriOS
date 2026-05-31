@@ -7,11 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Roadmap targets for v3.1 onward:
-- v3.1: M-Pesa Daraja real integration, Africa's Talking SMS integration
-- v3.2: Onboarding wizard, Kenya demo data one-click load
-- v3.3: Worker mobile v2 (my today / week / month views)
-- v3.4: OpenAPI client (AgriOS to AgriCloud federation)
+Roadmap targets:
+- v3.2: M-Pesa Daraja real integration, Africa's Talking SMS integration
+- v3.3: Onboarding wizard, Kenya demo data one-click load
+- v3.4: Worker mobile v2 (my today / week / month views)
+- v3.5: OpenAPI client (AgriOS to AgriCloud federation)
+
+## [3.1.0-rc1] - 2026-05-31
+
+Customer Service module via Chatwoot integration. Sprint 40.
+
+### Added — Service module (Sprint 40a–40f)
+
+- **AgriOS ↔ Chatwoot bridge** — embedded MIT-licensed Chatwoot stack
+  alongside AgriOS in `backend/docker-compose.yml` (web + worker + dedicated
+  PostgreSQL with pgvector + dedicated Redis). Decision recorded:
+  Mode 1 "Embedded" (Chatwoot ships with each AgriOS install,
+  offline-friendly). Future Mode 2 "Hosted" deferred to 2Africa ServiceOS.
+- **Two minimal bridge tables**, not a copy of Chatwoot's schema:
+  - `service_contact_link` — maps AgriOS Customer (and future vertical
+    entities like supplier / worker / partner) to Chatwoot Contact
+  - `service_event_log` — cross-system event audit trail with idempotency
+    keys for duplicate-webhook protection
+- **ChatwootClient** (Java) — REST API client: contact CRUD, conversation +
+  message endpoints, profile ping. Resilient parsing across Chatwoot's
+  multiple response envelope shapes.
+- **ContactSyncService** — one-way push of AgriOS Customer master data to
+  Chatwoot Contact. Idempotent (adopts orphan Chatwoot contacts via
+  identifier lookup before creating duplicates), auto-normalizes Kenyan
+  phone numbers to E.164, mirrors `agrios_customer_*` business attributes
+  into Chatwoot custom attributes for in-context CSR work.
+- **ChatwootWebhookController** — public endpoint at
+  `/v1/service/webhook/chatwoot`. Optional HMAC-SHA256 signature
+  verification. Reverse-resolves AgriOS entity from Chatwoot contact id.
+- **AI Agent** — provider-pluggable LLM layer (`LlmClient` interface +
+  `LlmRouter` + `ClaudeClient` + `OpenAiClient`). Switch between Anthropic
+  Claude and OpenAI (or any OpenAI-compatible gateway — Azure, OpenRouter,
+  Groq, Ollama, etc.) via a single env var, zero code change. Default reply
+  mode is private note (human-in-the-loop); operators can flip to fully
+  automated public replies. Diagnostic endpoint
+  `POST /v1/service/ai-agent/diagnose` for end-to-end LLM verification
+  without the Chatwoot dependency.
+- **Frontend Customer Service workspace** (`/service`) — embeds Chatwoot
+  via iframe with graceful "Open in new tab" fallback for browsers /
+  Chatwoot installs that block iframe embedding. `FRAME_ANCESTORS`
+  whitelist for AgriOS origins. New top-level sidebar menu item,
+  translated en / zh / sw.
+
+### Configuration
+
+- New env vars: `CHATWOOT_BASE_URL`, `CHATWOOT_API_TOKEN`,
+  `CHATWOOT_ACCOUNT_ID`, `CHATWOOT_WEBHOOK_SECRET`, `AI_AGENT_ENABLED`,
+  `AI_AGENT_PROVIDER`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
+  `OPENAI_BASE_URL`, `OPENAI_ORGANIZATION`, `AI_AGENT_MODEL`,
+  `AI_AGENT_REPLY_PUBLIC`. All optional; service module is opt-in.
+
+### Documentation
+
+- `docs/SERVICE_MODULE.md` — full operator guide: stack startup, first-time
+  login, contact sync flow, webhook configuration, Email Inbox setup
+  (Gmail App Password and Microsoft 365 paths), AI Agent setup (Claude
+  + OpenAI + Azure / OpenRouter / Ollama walkthroughs), troubleshooting,
+  production hardening checklist.
+
+### Notes
+
+- WhatsApp Cloud API inbox deliberately deferred — requires Meta business
+  verification with multi-week lead time. Email + AI Agent cover ~85% of
+  Kenyan smallholder customer touchpoints at MVP.
+- Migration `043_service_module.sql` is idempotent (`CREATE TABLE IF NOT
+  EXISTS`) so it can be safely re-run.
 
 ## [3.0.0] - 2026-05-29
 

@@ -56,9 +56,21 @@ export default {
     purchaseOrders: 'Purchase Orders',
     ap: 'Accounts Payable',
     fileDemo: 'File Upload Demo',
+    customerService: 'Customer Service',
     system: 'System',
     sysUsers: 'Users',
     sysRoles: 'Roles',
+  },
+
+  // Sprint 40e: Customer Service page (Chatwoot embed)
+  service: {
+    title: 'Customer Service Workspace',
+    poweredBy: 'Chatwoot',
+    reload: 'Reload',
+    openInNewTab: 'Open in new tab',
+    iframeHintTitle: 'Service panel not loading?',
+    iframeHintBody:
+      "If the area above looks blank, your browser or Chatwoot is likely blocking the embed. Click below to open it in a dedicated tab — same workspace, no limitations.",
   },
 
   // ---------- Generic buttons / labels ----------

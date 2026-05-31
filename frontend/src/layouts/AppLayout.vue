@@ -98,6 +98,14 @@
           <el-menu-item index="/operations/action-board">{{ t('menu.actionBoard') }}</el-menu-item>
         </el-sub-menu>
 
+        <!-- Sprint 40e: Customer Service - Chatwoot embedded.
+             Visible to every STAFF user; CUSTOMER / WORKER user types are
+             routed away from AppLayout entirely so we don't need extra gates. -->
+        <el-menu-item index="/service">
+          <el-icon><ServiceIcon /></el-icon>
+          <template #title>{{ t('menu.customerService') }}</template>
+        </el-menu-item>
+
         <el-sub-menu v-if="canFinance" index="finance">
           <template #title>
             <el-icon><FinanceIcon /></el-icon>
@@ -196,6 +204,7 @@ import {
   Money as FinanceIcon,
   ShoppingCart as ProcurementIcon,
   CircleCheck as QcIcon,
+  ChatRound as ServiceIcon,
   Setting as SettingIcon,
   Expand as ExpandIcon,
   Fold as FoldIcon,

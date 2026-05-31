@@ -805,4 +805,45 @@ CREATE TABLE `daily_report` (
   `issues`          VARCHAR(500),
   `next_plan`       VARCHAR(500),
   `created_at`      DATETIME     DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY `uk_staff_date` (`staff_id`
+  UNIQUE KEY `uk_staff_date` (`staff_id`, `report_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Daily report - lightweight';
+
+-- ============================================================================
+-- 9. SERVICE MODULE (Sprint 40 - AgriOS ↔ Chatwoot bridge, minimal)
+-- ============================================================================
+
+CREATE TABLE `service_contact_link` (
+  `id`                       BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `agrios_entity_type`       VARCHAR(32)  NOT NULL DEFAULT 'customer',
+  `agrios_entity_id`         BIGINT       NOT NULL,
+  `chatwoot_contact_id`      BIGINT       NOT NULL,
+  `chatwoot_account_id`      BIGINT       NOT NULL,
+  `last_synced_at`           DATETIME     NULL,
+  `sync_status`              VARCHAR(16)  NOT NULL DEFAULT 'pending',
+  `sync_error`               VARCHAR(500) NULL,
+  `created_at`               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `uk_chatwoot_contact` (`chatwoot_account_id`, `chatwoot_contact_id`),
+  KEY `idx_agrios_entity` (`agrios_entity_type`, `agrios_entity_id`),
+  KEY `idx_sync_status` (`sync_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Service module - AgriOS entity to Chatwoot contact bridge';
+
+CREATE TABLE `service_event_log` (
+  `id`                       BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  `event_type`               VARCHAR(64)  NOT NULL,
+  `direction`                VARCHAR(16)  NOT NULL,
+  `agrios_entity_type`       VARCHAR(32)  NULL,
+  `agrios_entity_id`         BIGINT       NULL,
+  `chatwoot_account_id`      BIGINT       NULL,
+  `chatwoot_conversation_id` BIGINT       NULL,
+  `chatwoot_message_id`      BIGINT       NULL,
+  `payload`                  JSON         NULL,
+  `result`                   VARCHAR(16)  NOT NULL DEFAULT 'ok',
+  `error_message`            VARCHAR(500) NULL,
+  `idempotency_key`          VARCHAR(128) NULL,
+  `created_at`               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
+  KEY `idx_agrios_entity` (`agrios_entity_type`, `agrios_entity_id`, `created_at`),
+  KEY `idx_chatwoot_conv` (`chatwoot_conversation_id`, `created_at`),
+  KEY `idx_event_type` (`event_type`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Service module - cross-system event audit log';
