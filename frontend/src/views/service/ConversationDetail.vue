@@ -55,11 +55,20 @@
       </div>
       <div class="context-pill" :class="{ alert: (conv.businessContext?.overdueArInvoiceCount || 0) > 0 }">
         <span class="context-label">{{ t('service.overdueAr') }}</span>
-        <span class="context-value">{{ conv.businessContext?.overdueArInvoiceCount ?? 0 }}</span>
+        <span class="context-value">
+          {{ conv.businessContext?.overdueArInvoiceCount ?? 0 }}
+          <span v-if="conv.businessContext?.overdueArAmount" class="context-money">
+            · KSh {{ formatMoney(conv.businessContext.overdueArAmount) }}
+          </span>
+        </span>
       </div>
       <div class="context-pill" :class="{ alert: (conv.businessContext?.openComplaintCount || 0) > 0 }">
         <span class="context-label">{{ t('service.openComplaints') }}</span>
         <span class="context-value">{{ conv.businessContext?.openComplaintCount ?? 0 }}</span>
+      </div>
+      <div v-if="conv.businessContext?.lastOrderDate" class="context-pill muted">
+        <span class="context-label">{{ t('service.lastOrder') }}</span>
+        <span class="context-value">{{ formatDate(conv.businessContext.lastOrderDate) }}</span>
       </div>
     </div>
 
@@ -222,6 +231,25 @@ function formatTime(epochSec) {
   })
 }
 
+function formatMoney(v) {
+  if (v === null || v === undefined) return '0'
+  const n = Number(v)
+  if (isNaN(n)) return String(v)
+  return n.toLocaleString('en-GB', { maximumFractionDigits: 0 })
+}
+
+function formatDate(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return iso
+  const now = new Date()
+  const days = Math.floor((now - d) / 86_400_000)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  if (days < 7) return `${days}d ago`
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
 function initials(s) {
   if (!s) return '?'
   return String(s).trim().slice(0, 2).toUpperCase()
@@ -329,9 +357,16 @@ onMounted(load)
   border-color: #f5a14d;
   color: #b35a00;
 }
+.context-pill.muted {
+  background: transparent;
+  border-color: transparent;
+  padding-left: 4px;
+}
 .context-label { color: #8a9690; }
 .context-value { font-weight: 600; color: #1c2e25; }
 .context-pill.alert .context-value { color: #b35a00; }
+.context-pill.muted .context-value { color: #5b6b62; font-weight: 500; }
+.context-money { color: #b35a00; font-weight: 600; margin-left: 2px; }
 
 /* ----- message stream ----- */
 .stream {

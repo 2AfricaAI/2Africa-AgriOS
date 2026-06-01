@@ -10,6 +10,7 @@ import ai.toafrica.agrios.service.client.dto.ChatwootConversation;
 import ai.toafrica.agrios.service.client.dto.ChatwootInbox;
 import ai.toafrica.agrios.service.entity.ServiceContactLink;
 import ai.toafrica.agrios.service.mapper.ServiceContactLinkMapper;
+import ai.toafrica.agrios.service.service.BusinessContextService;
 import ai.toafrica.agrios.service.vo.ConversationDetailVO;
 import ai.toafrica.agrios.service.vo.ConversationListItemVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -51,6 +52,7 @@ public class ConversationController {
     private final ChatwootClient chatwoot;
     private final ServiceContactLinkMapper linkMapper;
     private final CustomerMapper customerMapper;
+    private final BusinessContextService businessContext;
 
     // -----------------------------------------------------------------------
     // Conversations
@@ -152,16 +154,8 @@ public class ConversationController {
                             .creditDays(cust.getCreditDays())
                             .build());
 
-                    // Inline business context — open orders / overdue AR / complaints.
-                    // Sprint 41b v0.1: placeholders; Sprint 42 will wire these to the
-                    // real sales/finance/qc services once the read-only DAOs are
-                    // factored into a stable API. Keeping the shape stable here
-                    // means the frontend doesn't change when we light them up.
-                    builder.businessContext(ConversationDetailVO.BusinessContext.builder()
-                            .openOrderCount(0)
-                            .overdueArInvoiceCount(0)
-                            .openComplaintCount(0)
-                            .build());
+                    // Sprint 43D: wire real counts from sales/finance/qc.
+                    builder.businessContext(businessContext.forCustomer(cust));
                 }
             }
         }

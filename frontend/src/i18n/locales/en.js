@@ -96,6 +96,7 @@ export default {
     openOrders: 'Open orders',
     overdueAr: 'Overdue AR',
     openComplaints: 'Open complaints',
+    lastOrder: 'Last order',
 
     // detail page - composer
     reply: 'Reply',

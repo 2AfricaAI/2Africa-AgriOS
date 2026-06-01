@@ -95,6 +95,7 @@ export default {
     openOrders: '进行中订单',
     overdueAr: '逾期账款',
     openComplaints: '未结投诉',
+    lastOrder: '最近下单',
 
     // detail page - composer
     reply: '公开回复',
