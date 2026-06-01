@@ -1,8 +1,11 @@
 package ai.toafrica.agrios.service.client;
 
 import ai.toafrica.agrios.common.exception.BusinessException;
+import ai.toafrica.agrios.service.client.dto.ChatwootAgent;
 import ai.toafrica.agrios.service.client.dto.ChatwootContact;
 import ai.toafrica.agrios.service.client.dto.ChatwootContactRequest;
+import ai.toafrica.agrios.service.client.dto.ChatwootConversation;
+import ai.toafrica.agrios.service.client.dto.ChatwootInbox;
 import ai.toafrica.agrios.service.config.ChatwootProperties;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -205,6 +208,122 @@ public class ChatwootClient {
         public boolean fromCustomer;
         public boolean privateNote;
         public Long createdAt;
+    }
+
+    // -----------------------------------------------------------------------
+    // Sprint 41a — conversation list / detail, inbox + agent enumeration.
+    // Used by the AgriOS-native Customer Service UI.
+    // -----------------------------------------------------------------------
+
+    /**
+     * List conversations. Filters mirror Chatwoot's
+     * {@code GET /api/v1/accounts/{id}/conversations} query params:
+     * <ul>
+     *   <li>{@code status}: open / resolved / pending / snoozed (default: open)</li>
+     *   <li>{@code inbox_id}: filter to a single inbox</li>
+     *   <li>{@code assignee_type}: me / unassigned / assigned</li>
+     *   <li>{@code page}: 1-indexed pagination</li>
+     * </ul>
+     * Returns the page's conversations, never null.
+     */
+    public List<ChatwootConversation> listConversations(java.util.Map<String, String> filters) {
+        ensureEnabled();
+        StringBuilder url = new StringBuilder(baseAccountUrl()).append("/conversations");
+        if (filters != null && !filters.isEmpty()) {
+            url.append('?');
+            int i = 0;
+            for (java.util.Map.Entry<String, String> e : filters.entrySet()) {
+                if (e.getValue() == null || e.getValue().isBlank()) continue;
+                if (i++ > 0) url.append('&');
+                url.append(urlEncode(e.getKey())).append('=').append(urlEncode(e.getValue()));
+            }
+        }
+        String body = execute(url.toString(), Method.GET, null);
+        try {
+            JsonNode root = json.readTree(body);
+            // Chatwoot wraps the list under data.payload (sometimes data.meta.all_count
+            // etc.). We just need .payload.
+            JsonNode payload = root.path("data").path("payload");
+            if (payload.isMissingNode() || !payload.isArray()) payload = root.path("payload");
+            if (!payload.isArray()) return List.of();
+            return json.convertValue(payload, new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new BusinessException("Chatwoot conversation list malformed: " + e.getMessage());
+        }
+    }
+
+    /** {@code GET /api/v1/accounts/{id}/conversations/{convId}} */
+    public ChatwootConversation getConversation(Long conversationId) {
+        ensureEnabled();
+        String body = execute(baseAccountUrl() + "/conversations/" + conversationId, Method.GET, null);
+        try {
+            JsonNode root = json.readTree(body);
+            // Single-conversation responses come back at the root; if Chatwoot
+            // wraps in payload/data we unwrap.
+            JsonNode node = root;
+            if (root.has("payload")) node = root.path("payload");
+            else if (root.has("data")) node = root.path("data");
+            return json.treeToValue(node, ChatwootConversation.class);
+        } catch (IOException e) {
+            throw new BusinessException("Chatwoot conversation response malformed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Toggle a conversation's status. Accepts "open", "resolved",
+     * "pending", or "snoozed". Maps to Chatwoot's
+     * {@code POST /conversations/{id}/toggle_status}.
+     */
+    public void toggleConversationStatus(Long conversationId, String status) {
+        ensureEnabled();
+        String url = baseAccountUrl() + "/conversations/" + conversationId + "/toggle_status";
+        String payload = "{\"status\":\"" + escapeJson(status) + "\"}";
+        execute(url, Method.POST, payload);
+    }
+
+    /**
+     * Assign a conversation to an agent (or unassign if {@code agentId} is null).
+     * Maps to {@code POST /conversations/{id}/assignments}.
+     */
+    public void assignAgent(Long conversationId, Long agentId) {
+        ensureEnabled();
+        String url = baseAccountUrl() + "/conversations/" + conversationId + "/assignments";
+        String payload = "{\"assignee_id\":" + (agentId == null ? "null" : agentId) + "}";
+        execute(url, Method.POST, payload);
+    }
+
+    /** {@code GET /api/v1/accounts/{id}/inboxes} */
+    public List<ChatwootInbox> listInboxes() {
+        ensureEnabled();
+        String body = execute(baseAccountUrl() + "/inboxes", Method.GET, null);
+        try {
+            JsonNode root = json.readTree(body);
+            JsonNode payload = root.path("payload");
+            if (!payload.isArray()) return List.of();
+            return json.convertValue(payload, new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new BusinessException("Chatwoot inbox list malformed: " + e.getMessage());
+        }
+    }
+
+    /** {@code GET /api/v1/accounts/{id}/agents} */
+    public List<ChatwootAgent> listAgents() {
+        ensureEnabled();
+        String body = execute(baseAccountUrl() + "/agents", Method.GET, null);
+        try {
+            JsonNode root = json.readTree(body);
+            // /agents returns a top-level array, no envelope.
+            if (root.isArray()) {
+                return json.convertValue(root, new TypeReference<>() {});
+            }
+            JsonNode payload = root.path("payload");
+            if (payload.isArray()) {
+                return json.convertValue(payload, new TypeReference<>() {});
+            }
+            return List.of();
+        } catch (IOException e) {
+            throw new BusinessException("Chatwoot agent list malformed: " + e.getMessage());
+        }
     }
 
     /**

@@ -60,15 +60,63 @@ export default {
     sysRoles: '角色列表',
   },
 
-  // Sprint 40e: Customer Service page (Chatwoot embed)
+  // Sprint 41: AgriOS-native Customer Service workspace.
+  // (Sprint 40e iframe strings removed — workspace is now native UI.)
   service: {
+    // shared
     title: '客服工作台',
-    poweredBy: 'Chatwoot',
     reload: '刷新',
-    openInNewTab: '在新标签页打开',
-    iframeHintTitle: '客服面板没有加载?',
-    iframeHintBody:
-      '如果上方区域空白, 多半是浏览器或 Chatwoot 阻止了嵌入。点击下面在新标签页打开, 体验完全一致。',
+
+    // list page
+    filters: '筛选',
+    status: '状态',
+    statusOpen: '进行中',
+    statusPending: '待处理',
+    statusResolved: '已解决',
+    statusSnoozed: '已暂缓',
+    assignee: '负责人',
+    assigneeAll: '全部',
+    assigneeMe: '我',
+    assigneeUnassigned: '未分配',
+    inbox: '收件箱',
+    inboxAll: '全部收件箱',
+    conversations: '对话',
+    conversationsUnit: '条',
+    empty: '当前筛选条件下没有对话',
+    unknownContact: '未知联系人',
+    selectAConversation: '从左侧选择一条对话查看详情',
+    loadFailed: '加载失败',
+
+    // detail page - header
+    markResolved: '标记已解决',
+    reopen: '重新打开',
+    creditLevel: '信用等级',
+    paymentTerms: '账期',
+    openOrders: '进行中订单',
+    overdueAr: '逾期账款',
+    openComplaints: '未结投诉',
+
+    // detail page - composer
+    reply: '公开回复',
+    privateNote: '内部私信',
+    replyHint: '客户能看到, 三思后发',
+    privateNoteHint: '仅客服团队可见, 用作内部沟通',
+    replyPlaceholder: '输入回复内容 (Ctrl/Cmd + Enter 发送)',
+    privateNotePlaceholder: '输入私信内容 (仅团队可见)',
+    sendReply: '发送回复',
+    saveNote: '保存私信',
+    replySent: '回复已发送',
+    noteSaved: '私信已保存',
+    sendFailed: '发送失败',
+
+    // detail page - AI assistant
+    aiDraft: 'AI 起草',
+    aiThinking: 'AI 思考中...',
+    aiFailed: 'AI 调用失败',
+
+    // detail page - status change
+    statusChanged: '状态已更新',
+    statusFailed: '状态更新失败',
   },
 
   common: {

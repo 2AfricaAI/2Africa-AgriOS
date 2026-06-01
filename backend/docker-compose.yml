@@ -36,7 +36,20 @@ services:
       - "3006:3306"
     volumes:
       - toafrica_mysql_data:/var/lib/mysql
+      # Sprint 41i: docker-entrypoint-initdb.d runs every *.sql / *.sh in
+      # alphabetical order on the FIRST boot of an empty data volume.
+      #   01-schema.sql       — foundation tables (sys_user, plot, customer,
+      #                         sales_order, batch, …) from the v3.0 snapshot
+      #   02-apply-migrations — shell hook that walks /migrations/*.sql in
+      #                         numeric order and applies each one. Without
+      #                         this, a fresh `docker compose up -d` would
+      #                         leave warehouse_* / qc_* / complaint / recall /
+      #                         supplier / input_item etc. uncreated and the
+      #                         UI would throw "Table doesn't exist" on those
+      #                         menus.
       - ../schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../migrations:/migrations:ro
+      - ./scripts/apply-migrations-init.sh:/docker-entrypoint-initdb.d/02-apply-migrations.sh:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123456"]
       interval: 10s

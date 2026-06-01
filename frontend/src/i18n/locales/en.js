@@ -62,15 +62,62 @@ export default {
     sysRoles: 'Roles',
   },
 
-  // Sprint 40e: Customer Service page (Chatwoot embed)
+  // Sprint 41: AgriOS-native Customer Service workspace.
   service: {
+    // shared
     title: 'Customer Service Workspace',
-    poweredBy: 'Chatwoot',
     reload: 'Reload',
-    openInNewTab: 'Open in new tab',
-    iframeHintTitle: 'Service panel not loading?',
-    iframeHintBody:
-      "If the area above looks blank, your browser or Chatwoot is likely blocking the embed. Click below to open it in a dedicated tab — same workspace, no limitations.",
+
+    // list page
+    filters: 'Filters',
+    status: 'Status',
+    statusOpen: 'Open',
+    statusPending: 'Pending',
+    statusResolved: 'Resolved',
+    statusSnoozed: 'Snoozed',
+    assignee: 'Assignee',
+    assigneeAll: 'All',
+    assigneeMe: 'Me',
+    assigneeUnassigned: 'Unassigned',
+    inbox: 'Inbox',
+    inboxAll: 'All inboxes',
+    conversations: 'Conversations',
+    conversationsUnit: '',
+    empty: 'No conversations match the current filters',
+    unknownContact: 'Unknown contact',
+    selectAConversation: 'Select a conversation on the left to view details',
+    loadFailed: 'Failed to load',
+
+    // detail page - header
+    markResolved: 'Mark resolved',
+    reopen: 'Reopen',
+    creditLevel: 'Credit level',
+    paymentTerms: 'Payment terms',
+    openOrders: 'Open orders',
+    overdueAr: 'Overdue AR',
+    openComplaints: 'Open complaints',
+
+    // detail page - composer
+    reply: 'Reply',
+    privateNote: 'Private note',
+    replyHint: 'Customer will see this — review before sending',
+    privateNoteHint: 'Visible to your team only — for internal coordination',
+    replyPlaceholder: 'Type your reply (Ctrl/Cmd + Enter to send)',
+    privateNotePlaceholder: 'Type a private note (team only)',
+    sendReply: 'Send reply',
+    saveNote: 'Save note',
+    replySent: 'Reply sent',
+    noteSaved: 'Note saved',
+    sendFailed: 'Send failed',
+
+    // detail page - AI assistant
+    aiDraft: 'AI draft',
+    aiThinking: 'AI thinking...',
+    aiFailed: 'AI call failed',
+
+    // detail page - status change
+    statusChanged: 'Status updated',
+    statusFailed: 'Status update failed',
   },
 
   // ---------- Generic buttons / labels ----------

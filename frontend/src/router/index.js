@@ -258,11 +258,28 @@ const routes = [
         meta: { titleKey: 'menu.fileDemo' },
       },
       {
-        // Sprint 40e: Customer Service module - embeds Chatwoot UI.
+        // Sprint 41: AgriOS-native Customer Service workspace (replaces the
+        // Sprint 40e iframe embed). The parent shows the conversation list +
+        // filter sidebar; the child renders the selected conversation detail
+        // in the right-hand pane.
         path: 'service',
-        name: 'customer-service',
-        component: () => import('@/views/service/CustomerService.vue'),
+        component: () => import('@/views/service/ConversationList.vue'),
         meta: { titleKey: 'menu.customerService' },
+        children: [
+          {
+            path: '',
+            name: 'customer-service',
+            // Empty child — the parent shows the empty state in the detail pane.
+            component: { template: '<div></div>' },
+            meta: { titleKey: 'menu.customerService' },
+          },
+          {
+            path: 'conversations/:id',
+            name: 'service-conversation-detail',
+            component: () => import('@/views/service/ConversationDetail.vue'),
+            meta: { titleKey: 'service.title' },
+          },
+        ],
       },
       {
         path: 'system/users',

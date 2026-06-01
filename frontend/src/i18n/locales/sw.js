@@ -61,18 +61,64 @@ export default {
     mustBePositive: '{field} lazima iwe > 0',
   },
 
-  // Sprint 40e: Customer Service page
+  // Sprint 41: AgriOS-native Customer Service workspace
   menu: {
     customerService: 'Huduma kwa Wateja',
   },
   service: {
     title: 'Eneo la Huduma kwa Wateja',
-    poweredBy: 'Chatwoot',
     reload: 'Onyesha upya',
-    openInNewTab: 'Fungua katika kichupo kipya',
-    iframeHintTitle: 'Paneli haifunguliki?',
-    iframeHintBody:
-      'Ikiwa eneo la juu liko tupu, kivinjari au Chatwoot inazuia uingizaji. Bofya hapa chini kufungua katika kichupo kipya — kazi sawa, bila vikwazo.',
+
+    // list page
+    filters: 'Vichujio',
+    status: 'Hali',
+    statusOpen: 'Wazi',
+    statusPending: 'Inasubiri',
+    statusResolved: 'Imetatuliwa',
+    statusSnoozed: 'Imeahirishwa',
+    assignee: 'Mhudumu',
+    assigneeAll: 'Wote',
+    assigneeMe: 'Mimi',
+    assigneeUnassigned: 'Hawajapangiwa',
+    inbox: 'Sanduku',
+    inboxAll: 'Masanduku yote',
+    conversations: 'Mazungumzo',
+    conversationsUnit: '',
+    empty: 'Hakuna mazungumzo yanayolingana na vichujio',
+    unknownContact: 'Mteja asiyejulikana',
+    selectAConversation: 'Chagua mazungumzo kushoto kuona maelezo',
+    loadFailed: 'Imeshindwa kupakia',
+
+    // detail page
+    markResolved: 'Tia alama imetatuliwa',
+    reopen: 'Fungua tena',
+    creditLevel: 'Kiwango cha mkopo',
+    paymentTerms: 'Masharti ya malipo',
+    openOrders: 'Maagizo wazi',
+    overdueAr: 'Madeni yaliyochelewa',
+    openComplaints: 'Malalamiko wazi',
+
+    // composer
+    reply: 'Jibu',
+    privateNote: 'Kumbukumbu ya ndani',
+    replyHint: 'Mteja atauona — pitia kabla ya kutuma',
+    privateNoteHint: 'Inaonekana kwa timu yako tu',
+    replyPlaceholder: 'Andika jibu lako (Ctrl/Cmd + Enter kutuma)',
+    privateNotePlaceholder: 'Andika kumbukumbu ya timu',
+    sendReply: 'Tuma jibu',
+    saveNote: 'Hifadhi kumbukumbu',
+    replySent: 'Jibu limetumwa',
+    noteSaved: 'Kumbukumbu imehifadhiwa',
+    sendFailed: 'Imeshindwa kutuma',
+
+    // AI
+    aiDraft: 'Pendekezo la AI',
+    aiThinking: 'AI inafikiria...',
+    aiFailed: 'Wito wa AI umeshindwa',
+
+    // status
+    statusChanged: 'Hali imebadilishwa',
+    statusFailed: 'Imeshindwa kubadilisha hali',
   },
 
   // ---------- Input Items (Phase 4) ----------
