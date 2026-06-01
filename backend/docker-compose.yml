@@ -232,7 +232,12 @@ services:
     depends_on:
       chatwoot-db-prepare:
         condition: service_completed_successfully
-    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+    # Sprint 46 hotfix: clear any stale Rails PID file before Puma boots.
+    # If a previous container was killed hard (Docker Desktop OOM, host
+    # reboot, kill -9) the tmp/pids/server.pid file is left behind and Puma
+    # refuses to start, looping with "A server is already running". This
+    # `rm -f` guards against that and is harmless on a fresh container.
+    command: ["sh", "-c", "rm -f tmp/pids/server.pid && exec bundle exec rails s -p 3000 -b 0.0.0.0"]
     env_file:
       - ./chatwoot.env
     ports:
