@@ -46,6 +46,10 @@
           <el-icon><RefreshIcon /></el-icon>
           {{ t('service.reload') }}
         </el-button>
+        <el-button text @click="goToInboxes" class="filters-inboxes-btn">
+          <el-icon><SettingIcon /></el-icon>
+          {{ t('service.inboxesTitle') }}
+        </el-button>
       </div>
     </aside>
 
@@ -118,6 +122,7 @@ import { ElMessage } from 'element-plus'
 import {
   Refresh as RefreshIcon,
   ChatRound as ChatRoundIcon,
+  Setting as SettingIcon,
 } from '@element-plus/icons-vue'
 import { listConversations, listInboxes } from '@/api/service'
 
@@ -165,6 +170,10 @@ async function loadInboxes() {
 
 function openConversation(conv) {
   router.push({ name: 'service-conversation-detail', params: { id: conv.id } })
+}
+
+function goToInboxes() {
+  router.push({ name: 'service-inboxes' })
 }
 
 function formatTime(epochSec) {

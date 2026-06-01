@@ -119,6 +119,25 @@ export default {
     // status
     statusChanged: 'Hali imebadilishwa',
     statusFailed: 'Imeshindwa kubadilisha hali',
+
+    // Sprint 42: Inbox setup wizard (Swahili short labels — falls back to en)
+    inboxesTitle: 'Masanduku ya Wateja',
+    inboxesSub: 'Unganisha Barua-pepe / WhatsApp / Soga ya tovuti — ujumbe wote unakuja hapa',
+    addInbox: 'Ongeza sanduku',
+    noInboxes: 'Bado hakuna sanduku — bofya kuongeza la kwanza',
+    openInChatwoot: 'Fungua katika Chatwoot',
+    deleteInbox: 'Futa sanduku',
+    deleteConfirm: 'Futa sanduku "{name}"? Historia ya mazungumzo itafutwa.',
+    inboxCreated: 'Sanduku "{name}" limeundwa',
+    inboxDeleted: 'Sanduku limefutwa',
+    deleteFailed: 'Imeshindwa kufuta',
+    createFailed: 'Imeshindwa kuunda',
+    createInbox: 'Unda sanduku',
+    wizardTitle: 'Ongeza Njia ya Huduma',
+    pickChannelHint: 'Chagua njia ya kuunganisha.',
+    comingSoon: 'Inakuja',
+    required: 'Inahitajika',
+    fldInboxName: 'Jina la sanduku',
   },
 
   // ---------- Input Items (Phase 4) ----------

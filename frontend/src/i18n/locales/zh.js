@@ -117,6 +117,83 @@ export default {
     // detail page - status change
     statusChanged: '状态已更新',
     statusFailed: '状态更新失败',
+
+    // Sprint 42: Inbox setup wizard
+    inboxesTitle: '收件箱管理',
+    inboxesSub: '配置邮箱 / WhatsApp / 网站聊天等渠道, 客户消息统一进客服中心',
+    addInbox: '添加收件箱',
+    noInboxes: '还没有收件箱, 点这里加第一个',
+    openInChatwoot: '在 Chatwoot 中打开',
+    deleteInbox: '删除收件箱',
+    deleteConfirm: '确定删除收件箱 "{name}" 吗? 该渠道下的对话历史也会清空, 不可恢复。',
+    inboxCreated: '收件箱 "{name}" 创建成功',
+    inboxDeleted: '收件箱已删除',
+    deleteFailed: '删除失败',
+    createFailed: '创建失败',
+    createInbox: '创建收件箱',
+
+    // wizard
+    wizardTitle: '添加客服渠道',
+    pickChannelHint: '选择一个渠道开始接入。每个渠道有不同的接入步骤, 跟着向导填几个字段即可。',
+    comingSoon: '即将上线',
+
+    chEmail: '邮箱', chEmailDesc: 'Gmail / Microsoft 365 / 其他 IMAP 邮箱',
+    chWhatsapp: 'WhatsApp', chWhatsappDesc: 'Meta WhatsApp Business 云 API',
+    chWebWidget: '网站聊天', chWebWidgetDesc: '嵌入到农场官网/商城的聊天小窗',
+    chSms: '短信', chSmsDesc: 'Africa\'s Talking / Twilio',
+    chPhone: '电话', chPhoneDesc: 'Twilio 语音, 全球号码',
+    chTwitter: 'Twitter / X', chTwitterDesc: '账号私信',
+    chFacebook: 'Facebook', chFacebookDesc: 'Page Messenger',
+    chTiktok: 'TikTok', chTiktokDesc: 'TikTok for Business 私信',
+    chSlack: 'Slack', chSlackDesc: '内部团队转发频道',
+    chTelegram: 'Telegram', chTelegramDesc: 'Bot API',
+
+    // form fields - shared
+    fldInboxName: '收件箱名称',
+    fldInboxNameHint: '例如 "Albert 农场客服"',
+    required: '必填',
+    showAdvanced: '高级 / 自定义服务器',
+    hideAdvanced: '收起高级选项',
+
+    // Email
+    emailHintTitle: '推荐用 Gmail App Password',
+    emailHintLine1: 'Gmail 需要先开两步验证, 然后生成应用专用密码 (16 位)。',
+    emailHintLine2: '其他邮箱 (Outlook / iCloud / Yahoo) 也支持, 输入 email 后会自动识别 IMAP/SMTP 服务器。',
+    fldEmail: '邮箱地址',
+    invalidEmail: '邮箱格式不正确',
+    fldAppPassword: 'App Password',
+    fldAppPasswordHint: 'Gmail App Password (16 位), 或邮箱主密码',
+    providerDetected: '已识别 {name} 服务器配置',
+    fldImapAddress: 'IMAP 服务器',
+    fldImapPort: 'IMAP 端口',
+    fldSmtpAddress: 'SMTP 服务器',
+    fldSmtpPort: 'SMTP 端口',
+
+    // WhatsApp
+    whatsappHintTitle: '从 Meta Business Manager 拿 3 个 ID',
+    whatsappHintLine1: '需要先在 Meta Business Manager 注册 WhatsApp Business 账号并加上号码。',
+    whatsappStep1: '进 business.facebook.com → WhatsApp 账号 → 选你的号码',
+    whatsappStep2: '复制 Phone Number ID',
+    whatsappStep3: '复制 WhatsApp Business Account ID',
+    whatsappStep4: '在 System User 里生成 permanent access token',
+    fldPhoneNumber: 'WhatsApp 号码',
+    fldPhoneNumberHint: 'E.164 格式, 比如 +254700123456 (肯尼亚)',
+    fldMetaApiToken: 'Meta API Token',
+    fldMetaApiTokenHint: 'EAAxx... 长字符串',
+    fldPhoneNumberId: 'Phone Number ID',
+    fldPhoneNumberIdHint: '15-20 位数字',
+    fldBusinessAccountId: 'Business Account ID (WABA ID)',
+    fldBusinessAccountIdHint: '15-20 位数字',
+
+    // Web widget
+    webWidgetHintTitle: '0 外部账号, 1 分钟搞定',
+    webWidgetHint: '创建后会得到一段 JavaScript 代码, 粘贴到你网站的 HTML 即可。访客直接在网页右下角和你聊天。',
+    fldWebsiteUrl: '网站地址',
+    invalidUrl: '请输入完整 http:// 或 https:// 链接',
+    fldWelcomeTitle: '欢迎标题',
+    fldWelcomeTagline: '欢迎语',
+    fldWidgetColor: '主题色',
+    preview: '预览',
   },
 
   common: {

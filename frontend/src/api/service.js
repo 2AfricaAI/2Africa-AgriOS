@@ -51,6 +51,26 @@ export function listAgents() {
 }
 
 // -----------------------------------------------------------------------
+// Sprint 42: channel setup wizards
+// -----------------------------------------------------------------------
+
+export function setupEmailInbox(payload) {
+  return request.post('/v1/service/inboxes/setup-email', payload)
+}
+
+export function setupWhatsAppInbox(payload) {
+  return request.post('/v1/service/inboxes/setup-whatsapp', payload)
+}
+
+export function setupWebWidgetInbox(payload) {
+  return request.post('/v1/service/inboxes/setup-web-widget', payload)
+}
+
+export function deleteInbox(id) {
+  return request.delete(`/v1/service/inboxes/${id}`)
+}
+
+// -----------------------------------------------------------------------
 // Module health + AI diagnose (kept here so all /v1/service/* lives in one place)
 // -----------------------------------------------------------------------
 

@@ -292,6 +292,35 @@ public class ChatwootClient {
         execute(url, Method.POST, payload);
     }
 
+    /**
+     * Create a new inbox of any channel type. Caller composes the payload —
+     * channel-specific shapes live in
+     * {@link ai.toafrica.agrios.service.service.InboxSetupService}. Returns
+     * the new inbox as Chatwoot returned it (includes inbox_identifier,
+     * widget tokens etc. for downstream embed code generation).
+     */
+    public ChatwootInbox createInbox(Object payload) {
+        ensureEnabled();
+        String body = execute(baseAccountUrl() + "/inboxes", Method.POST, toJson(payload));
+        try {
+            JsonNode root = json.readTree(body);
+            // Chatwoot returns the inbox at the root; some versions wrap in
+            // data/payload. Be defensive.
+            JsonNode node = root;
+            if (root.has("payload")) node = root.path("payload");
+            else if (root.has("data")) node = root.path("data");
+            return json.treeToValue(node, ChatwootInbox.class);
+        } catch (IOException e) {
+            throw new BusinessException("Chatwoot createInbox response malformed: " + e.getMessage());
+        }
+    }
+
+    /** {@code DELETE /api/v1/accounts/{id}/inboxes/{inboxId}} */
+    public void deleteInbox(Long inboxId) {
+        ensureEnabled();
+        execute(baseAccountUrl() + "/inboxes/" + inboxId, Method.DELETE, null);
+    }
+
     /** {@code GET /api/v1/accounts/{id}/inboxes} */
     public List<ChatwootInbox> listInboxes() {
         ensureEnabled();

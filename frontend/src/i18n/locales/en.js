@@ -118,6 +118,83 @@ export default {
     // detail page - status change
     statusChanged: 'Status updated',
     statusFailed: 'Status update failed',
+
+    // Sprint 42: Inbox setup wizard
+    inboxesTitle: 'Inboxes',
+    inboxesSub: 'Connect Email / WhatsApp / Website Chat and other channels — customer messages all land here.',
+    addInbox: 'Add inbox',
+    noInboxes: 'No inboxes yet — click below to add your first one',
+    openInChatwoot: 'Open in Chatwoot',
+    deleteInbox: 'Delete inbox',
+    deleteConfirm: 'Delete inbox "{name}"? Conversation history on this channel will be wiped. This cannot be undone.',
+    inboxCreated: 'Inbox "{name}" created',
+    inboxDeleted: 'Inbox deleted',
+    deleteFailed: 'Delete failed',
+    createFailed: 'Create failed',
+    createInbox: 'Create inbox',
+
+    // wizard
+    wizardTitle: 'Add a customer service channel',
+    pickChannelHint: 'Pick a channel to onboard. Each one has its own short setup form.',
+    comingSoon: 'Coming soon',
+
+    chEmail: 'Email', chEmailDesc: 'Gmail / Microsoft 365 / any IMAP mailbox',
+    chWhatsapp: 'WhatsApp', chWhatsappDesc: 'Meta WhatsApp Business Cloud API',
+    chWebWidget: 'Website Chat', chWebWidgetDesc: 'Embeddable chat widget for your website',
+    chSms: 'SMS', chSmsDesc: 'Africa\'s Talking / Twilio',
+    chPhone: 'Phone', chPhoneDesc: 'Twilio Voice, global numbers',
+    chTwitter: 'Twitter / X', chTwitterDesc: 'Direct messages',
+    chFacebook: 'Facebook', chFacebookDesc: 'Page Messenger',
+    chTiktok: 'TikTok', chTiktokDesc: 'TikTok for Business DMs',
+    chSlack: 'Slack', chSlackDesc: 'Internal team channel relay',
+    chTelegram: 'Telegram', chTelegramDesc: 'Bot API',
+
+    // form fields - shared
+    fldInboxName: 'Inbox name',
+    fldInboxNameHint: 'e.g. "Albert\'s Farm Support"',
+    required: 'Required',
+    showAdvanced: 'Advanced / custom server',
+    hideAdvanced: 'Hide advanced',
+
+    // Email
+    emailHintTitle: 'Gmail App Password is the easiest path',
+    emailHintLine1: 'Enable 2-Step Verification on Gmail, then generate a 16-character App Password.',
+    emailHintLine2: 'Microsoft 365 / iCloud / Yahoo also work — IMAP/SMTP servers are auto-detected from the email address.',
+    fldEmail: 'Email address',
+    invalidEmail: 'Invalid email',
+    fldAppPassword: 'App password',
+    fldAppPasswordHint: 'Gmail App Password (16 chars) or mailbox main password',
+    providerDetected: 'Detected {name} — IMAP/SMTP auto-filled',
+    fldImapAddress: 'IMAP host',
+    fldImapPort: 'IMAP port',
+    fldSmtpAddress: 'SMTP host',
+    fldSmtpPort: 'SMTP port',
+
+    // WhatsApp
+    whatsappHintTitle: 'Get 3 IDs from Meta Business Manager',
+    whatsappHintLine1: 'Register a WhatsApp Business account and add a phone number in Meta Business Manager first.',
+    whatsappStep1: 'Go to business.facebook.com → WhatsApp Accounts → pick your number',
+    whatsappStep2: 'Copy the Phone Number ID',
+    whatsappStep3: 'Copy the WhatsApp Business Account ID',
+    whatsappStep4: 'Generate a permanent access token via System User',
+    fldPhoneNumber: 'WhatsApp number',
+    fldPhoneNumberHint: 'E.164 format, e.g. +254700123456 (Kenya)',
+    fldMetaApiToken: 'Meta API token',
+    fldMetaApiTokenHint: 'Long string starting with EAA...',
+    fldPhoneNumberId: 'Phone Number ID',
+    fldPhoneNumberIdHint: '15–20 digits',
+    fldBusinessAccountId: 'Business Account ID (WABA ID)',
+    fldBusinessAccountIdHint: '15–20 digits',
+
+    // Web widget
+    webWidgetHintTitle: 'No external account, ~1 minute setup',
+    webWidgetHint: 'After saving you\'ll get a JavaScript snippet — paste it into your website HTML. Visitors will see a chat bubble at the bottom right.',
+    fldWebsiteUrl: 'Website URL',
+    invalidUrl: 'Enter a full http:// or https:// URL',
+    fldWelcomeTitle: 'Welcome title',
+    fldWelcomeTagline: 'Welcome tagline',
+    fldWidgetColor: 'Theme color',
+    preview: 'Preview',
   },
 
   // ---------- Generic buttons / labels ----------

@@ -282,6 +282,13 @@ const routes = [
         ],
       },
       {
+        // Sprint 42: Inbox management + channel setup wizards.
+        path: 'service/inboxes',
+        name: 'service-inboxes',
+        component: () => import('@/views/service/InboxList.vue'),
+        meta: { titleKey: 'service.inboxesTitle' },
+      },
+      {
         path: 'system/users',
         name: 'system-users',
         component: () => import('@/views/system/UserList.vue'),
