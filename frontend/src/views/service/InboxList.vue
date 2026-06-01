@@ -27,7 +27,7 @@
           {{ t('service.addInbox') }}
         </el-button>
       </el-empty>
-    </el-skeleton>
+    </div>
 
     <ul v-else class="grid">
       <li v-for="ib in inboxes" :key="ib.id" class="card">
