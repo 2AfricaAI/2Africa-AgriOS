@@ -139,6 +139,10 @@ services:
       AFRICASTALKING_SENDER_ID: ${AFRICASTALKING_SENDER_ID:-}
       AFRICASTALKING_SANDBOX: ${AFRICASTALKING_SANDBOX:-true}
       AFRICASTALKING_SMS_INBOX_ID: ${AFRICASTALKING_SMS_INBOX_ID:-}
+      # Sprint 47: WhatsApp zero-cost policy (only allow replies inside
+      # Meta's 24h customer-initiated service window).
+      WHATSAPP_SERVICE_WINDOW_HOURS: ${WHATSAPP_SERVICE_WINDOW_HOURS:-24}
+      WHATSAPP_SIMULATED_INBOX_IDS: ${WHATSAPP_SIMULATED_INBOX_IDS:-}
     ports:
       - "8080:8080"
     healthcheck:

@@ -21,6 +21,26 @@
         </div>
       </div>
       <div class="head-right">
+        <!-- Sprint 47: WhatsApp 24h service-window chip -->
+        <el-tooltip
+          v-if="conv.whatsAppPolicy?.managed"
+          :content="waTooltip"
+          placement="bottom"
+        >
+          <el-tag
+            :type="waWithinWindow ? 'success' : 'info'"
+            size="small"
+            effect="plain"
+            class="wa-chip"
+          >
+            <el-icon class="wa-chip-icon">
+              <ClockIcon v-if="waWithinWindow" />
+              <WarningIcon v-else />
+            </el-icon>
+            {{ waChipLabel }}
+          </el-tag>
+        </el-tooltip>
+
         <el-tag
           :type="conv.status === 'open' ? 'warning' : conv.status === 'resolved' ? 'success' : 'info'"
           size="small"
@@ -38,6 +58,15 @@
         >{{ t('service.reopen') }}</el-button>
       </div>
     </header>
+
+    <!-- ===================== WhatsApp policy banner (window expired) ===================== -->
+    <div
+      v-if="conv.whatsAppPolicy?.managed && !waWithinWindow"
+      class="wa-banner"
+    >
+      <el-icon><WarningIcon /></el-icon>
+      <span>{{ t('service.whatsAppBlockedBanner') }}</span>
+    </div>
 
     <!-- ===================== Business context strip ===================== -->
     <div v-if="conv.customer" class="context">
@@ -91,7 +120,15 @@
     <footer class="composer">
       <div class="composer-tabs">
         <el-radio-group v-model="replyMode" size="small">
-          <el-radio-button label="reply">{{ t('service.reply') }}</el-radio-button>
+          <el-tooltip
+            :content="t('service.whatsAppBlockedTooltip')"
+            :disabled="!waReplyBlocked"
+            placement="top"
+          >
+            <el-radio-button label="reply" :disabled="waReplyBlocked">
+              {{ t('service.reply') }}
+            </el-radio-button>
+          </el-tooltip>
           <el-radio-button label="note">{{ t('service.privateNote') }}</el-radio-button>
         </el-radio-group>
         <span class="composer-hint">
@@ -155,13 +192,15 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
   MagicStick as MagicStickIcon,
   Document as DocumentIcon,
+  Clock as ClockIcon,
+  Warning as WarningIcon,
 } from '@element-plus/icons-vue'
 import {
   getConversation,
@@ -185,9 +224,46 @@ const streamRef = ref(null)
 const templates = ref([])
 const pickingTpl = ref(false)
 
+// Sprint 47 — WhatsApp service-window state.
+// `nowTick` is bumped every 30s so the countdown chip recomputes live
+// without needing a full conversation reload.
+const nowTick = ref(Date.now())
+let nowTimer = null
+
+const waWithinWindow = computed(() => {
+  const p = conv.value?.whatsAppPolicy
+  if (!p?.managed) return true            // non-WhatsApp inboxes are unrestricted
+  if (!p.serviceWindowExpiresAt) return false
+  return nowTick.value / 1000 < p.serviceWindowExpiresAt
+})
+
+const waReplyBlocked = computed(() => {
+  const p = conv.value?.whatsAppPolicy
+  return p?.managed && !waWithinWindow.value
+})
+
+const waChipLabel = computed(() => {
+  const p = conv.value?.whatsAppPolicy
+  if (!p?.managed) return ''
+  if (!p.serviceWindowExpiresAt) return t('service.whatsAppNoWindow')
+  const msLeft = p.serviceWindowExpiresAt * 1000 - nowTick.value
+  if (msLeft <= 0) return t('service.whatsAppWindowExpired')
+  const hours = Math.floor(msLeft / 3_600_000)
+  const minutes = Math.floor((msLeft % 3_600_000) / 60_000)
+  return t('service.whatsAppWindowRemaining', { h: hours, m: minutes })
+})
+
+const waTooltip = computed(() => {
+  const p = conv.value?.whatsAppPolicy
+  if (!p?.managed) return ''
+  return waWithinWindow.value
+    ? t('service.whatsAppWindowTooltip')
+    : t('service.whatsAppExpiredTooltip')
+})
+
 async function load() {
   try {
-    const { data } = await getConversation(route.params.id)
+    const data = await getConversation(route.params.id)
     conv.value = data
     await nextTick()
     scrollToBottom()
@@ -221,7 +297,7 @@ async function send() {
 
 async function loadTemplates() {
   try {
-    const { data } = await listSmsTemplates()
+    const data = await listSmsTemplates()
     templates.value = Array.isArray(data) ? data : []
   } catch {
     templates.value = []
@@ -231,7 +307,7 @@ async function loadTemplates() {
 async function onPickTemplate(code) {
   pickingTpl.value = true
   try {
-    const { data } = await renderSmsTemplate(code, Number(route.params.id))
+    const data = await renderSmsTemplate(code, Number(route.params.id))
     if (data?.rendered) {
       replyText.value = data.rendered
     }
@@ -250,7 +326,7 @@ async function askAi() {
     const ctx = (conv.value?.messages || []).slice(-3)
       .map(m => (m.messageType === 0 ? 'Customer' : 'Agent') + ': ' + m.content).join('\n')
     const prompt = `You are a CSR for Albert's Farm. Suggest a concise, friendly reply to the customer based on the recent exchange. Reply in the customer's language.\n\nRecent exchange:\n${ctx}\n\nDraft a reply (1-3 sentences):`
-    const { data } = await aiAgentDiagnose(prompt)
+    const data = await aiAgentDiagnose(prompt)
     if (data?.reply) {
       replyText.value = data.reply
     } else if (data?.error) {
@@ -331,9 +407,22 @@ watch(() => route.params.id, (id) => {
   }
 })
 
+// Auto-switch to private note when the window expires (or starts that way).
+// Keeps the user from typing a reply that the backend would refuse anyway.
+watch(waReplyBlocked, (blocked) => {
+  if (blocked && replyMode.value === 'reply') {
+    replyMode.value = 'note'
+  }
+})
+
 onMounted(() => {
   load()
   loadTemplates()
+  nowTimer = setInterval(() => { nowTick.value = Date.now() }, 30_000)
+})
+
+onBeforeUnmount(() => {
+  if (nowTimer) clearInterval(nowTimer)
 })
 </script>
 
@@ -502,4 +591,26 @@ onMounted(() => {
 }
 .tpl-name { font-size: 13px; color: #1c2e25; font-weight: 500; }
 .tpl-meta { font-size: 11px; color: #8a9690; }
+
+/* ----- Sprint 47: WhatsApp service-window chip + banner ----- */
+.wa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.wa-chip-icon {
+  font-size: 12px;
+}
+.wa-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: #fff3e6;
+  border-bottom: 1px solid #f5a14d;
+  color: #b35a00;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.wa-banner .el-icon { flex-shrink: 0; }
 </style>

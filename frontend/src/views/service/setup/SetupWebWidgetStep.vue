@@ -84,7 +84,7 @@ const presetColors = [
 
 async function submit() {
   await formRef.value.validate()
-  const { data } = await setupWebWidgetInbox({ ...form.value })
+  const data = await setupWebWidgetInbox({ ...form.value })
   emit('submitted', data)
 }
 

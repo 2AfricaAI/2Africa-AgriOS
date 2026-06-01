@@ -11,8 +11,10 @@ import ai.toafrica.agrios.service.client.dto.ChatwootInbox;
 import ai.toafrica.agrios.service.entity.ServiceContactLink;
 import ai.toafrica.agrios.service.mapper.ServiceContactLinkMapper;
 import ai.toafrica.agrios.finance.entity.SmsTemplate;
+import ai.toafrica.agrios.common.exception.BusinessException;
 import ai.toafrica.agrios.service.service.BusinessContextService;
 import ai.toafrica.agrios.service.service.SmsTemplateRenderService;
+import ai.toafrica.agrios.service.service.WhatsAppPolicyService;
 import ai.toafrica.agrios.service.vo.ConversationDetailVO;
 import ai.toafrica.agrios.service.vo.ConversationListItemVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -56,6 +58,7 @@ public class ConversationController {
     private final CustomerMapper customerMapper;
     private final BusinessContextService businessContext;
     private final SmsTemplateRenderService templateRender;
+    private final WhatsAppPolicyService whatsAppPolicy;
 
     // -----------------------------------------------------------------------
     // Conversations
@@ -84,16 +87,14 @@ public class ConversationController {
         // Single round-trip to the link table + customers table.
         Map<Long, ServiceContactLink> linkByContact = bulkLookupLinks(
                 raw.stream()
-                   .map(c -> c.getContact() != null ? c.getContact().getId()
-                           : (c.getMeta() != null ? c.getMeta().getId() : null))
+                   .map(c -> c.resolvedContact() != null ? c.resolvedContact().getId() : null)
                    .filter(java.util.Objects::nonNull)
                    .collect(Collectors.toSet())
         );
 
         for (int i = 0; i < rows.size(); i++) {
             ChatwootConversation c = raw.get(i);
-            Long contactId = c.getContact() != null ? c.getContact().getId()
-                    : (c.getMeta() != null ? c.getMeta().getId() : null);
+            Long contactId = c.resolvedContact() != null ? c.resolvedContact().getId() : null;
             if (contactId == null) continue;
             ServiceContactLink link = linkByContact.get(contactId);
             if (link == null) continue;
@@ -125,18 +126,28 @@ public class ConversationController {
                         .build())
                 .toList();
 
+        // Sprint 47: evaluate WhatsApp service-window policy once and ship
+        // the result alongside the conversation so the UI can render the
+        // countdown chip and decide whether public reply is enabled.
+        WhatsAppPolicyService.Decision waDecision = whatsAppPolicy.evaluate(c);
+
         var builder = ConversationDetailVO.builder()
                 .id(c.getId())
-                .displayId(c.getDisplayId())
+                .displayId(c.getDisplayId() != null ? c.getDisplayId() : c.getId())
                 .status(c.getStatus())
-                .channel(c.getChannel())
+                .channel(c.resolvedChannel())
                 .inboxId(c.getInboxId())
                 .assigneeId(c.getAssigneeId())
+                .whatsAppPolicy(ConversationDetailVO.WhatsAppPolicy.builder()
+                        .managed(waDecision.managed())
+                        .lastInboundAt(waDecision.lastInboundAtEpochSec())
+                        .serviceWindowExpiresAt(waDecision.serviceWindowExpiresAtEpochSec())
+                        .withinServiceWindow(waDecision.withinServiceWindow())
+                        .build())
                 .messages(mvs);
 
         // Resolve AgriOS Customer if linked.
-        Long contactId = c.getContact() != null ? c.getContact().getId()
-                : (c.getMeta() != null ? c.getMeta().getId() : null);
+        Long contactId = c.resolvedContact() != null ? c.resolvedContact().getId() : null;
         if (contactId != null) {
             ServiceContactLink link = linkMapper.selectOne(
                     new LambdaQueryWrapper<ServiceContactLink>()
@@ -171,7 +182,28 @@ public class ConversationController {
         if (body == null || body.getContent() == null || body.getContent().isBlank()) {
             return R.ok();
         }
-        if (Boolean.TRUE.equals(body.getPrivateNote())) {
+        boolean isPrivate = Boolean.TRUE.equals(body.getPrivateNote());
+
+        // Sprint 47 — WhatsApp zero-cost policy enforcement.
+        // Private notes are never sent to the customer, so they cost
+        // nothing and are always allowed. Public replies on WhatsApp
+        // inboxes are gated by the 24h service window.
+        if (!isPrivate) {
+            ChatwootConversation conv = chatwoot.getConversation(id);
+            WhatsAppPolicyService.Decision d = whatsAppPolicy.evaluate(conv);
+            if (d.managed() && !d.withinServiceWindow()) {
+                log.info("[WhatsApp policy] BLOCK public reply on conv#{} — "
+                        + "service window expired (lastInboundAt={}, expiresAt={})",
+                        id, d.lastInboundAtEpochSec(), d.serviceWindowExpiresAtEpochSec());
+                throw new BusinessException(40901,
+                        "WhatsApp 24h service window expired; public reply "
+                        + "blocked by zero-cost policy. Use a private note "
+                        + "for internal follow-up, or contact the customer "
+                        + "via SMS / Email.");
+            }
+        }
+
+        if (isPrivate) {
             chatwoot.sendPrivateNote(id, body.getContent());
         } else {
             chatwoot.sendOutboundMessage(id, body.getContent());
@@ -230,8 +262,7 @@ public class ConversationController {
         if (customerId == null && body.getConversationId() != null) {
             // Resolve customer via conversation → service_contact_link
             ChatwootConversation c = chatwoot.getConversation(body.getConversationId());
-            Long contactId = c.getContact() != null ? c.getContact().getId()
-                    : (c.getMeta() != null ? c.getMeta().getId() : null);
+            Long contactId = c.resolvedContact() != null ? c.resolvedContact().getId() : null;
             if (contactId != null) {
                 ServiceContactLink link = linkMapper.selectOne(
                         new LambdaQueryWrapper<ServiceContactLink>()

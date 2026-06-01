@@ -150,7 +150,7 @@ async function reload() {
     const params = { status: statusFilter.value }
     if (assigneeFilter.value) params.assigneeType = assigneeFilter.value
     if (inboxFilter.value) params.inboxId = inboxFilter.value
-    const { data } = await listConversations(params)
+    const data = await listConversations(params)
     conversations.value = Array.isArray(data) ? data : []
   } catch (err) {
     ElMessage.error(err?.message || t('service.loadFailed'))
@@ -161,7 +161,7 @@ async function reload() {
 
 async function loadInboxes() {
   try {
-    const { data } = await listInboxes()
+    const data = await listInboxes()
     inboxes.value = Array.isArray(data) ? data : []
   } catch {
     // Non-fatal — just leave the inbox filter empty.

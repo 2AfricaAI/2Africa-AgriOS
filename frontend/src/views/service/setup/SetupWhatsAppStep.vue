@@ -84,7 +84,7 @@ const rules = {
 
 async function submit() {
   await formRef.value.validate()
-  const { data } = await setupWhatsAppInbox({ ...form.value })
+  const data = await setupWhatsAppInbox({ ...form.value })
   emit('submitted', data)
 }
 

@@ -124,6 +124,15 @@ export default {
     statusChanged: '状态已更新',
     statusFailed: '状态更新失败',
 
+    // Sprint 47: WhatsApp zero-cost policy
+    whatsAppWindowRemaining: '服务窗口剩 {h}h {m}m',
+    whatsAppWindowExpired: '服务窗口已过期',
+    whatsAppNoWindow: '等待客户首条消息',
+    whatsAppWindowTooltip: 'Meta 政策: 客户主动发消息后 24 小时内, 平台公开回复免费',
+    whatsAppExpiredTooltip: '超出 24h 服务窗口, 公开回复需 template 付费, 已被零费用策略拦截。可改用内部私信记录或发短信跟进。',
+    whatsAppBlockedTooltip: '公开回复需 Meta template, 已被零费用策略拦截',
+    whatsAppBlockedBanner: 'WhatsApp 24 小时服务窗口已过期。公开回复需要付费的 template, 已被零费用策略拦截。可继续使用内部私信记录, 或通过短信/邮件联系客户。',
+
     // Sprint 42: Inbox setup wizard
     inboxesTitle: '收件箱管理',
     inboxesSub: '配置邮箱 / WhatsApp / 网站聊天等渠道, 客户消息统一进客服中心',

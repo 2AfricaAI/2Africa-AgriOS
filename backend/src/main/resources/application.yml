@@ -134,6 +134,15 @@ agrios:
     sender-id: ${AFRICASTALKING_SENDER_ID:}
     sandbox: ${AFRICASTALKING_SANDBOX:true}
     sms-inbox-id: ${AFRICASTALKING_SMS_INBOX_ID:}
+  # Sprint 47: WhatsApp zero-cost policy. AgriOS only allows agent replies
+  # inside Meta's free 24h service window (after a customer-initiated
+  # inbound). Outside the window, public replies are blocked so SMB
+  # farms never trigger paid template conversations by accident.
+  # simulated-inbox-ids lets local dev pin a Chatwoot API channel inbox
+  # as "WhatsApp" for end-to-end testing without Meta Cloud.
+  whatsapp:
+    service-window-hours: ${WHATSAPP_SERVICE_WINDOW_HOURS:24}
+    simulated-inbox-ids: ${WHATSAPP_SIMULATED_INBOX_IDS:}
 
 # Swagger / OpenAPI
 springdoc:

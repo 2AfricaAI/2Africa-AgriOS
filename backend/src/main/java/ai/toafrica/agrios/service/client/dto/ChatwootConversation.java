@@ -16,11 +16,11 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChatwootConversation {
     private Long id;
-    /** Per-account display id, what the URL bar shows: /conversations/{display_id}. */
+    /** Per-account display id; in Chatwoot v4 this is often equal to id. */
     private Long displayId;
     /** open / resolved / pending / snoozed */
     private String status;
-    /** "Channel::Email" / "Channel::WebWidget" / "Channel::Whatsapp" / etc. */
+    /** Direct channel string — only present on the single-conversation endpoint. */
     private String channel;
     private Long inboxId;
     private Long contactInbox;
@@ -30,13 +30,41 @@ public class ChatwootConversation {
     private Long updatedAt;
     /** Counter of unread incoming messages. */
     private Integer unreadCount;
-    /** Sender (customer) — minimal projection only. */
-    private ChatwootContact meta;
-    /** Nested contact if Chatwoot returns it under a different key in newer versions. */
+    /**
+     * v4 list response stuffs everything (channel + sender + hmac flag) under
+     * a {@code meta} object rather than at the root. Detail responses may
+     * inline {@code contact} instead, so we keep both fields.
+     */
+    private Meta meta;
     private ChatwootContact contact;
     /** Most recent message (for list previews). */
     private List<ChatwootMessageEnvelope> messages;
     private Long assigneeId;
+
+    /** Chatwoot v4 conversation-list "meta" wrapper. */
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Meta {
+        /** "Channel::WebWidget" / "Channel::Email" / "Channel::Whatsapp" / ... */
+        private String channel;
+        /** The customer-side contact for this conversation. */
+        private ChatwootContact sender;
+        private Boolean hmacVerified;
+    }
+
+    /** Best-effort accessor: returns the contact from whichever shape Chatwoot used. */
+    public ChatwootContact resolvedContact() {
+        if (contact != null) return contact;
+        if (meta != null && meta.getSender() != null) return meta.getSender();
+        return null;
+    }
+
+    /** Best-effort accessor: channel from root or from meta. */
+    public String resolvedChannel() {
+        if (channel != null && !channel.isBlank()) return channel;
+        if (meta != null && meta.getChannel() != null) return meta.getChannel();
+        return null;
+    }
 
     /** Slim envelope for nested-message previews returned in list payloads. */
     @Data

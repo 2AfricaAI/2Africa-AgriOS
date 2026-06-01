@@ -38,21 +38,21 @@ public class ConversationListItemVO {
     public static ConversationListItemVO from(ChatwootConversation c) {
         var b = ConversationListItemVO.builder()
                 .id(c.getId())
-                .displayId(c.getDisplayId())
+                // v4 conversation-list responses don't always send display_id —
+                // fall back to id so URLs and re-fetches still work.
+                .displayId(c.getDisplayId() != null ? c.getDisplayId() : c.getId())
                 .status(c.getStatus())
-                .channel(c.getChannel())
+                .channel(c.resolvedChannel())
                 .inboxId(c.getInboxId())
                 .lastActivityAt(c.getLastActivityAt())
                 .unreadCount(c.getUnreadCount())
                 .assigneeId(c.getAssigneeId());
-        if (c.getContact() != null) {
-            b.contactName(c.getContact().getName())
-             .contactPhone(c.getContact().getPhoneNumber())
-             .contactEmail(c.getContact().getEmail());
-        } else if (c.getMeta() != null) {
-            b.contactName(c.getMeta().getName())
-             .contactPhone(c.getMeta().getPhoneNumber())
-             .contactEmail(c.getMeta().getEmail());
+
+        var ct = c.resolvedContact();
+        if (ct != null) {
+            b.contactName(ct.getName())
+             .contactPhone(ct.getPhoneNumber())
+             .contactEmail(ct.getEmail());
         }
         if (c.getMessages() != null && !c.getMessages().isEmpty()) {
             ChatwootConversation.ChatwootMessageEnvelope last = c.getMessages().get(0);

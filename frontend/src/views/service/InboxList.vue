@@ -108,7 +108,7 @@ const CHATWOOT_URL = import.meta.env.VITE_CHATWOOT_URL || 'http://localhost:3000
 async function reload() {
   loading.value = true
   try {
-    const { data } = await listInboxes()
+    const data = await listInboxes()
     inboxes.value = Array.isArray(data) ? data : []
   } catch (err) {
     ElMessage.error(err?.message || t('service.loadFailed'))

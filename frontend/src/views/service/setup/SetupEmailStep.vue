@@ -136,7 +136,7 @@ async function submit() {
     smtpAddress:  form.value.smtpAddress || null,
     smtpPort:     form.value.smtpPort || null,
   }
-  const { data } = await setupEmailInbox(payload)
+  const data = await setupEmailInbox(payload)
   emit('submitted', data)
 }
 

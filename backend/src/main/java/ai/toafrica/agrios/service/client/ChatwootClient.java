@@ -397,13 +397,21 @@ public class ChatwootClient {
         long t0 = System.currentTimeMillis();
         HttpRequest req = HttpUtil.createRequest(method, url)
                 .header("api_access_token", props.getApiToken())
-                .header("Content-Type", "application/json")
+                .header("Content-Type", "application/json; charset=utf-8")
+                // Force UTF-8 on the request body so multibyte payloads (Chinese,
+                // Swahili apostrophes, emoji) round-trip cleanly. Without this
+                // Hutool defaults to ISO-8859-1 and Chatwoot sees mojibake.
+                .charset(java.nio.charset.StandardCharsets.UTF_8)
                 .timeout(props.getTimeoutMs());
         if (body != null) req.body(body);
 
         try (HttpResponse resp = req.execute()) {
             int status = resp.getStatus();
-            String text = resp.body();
+            // Decode the response with UTF-8 explicitly. Chatwoot returns the
+            // correct Content-Type but Hutool's default body() uses the
+            // platform charset on Windows, which mangles non-ASCII characters
+            // (e.g. 你好 becomes ä½ å¥½).
+            String text = new String(resp.bodyBytes(), java.nio.charset.StandardCharsets.UTF_8);
             long ms = System.currentTimeMillis() - t0;
             if (status >= 200 && status < 300) {
                 log.debug("[Chatwoot {} {}] {} in {}ms", method, url, status, ms);

@@ -110,7 +110,7 @@ const rules = {
 
 async function submit() {
   await formRef.value.validate()
-  const { data } = await setupSmsInbox({ ...form.value })
+  const data = await setupSmsInbox({ ...form.value })
   result.value = data
   // Hold the wizard open so the operator can copy the inbound webhook URL.
   // The 'submitted' event closes the wizard, so we delay it by one tick so

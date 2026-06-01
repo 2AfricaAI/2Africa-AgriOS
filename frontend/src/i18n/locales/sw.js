@@ -120,6 +120,15 @@ export default {
     statusChanged: 'Hali imebadilishwa',
     statusFailed: 'Imeshindwa kubadilisha hali',
 
+    // Sprint 47: Sera ya WhatsApp bila gharama
+    whatsAppWindowRemaining: 'Dirisha la huduma: salio {h}h {m}m',
+    whatsAppWindowExpired: 'Dirisha la huduma limeisha',
+    whatsAppNoWindow: 'Tunasubiri ujumbe wa kwanza wa mteja',
+    whatsAppWindowTooltip: 'Sera ya Meta: majibu ya umma ni bure kwa masaa 24 baada ya ujumbe wa mteja.',
+    whatsAppExpiredTooltip: 'Nje ya dirisha la masaa 24. Jibu la umma lingehitaji template ya kulipia; limezuiwa na sera ya gharama-sifuri. Tumia maelezo ya ndani au fuata kwa SMS.',
+    whatsAppBlockedTooltip: 'Jibu la umma linahitaji template ya kulipia; limezuiwa na sera ya gharama-sifuri',
+    whatsAppBlockedBanner: 'Dirisha la masaa 24 la WhatsApp limeisha. Jibu la umma lingehitaji template ya kulipia ya Meta na limezuiwa na sera yako ya gharama-sifuri. Bado unaweza kuongeza maelezo ya ndani au kufikia mteja kupitia SMS / Email.',
+
     // Sprint 42: Inbox setup wizard (Swahili short labels — falls back to en)
     inboxesTitle: 'Masanduku ya Wateja',
     inboxesSub: 'Unganisha Barua-pepe / WhatsApp / Soga ya tovuti — ujumbe wote unakuja hapa',

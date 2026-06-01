@@ -125,6 +125,15 @@ export default {
     statusChanged: 'Status updated',
     statusFailed: 'Status update failed',
 
+    // Sprint 47: WhatsApp zero-cost policy
+    whatsAppWindowRemaining: 'Service window: {h}h {m}m left',
+    whatsAppWindowExpired: 'Service window expired',
+    whatsAppNoWindow: 'Waiting for first customer message',
+    whatsAppWindowTooltip: 'Meta policy: public agent replies are free for 24h after a customer-initiated message.',
+    whatsAppExpiredTooltip: 'Outside the 24h service window. Public replies would require a paid template; blocked by zero-cost policy. Use private notes or follow up by SMS.',
+    whatsAppBlockedTooltip: 'Public reply requires a paid Meta template; blocked by zero-cost policy',
+    whatsAppBlockedBanner: 'The WhatsApp 24-hour service window has expired. Public replies would require a paid Meta template and are blocked by your zero-cost policy. You can still add private notes or reach the customer via SMS / Email.',
+
     // Sprint 42: Inbox setup wizard
     inboxesTitle: 'Inboxes',
     inboxesSub: 'Connect Email / WhatsApp / Website Chat and other channels — customer messages all land here.',

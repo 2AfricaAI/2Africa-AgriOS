@@ -33,6 +33,13 @@ public class ConversationDetailVO {
     /** Inline business context for the agent (orders, AR, complaints). */
     private BusinessContext businessContext;
 
+    /**
+     * Sprint 47 — WhatsApp zero-cost policy state. Always populated.
+     * {@code managed=false} means this isn't a WhatsApp inbox and the UI
+     * should hide the countdown chip + service-window banner entirely.
+     */
+    private WhatsAppPolicy whatsAppPolicy;
+
     @Data
     @Builder
     public static class AgriosCustomerSummary {
@@ -66,5 +73,24 @@ public class ConversationDetailVO {
         private java.math.BigDecimal overdueArAmount;
         private Integer openComplaintCount;
         private java.time.LocalDate lastOrderDate;
+    }
+
+    /**
+     * Sprint 47 — projection of {@code WhatsAppPolicyService.Decision} for
+     * the frontend. UI uses {@code serviceWindowExpiresAt} to render a
+     * countdown chip, and {@code withinServiceWindow} to decide whether
+     * the "公开回复" tab is enabled.
+     */
+    @Data
+    @Builder
+    public static class WhatsAppPolicy {
+        /** True when this conversation's inbox is governed by the policy. */
+        private Boolean managed;
+        /** Latest customer inbound timestamp (epoch sec); null if never. */
+        private Long lastInboundAt;
+        /** When the free reply window closes (epoch sec); null if N/A. */
+        private Long serviceWindowExpiresAt;
+        /** True when a public agent reply right now would be free. */
+        private Boolean withinServiceWindow;
     }
 }
