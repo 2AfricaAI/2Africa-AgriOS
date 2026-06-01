@@ -49,6 +49,12 @@ public class InboxSetupController {
         return R.ok(setup.setupWebWidget(req));
     }
 
+    @Operation(summary = "Create a SMS inbox via Africa's Talking (Kenya-friendly cheap SMS)")
+    @PostMapping("/setup-sms")
+    public R<InboxSetupService.SmsSetupResult> setupSms(@RequestBody InboxSetupService.SmsSetupRequest req) {
+        return R.ok(setup.setupSms(req));
+    }
+
     @Operation(summary = "Delete a Chatwoot inbox by id")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {

@@ -124,6 +124,16 @@ agrios:
       max-tokens: ${AI_AGENT_MAX_TOKENS:400}
       temperature: ${AI_AGENT_TEMPERATURE:0.4}
       reply-public: ${AI_AGENT_REPLY_PUBLIC:false}
+  # Sprint 43: Africa's Talking SMS gateway (Kenya-friendly cheap SMS).
+  # Defaults to sandbox so devs can experiment without burning real
+  # shillings. Set sandbox=false + a real API key + a registered sender id
+  # to go live.
+  africastalking:
+    username: ${AFRICASTALKING_USERNAME:sandbox}
+    api-key: ${AFRICASTALKING_API_KEY:}
+    sender-id: ${AFRICASTALKING_SENDER_ID:}
+    sandbox: ${AFRICASTALKING_SANDBOX:true}
+    sms-inbox-id: ${AFRICASTALKING_SMS_INBOX_ID:}
 
 # Swagger / OpenAPI
 springdoc:

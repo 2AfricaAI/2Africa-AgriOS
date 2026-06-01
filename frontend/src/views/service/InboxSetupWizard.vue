@@ -57,6 +57,11 @@
       ref="formRef"
       @submitted="onCreated"
     />
+    <SetupSmsStep
+      v-else-if="step === 'form' && picked === 'sms'"
+      ref="formRef"
+      @submitted="onCreated"
+    />
 
     <!-- ======== Footer ======== -->
     <template #footer>
@@ -85,6 +90,7 @@ import { ElMessage } from 'element-plus'
 import SetupEmailStep from './setup/SetupEmailStep.vue'
 import SetupWhatsAppStep from './setup/SetupWhatsAppStep.vue'
 import SetupWebWidgetStep from './setup/SetupWebWidgetStep.vue'
+import SetupSmsStep from './setup/SetupSmsStep.vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -104,7 +110,7 @@ const channels = [
   { id: 'email',     icon: '✉️', labelKey: 'service.chEmail',     descKey: 'service.chEmailDesc',     ready: true  },
   { id: 'whatsapp',  icon: '🟢', labelKey: 'service.chWhatsapp',  descKey: 'service.chWhatsappDesc',  ready: true  },
   { id: 'webwidget', icon: '🌐', labelKey: 'service.chWebWidget', descKey: 'service.chWebWidgetDesc', ready: true  },
-  { id: 'sms',       icon: '📱', labelKey: 'service.chSms',       descKey: 'service.chSmsDesc',       ready: false },
+  { id: 'sms',       icon: '📱', labelKey: 'service.chSms',       descKey: 'service.chSmsDesc',       ready: true  },
   { id: 'phone',     icon: '☎️', labelKey: 'service.chPhone',     descKey: 'service.chPhoneDesc',     ready: false },
   { id: 'twitter',   icon: '🐦', labelKey: 'service.chTwitter',   descKey: 'service.chTwitterDesc',   ready: false },
   { id: 'facebook',  icon: '📘', labelKey: 'service.chFacebook',  descKey: 'service.chFacebookDesc',  ready: false },

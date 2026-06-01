@@ -3,6 +3,8 @@ package ai.toafrica.agrios.service.service;
 import ai.toafrica.agrios.common.exception.BusinessException;
 import ai.toafrica.agrios.service.client.ChatwootClient;
 import ai.toafrica.agrios.service.client.dto.ChatwootInbox;
+import ai.toafrica.agrios.service.config.AfricasTalkingProperties;
+import ai.toafrica.agrios.service.config.ChatwootProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ import java.util.Map;
 public class InboxSetupService {
 
     private final ChatwootClient chatwoot;
+    private final AfricasTalkingProperties atProps;
+    private final ChatwootProperties cwProps;
 
     // =======================================================================
     // Email — IMAP/SMTP. The wizard form asks the operator for the bare
@@ -110,6 +114,73 @@ public class InboxSetupService {
         ChatwootInbox out = chatwoot.createInbox(body);
         log.info("[InboxSetup] WhatsApp Cloud inbox created: id={} phone={}", out.getId(), req.getPhoneNumber());
         return out;
+    }
+
+    // =======================================================================
+    // SMS via Africa's Talking. We create a Chatwoot "API Channel" inbox and
+    // point its outgoing webhook back at AgriOS — so when an agent replies in
+    // the Chatwoot UI, our backend gets the message and relays it through
+    // Africa's Talking. Inbound SMS comes in via the Africa's Talking
+    // dashboard webhook (configured by the operator after this returns) and
+    // hits {@code /v1/service/webhook/africastalking/incoming}.
+    //
+    // Credentials are global (one AT account per AgriOS install). The
+    // wizard records the resulting Chatwoot inbox id back into
+    // {@link AfricasTalkingProperties} so subsequent webhook traffic can
+    // identify the right channel.
+    // =======================================================================
+
+    public SmsSetupResult setupSms(SmsSetupRequest req) {
+        if (req == null) throw new BusinessException("payload is required");
+        if (blank(req.getUsername()))  throw new BusinessException("Africa's Talking username is required");
+        if (blank(req.getApiKey()))    throw new BusinessException("Africa's Talking API key is required");
+
+        // Persist into the in-memory props bean so subsequent webhook traffic
+        // can read them. Operators should still set the env vars for restart
+        // durability — the wizard surfaces those values in the result.
+        atProps.setUsername(req.getUsername());
+        atProps.setApiKey(req.getApiKey());
+        atProps.setSenderId(req.getSenderId() == null ? "" : req.getSenderId());
+        atProps.setSandbox(req.isSandbox());
+
+        String outboundWebhook = req.getPublicAgriosUrl() != null && !req.getPublicAgriosUrl().isBlank()
+                ? req.getPublicAgriosUrl()
+                : "http://host.docker.internal:8080";
+        outboundWebhook = stripTrailingSlash(outboundWebhook)
+                + "/api/v1/service/webhook/africastalking/outbound";
+
+        Map<String, Object> channel = new HashMap<>();
+        channel.put("type", "api");
+        channel.put("webhook_url", outboundWebhook);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", firstNonBlank(req.getName(), "SMS via Africa's Talking"));
+        body.put("channel", channel);
+
+        ChatwootInbox out = chatwoot.createInbox(body);
+        atProps.setSmsInboxId(out.getId());
+
+        // Compose the inbound webhook the operator must paste into the
+        // Africa's Talking dashboard ("SMS Callback URL" for inbound).
+        String publicBase = stripTrailingSlash(req.getPublicAgriosUrl());
+        String inboundWebhook = (publicBase == null || publicBase.isBlank())
+                ? "https://<your-public-agrios-url>/api/v1/service/webhook/africastalking/incoming"
+                : publicBase + "/api/v1/service/webhook/africastalking/incoming";
+
+        log.info("[InboxSetup] SMS inbox created: id={} sandbox={} inboundWebhook={}",
+                out.getId(), req.isSandbox(), inboundWebhook);
+
+        return SmsSetupResult.builder()
+                .inbox(out)
+                .inboundWebhookUrl(inboundWebhook)
+                .outboundWebhookUrl(outboundWebhook)
+                .sandbox(req.isSandbox())
+                .build();
+    }
+
+    private static String stripTrailingSlash(String s) {
+        if (s == null) return null;
+        return s.endsWith("/") ? s.substring(0, s.length() - 1) : s;
     }
 
     // =======================================================================
@@ -254,5 +325,32 @@ public class InboxSetupService {
         private String welcomeTagline;
         /** Hex color, e.g. "#0F3A26". */
         private String widgetColor;
+    }
+
+    @lombok.Data
+    public static class SmsSetupRequest {
+        private String name;
+        private String username;
+        private String apiKey;
+        /** Optional alphanumeric / short code sender id. */
+        private String senderId;
+        /** True for the AT sandbox (no real billing, +254 test numbers only). */
+        private boolean sandbox = true;
+        /**
+         * Public URL the operator's AgriOS install is reachable at. Used to
+         * compose the inbound + outbound webhook URLs the wizard surfaces
+         * back to the operator. Optional during dev (we fall back to
+         * host.docker.internal for outbound).
+         */
+        private String publicAgriosUrl;
+    }
+
+    @lombok.Data
+    @lombok.Builder
+    public static class SmsSetupResult {
+        private ChatwootInbox inbox;
+        private String inboundWebhookUrl;
+        private String outboundWebhookUrl;
+        private boolean sandbox;
     }
 }

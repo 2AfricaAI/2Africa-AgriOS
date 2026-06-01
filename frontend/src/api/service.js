@@ -66,6 +66,10 @@ export function setupWebWidgetInbox(payload) {
   return request.post('/v1/service/inboxes/setup-web-widget', payload)
 }
 
+export function setupSmsInbox(payload) {
+  return request.post('/v1/service/inboxes/setup-sms', payload)
+}
+
 export function deleteInbox(id) {
   return request.delete(`/v1/service/inboxes/${id}`)
 }
