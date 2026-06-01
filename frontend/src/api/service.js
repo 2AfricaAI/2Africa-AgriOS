@@ -85,3 +85,15 @@ export function serviceHealth() {
 export function aiAgentDiagnose(prompt) {
   return request.post('/v1/service/ai-agent/diagnose', { prompt })
 }
+
+// -----------------------------------------------------------------------
+// Sprint 45: SMS / WhatsApp templates
+// -----------------------------------------------------------------------
+
+export function listSmsTemplates() {
+  return request.get('/v1/service/sms-templates')
+}
+
+export function renderSmsTemplate(code, conversationId) {
+  return request.post('/v1/service/sms-templates/render', { code, conversationId })
+}

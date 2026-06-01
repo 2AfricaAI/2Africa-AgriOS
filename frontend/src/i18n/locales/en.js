@@ -116,6 +116,11 @@ export default {
     aiThinking: 'AI thinking...',
     aiFailed: 'AI call failed',
 
+    // Sprint 45: SMS template auto-fill
+    template: 'Template',
+    templateLoading: 'Rendering...',
+    templateFailed: 'Template render failed',
+
     // detail page - status change
     statusChanged: 'Status updated',
     statusFailed: 'Status update failed',

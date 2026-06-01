@@ -115,6 +115,11 @@ export default {
     aiThinking: 'AI 思考中...',
     aiFailed: 'AI 调用失败',
 
+    // Sprint 45: SMS template auto-fill
+    template: '模板',
+    templateLoading: '套用中...',
+    templateFailed: '模板套用失败',
+
     // detail page - status change
     statusChanged: '状态已更新',
     statusFailed: '状态更新失败',

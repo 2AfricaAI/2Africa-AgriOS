@@ -10,7 +10,9 @@ import ai.toafrica.agrios.service.client.dto.ChatwootConversation;
 import ai.toafrica.agrios.service.client.dto.ChatwootInbox;
 import ai.toafrica.agrios.service.entity.ServiceContactLink;
 import ai.toafrica.agrios.service.mapper.ServiceContactLinkMapper;
+import ai.toafrica.agrios.finance.entity.SmsTemplate;
 import ai.toafrica.agrios.service.service.BusinessContextService;
+import ai.toafrica.agrios.service.service.SmsTemplateRenderService;
 import ai.toafrica.agrios.service.vo.ConversationDetailVO;
 import ai.toafrica.agrios.service.vo.ConversationListItemVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -53,6 +55,7 @@ public class ConversationController {
     private final ServiceContactLinkMapper linkMapper;
     private final CustomerMapper customerMapper;
     private final BusinessContextService businessContext;
+    private final SmsTemplateRenderService templateRender;
 
     // -----------------------------------------------------------------------
     // Conversations
@@ -204,6 +207,53 @@ public class ConversationController {
     @GetMapping("/agents")
     public R<List<ChatwootAgent>> agents() {
         return R.ok(chatwoot.listAgents());
+    }
+
+    // -----------------------------------------------------------------------
+    // Sprint 45: SMS / WhatsApp templates — list + render against a conv
+    // -----------------------------------------------------------------------
+
+    @Operation(summary = "List available SMS / WhatsApp templates")
+    @GetMapping("/sms-templates")
+    public R<List<SmsTemplate>> listSmsTemplates() {
+        return R.ok(templateRender.safeListTemplates());
+    }
+
+    @Operation(summary = "Render a template against the given conversation's resolved customer")
+    @PostMapping("/sms-templates/render")
+    public R<Map<String, Object>> renderSmsTemplate(@RequestBody RenderTemplateBody body) {
+        if (body == null || body.getCode() == null || body.getCode().isBlank()) {
+            throw new ai.toafrica.agrios.common.exception.BusinessException("code is required");
+        }
+
+        Long customerId = body.getCustomerId();
+        if (customerId == null && body.getConversationId() != null) {
+            // Resolve customer via conversation → service_contact_link
+            ChatwootConversation c = chatwoot.getConversation(body.getConversationId());
+            Long contactId = c.getContact() != null ? c.getContact().getId()
+                    : (c.getMeta() != null ? c.getMeta().getId() : null);
+            if (contactId != null) {
+                ServiceContactLink link = linkMapper.selectOne(
+                        new LambdaQueryWrapper<ServiceContactLink>()
+                                .eq(ServiceContactLink::getChatwootContactId, contactId)
+                                .last("LIMIT 1"));
+                if (link != null) customerId = link.getAgriosEntityId();
+            }
+        }
+
+        String rendered = templateRender.render(body.getCode(), customerId);
+        return R.ok(Map.of(
+                "code", body.getCode(),
+                "customerId", customerId == null ? "" : customerId,
+                "rendered", rendered
+        ));
+    }
+
+    @lombok.Data
+    public static class RenderTemplateBody {
+        private String code;
+        private Long conversationId;
+        private Long customerId;
     }
 
     // -----------------------------------------------------------------------

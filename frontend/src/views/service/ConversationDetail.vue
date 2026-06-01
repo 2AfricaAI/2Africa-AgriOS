@@ -107,10 +107,38 @@
         @keydown.enter.meta="send"
       />
       <div class="composer-actions">
-        <el-button text @click="askAi" :disabled="askingAi">
-          <el-icon><MagicStickIcon /></el-icon>
-          {{ askingAi ? t('service.aiThinking') : t('service.aiDraft') }}
-        </el-button>
+        <div class="composer-actions-left">
+          <el-dropdown
+            v-if="templates.length"
+            trigger="click"
+            @command="onPickTemplate"
+          >
+            <el-button text :disabled="pickingTpl">
+              <el-icon><DocumentIcon /></el-icon>
+              {{ pickingTpl ? t('service.templateLoading') : t('service.template') }}
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="tpl in templates"
+                  :key="tpl.id"
+                  :command="tpl.code"
+                >
+                  <div class="tpl-row">
+                    <span class="tpl-name">{{ tpl.name }}</span>
+                    <span class="tpl-meta">{{ tpl.channel }} · {{ tpl.lang }}</span>
+                  </div>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+
+          <el-button text @click="askAi" :disabled="askingAi">
+            <el-icon><MagicStickIcon /></el-icon>
+            {{ askingAi ? t('service.aiThinking') : t('service.aiDraft') }}
+          </el-button>
+        </div>
+
         <el-button
           type="primary"
           :disabled="!replyText.trim() || sending"
@@ -131,12 +159,17 @@ import { ref, watch, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { MagicStick as MagicStickIcon } from '@element-plus/icons-vue'
+import {
+  MagicStick as MagicStickIcon,
+  Document as DocumentIcon,
+} from '@element-plus/icons-vue'
 import {
   getConversation,
   replyToConversation,
   changeConversationStatus,
   aiAgentDiagnose,
+  listSmsTemplates,
+  renderSmsTemplate,
 } from '@/api/service'
 
 const { t } = useI18n()
@@ -148,6 +181,9 @@ const replyMode = ref('reply') // 'reply' or 'note'
 const sending = ref(false)
 const askingAi = ref(false)
 const streamRef = ref(null)
+
+const templates = ref([])
+const pickingTpl = ref(false)
 
 async function load() {
   try {
@@ -180,6 +216,29 @@ async function send() {
     ElMessage.error(err?.message || t('service.sendFailed'))
   } finally {
     sending.value = false
+  }
+}
+
+async function loadTemplates() {
+  try {
+    const { data } = await listSmsTemplates()
+    templates.value = Array.isArray(data) ? data : []
+  } catch {
+    templates.value = []
+  }
+}
+
+async function onPickTemplate(code) {
+  pickingTpl.value = true
+  try {
+    const { data } = await renderSmsTemplate(code, Number(route.params.id))
+    if (data?.rendered) {
+      replyText.value = data.rendered
+    }
+  } catch (err) {
+    ElMessage.error(err?.message || t('service.templateFailed'))
+  } finally {
+    pickingTpl.value = false
   }
 }
 
@@ -272,7 +331,10 @@ watch(() => route.params.id, (id) => {
   }
 })
 
-onMounted(load)
+onMounted(() => {
+  load()
+  loadTemplates()
+})
 </script>
 
 <style scoped>
@@ -427,4 +489,17 @@ onMounted(load)
   justify-content: space-between;
   align-items: center;
 }
+.composer-actions-left {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.tpl-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0;
+}
+.tpl-name { font-size: 13px; color: #1c2e25; font-weight: 500; }
+.tpl-meta { font-size: 11px; color: #8a9690; }
 </style>
