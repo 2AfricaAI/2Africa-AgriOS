@@ -8,11 +8,11 @@ import ai.toafrica.agrios.service.client.dto.ChatwootAgent;
 import ai.toafrica.agrios.service.client.dto.ChatwootContact;
 import ai.toafrica.agrios.service.client.dto.ChatwootConversation;
 import ai.toafrica.agrios.service.client.dto.ChatwootInbox;
-import ai.toafrica.agrios.service.entity.ServiceContactLink;
-import ai.toafrica.agrios.service.mapper.ServiceContactLinkMapper;
+import ai.toafrica.agrios.service.entity.CsContactLink;
+import ai.toafrica.agrios.service.mapper.CsContactLinkMapper;
 import ai.toafrica.agrios.finance.entity.SmsTemplate;
 import ai.toafrica.agrios.common.exception.BusinessException;
-import ai.toafrica.agrios.service.service.BusinessContextService;
+import ai.toafrica.agrios.service.spi.BusinessContextProvider;
 import ai.toafrica.agrios.service.service.SmsTemplateRenderService;
 import ai.toafrica.agrios.service.service.WhatsAppPolicyService;
 import ai.toafrica.agrios.service.vo.ConversationDetailVO;
@@ -49,14 +49,20 @@ import java.util.stream.Collectors;
 @Slf4j
 @Tag(name = "91 · Service - Conversations", description = "AgriOS-native conversation workspace")
 @RestController
-@RequestMapping("/v1/service")
+@RequestMapping({"/v1/cs", "/v1/service"})
 @RequiredArgsConstructor
 public class ConversationController {
 
     private final ChatwootClient chatwoot;
-    private final ServiceContactLinkMapper linkMapper;
+    private final CsContactLinkMapper linkMapper;
     private final CustomerMapper customerMapper;
-    private final BusinessContextService businessContext;
+    /**
+     * CS-Core SPI (Sprint 48a). Pluggable per consuming product — AgriOS
+     * ships {@code AgriOsBusinessContextProvider}. Other products plug their
+     * own {@code BusinessContextProvider} bean and the bean wiring picks the
+     * right one at startup.
+     */
+    private final BusinessContextProvider businessContext;
     private final SmsTemplateRenderService templateRender;
     private final WhatsAppPolicyService whatsAppPolicy;
 
@@ -85,7 +91,7 @@ public class ConversationController {
 
         // Bulk-resolve AgriOS customers for the contact ids we just collected.
         // Single round-trip to the link table + customers table.
-        Map<Long, ServiceContactLink> linkByContact = bulkLookupLinks(
+        Map<Long, CsContactLink> linkByContact = bulkLookupLinks(
                 raw.stream()
                    .map(c -> c.resolvedContact() != null ? c.resolvedContact().getId() : null)
                    .filter(java.util.Objects::nonNull)
@@ -96,9 +102,9 @@ public class ConversationController {
             ChatwootConversation c = raw.get(i);
             Long contactId = c.resolvedContact() != null ? c.resolvedContact().getId() : null;
             if (contactId == null) continue;
-            ServiceContactLink link = linkByContact.get(contactId);
+            CsContactLink link = linkByContact.get(contactId);
             if (link == null) continue;
-            Customer cust = customerMapper.selectById(link.getAgriosEntityId());
+            Customer cust = customerMapper.selectById(link.getSubjectId());
             if (cust == null) continue;
             rows.get(i).setAgriosCustomerId(cust.getId());
             rows.get(i).setAgriosCustomerCode(cust.getCode());
@@ -149,12 +155,12 @@ public class ConversationController {
         // Resolve AgriOS Customer if linked.
         Long contactId = c.resolvedContact() != null ? c.resolvedContact().getId() : null;
         if (contactId != null) {
-            ServiceContactLink link = linkMapper.selectOne(
-                    new LambdaQueryWrapper<ServiceContactLink>()
-                            .eq(ServiceContactLink::getChatwootContactId, contactId)
+            CsContactLink link = linkMapper.selectOne(
+                    new LambdaQueryWrapper<CsContactLink>()
+                            .eq(CsContactLink::getChatwootContactId, contactId)
                             .last("LIMIT 1"));
             if (link != null) {
-                Customer cust = customerMapper.selectById(link.getAgriosEntityId());
+                Customer cust = customerMapper.selectById(link.getSubjectId());
                 if (cust != null) {
                     builder.customer(ConversationDetailVO.AgriosCustomerSummary.builder()
                             .id(cust.getId())
@@ -169,7 +175,9 @@ public class ConversationController {
                             .build());
 
                     // Sprint 43D: wire real counts from sales/finance/qc.
-                    builder.businessContext(businessContext.forCustomer(cust));
+                    // Sprint 48a: dispatch via the CS-Core SPI so the
+                    // controller no longer hard-codes AgriOS aggregation.
+                    builder.businessContext(businessContext.forSubject(link.getSubjectId()));
                 }
             }
         }
@@ -264,11 +272,11 @@ public class ConversationController {
             ChatwootConversation c = chatwoot.getConversation(body.getConversationId());
             Long contactId = c.resolvedContact() != null ? c.resolvedContact().getId() : null;
             if (contactId != null) {
-                ServiceContactLink link = linkMapper.selectOne(
-                        new LambdaQueryWrapper<ServiceContactLink>()
-                                .eq(ServiceContactLink::getChatwootContactId, contactId)
+                CsContactLink link = linkMapper.selectOne(
+                        new LambdaQueryWrapper<CsContactLink>()
+                                .eq(CsContactLink::getChatwootContactId, contactId)
                                 .last("LIMIT 1"));
-                if (link != null) customerId = link.getAgriosEntityId();
+                if (link != null) customerId = link.getSubjectId();
             }
         }
 
@@ -291,15 +299,15 @@ public class ConversationController {
     // Helpers
     // -----------------------------------------------------------------------
 
-    private Map<Long, ServiceContactLink> bulkLookupLinks(java.util.Set<Long> chatwootContactIds) {
+    private Map<Long, CsContactLink> bulkLookupLinks(java.util.Set<Long> chatwootContactIds) {
         if (chatwootContactIds == null || chatwootContactIds.isEmpty()) {
             return Map.of();
         }
-        List<ServiceContactLink> links = linkMapper.selectList(
-                new LambdaQueryWrapper<ServiceContactLink>()
-                        .in(ServiceContactLink::getChatwootContactId, chatwootContactIds));
+        List<CsContactLink> links = linkMapper.selectList(
+                new LambdaQueryWrapper<CsContactLink>()
+                        .in(CsContactLink::getChatwootContactId, chatwootContactIds));
         return links.stream()
-                .collect(Collectors.toMap(ServiceContactLink::getChatwootContactId,
+                .collect(Collectors.toMap(CsContactLink::getChatwootContactId,
                                           l -> l, (a, b) -> a));
     }
 
@@ -309,18 +317,26 @@ public class ConversationController {
 
     @lombok.Data
     public static class ReplyBody {
+        /** Message text the agent typed. */
         private String content;
-        /** When true, message is sent as a private note (visible to agents only). */
-        private Boolean privateNote = false;
+        /**
+         * When true, persisted as a Chatwoot private note (visible only to the
+         * agent team) instead of an outbound customer-facing message. Used by
+         * the AgriOS UI's "内部私信" mode and by the Sprint 47 WhatsApp
+         * service-window fallback path.
+         */
+        private Boolean privateNote;
     }
 
     @lombok.Data
     public static class StatusBody {
+        /** "open" / "resolved" / "pending" / "snoozed". */
         private String status;
     }
 
     @lombok.Data
     public static class AssignBody {
+        /** Chatwoot agent id, or {@code null} to unassign. */
         private Long assigneeId;
     }
 }

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "92 · Service - Inbox Setup", description = "Channel onboarding wizards")
 @RestController
-@RequestMapping("/v1/service/inboxes")
+@RequestMapping({"/v1/cs/inboxes", "/v1/service/inboxes"})
 @RequiredArgsConstructor
 public class InboxSetupController {
 

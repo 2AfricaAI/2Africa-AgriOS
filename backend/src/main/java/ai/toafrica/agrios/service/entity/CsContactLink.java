@@ -15,15 +15,15 @@ import java.time.LocalDateTime;
  * full table doc and rationale.
  */
 @Data
-@TableName("service_contact_link")
-public class ServiceContactLink {
+@TableName("cs_contact_link")
+public class CsContactLink {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /** 'customer' in v0.1; reserved for 'supplier' / 'worker' / 'partner' later. */
-    private String agriosEntityType;
-    private Long agriosEntityId;
+    private String subjectType;
+    private Long subjectId;
 
     private Long chatwootContactId;
     private Long chatwootAccountId;

@@ -4,7 +4,7 @@ import ai.toafrica.agrios.common.R;
 import ai.toafrica.agrios.service.client.AfricasTalkingClient;
 import ai.toafrica.agrios.service.config.AfricasTalkingProperties;
 import ai.toafrica.agrios.service.config.ChatwootProperties;
-import ai.toafrica.agrios.service.service.ServiceEventLogger;
+import ai.toafrica.agrios.service.service.CsEventLogger;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
@@ -47,14 +47,14 @@ import java.util.Map;
 @Slf4j
 @Tag(name = "93 · Service - SMS (Africa's Talking)", description = "SMS bridge for Chatwoot")
 @RestController
-@RequestMapping("/v1/service/webhook/africastalking")
+@RequestMapping({"/v1/cs/webhook/africastalking", "/v1/service/webhook/africastalking"})
 @RequiredArgsConstructor
 public class AfricasTalkingWebhookController {
 
     private final AfricasTalkingProperties atProps;
     private final ChatwootProperties cwProps;
     private final AfricasTalkingClient at;
-    private final ServiceEventLogger eventLogger;
+    private final CsEventLogger eventLogger;
     private final ObjectMapper json = new ObjectMapper();
 
     // -----------------------------------------------------------------------

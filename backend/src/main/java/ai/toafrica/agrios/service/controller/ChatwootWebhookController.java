@@ -2,12 +2,12 @@ package ai.toafrica.agrios.service.controller;
 
 import ai.toafrica.agrios.common.R;
 import ai.toafrica.agrios.service.config.ChatwootProperties;
-import ai.toafrica.agrios.service.entity.ServiceContactLink;
-import ai.toafrica.agrios.service.entity.ServiceEventLog;
-import ai.toafrica.agrios.service.mapper.ServiceContactLinkMapper;
-import ai.toafrica.agrios.service.mapper.ServiceEventLogMapper;
+import ai.toafrica.agrios.service.entity.CsContactLink;
+import ai.toafrica.agrios.service.entity.CsEventLog;
+import ai.toafrica.agrios.service.mapper.CsContactLinkMapper;
+import ai.toafrica.agrios.service.mapper.CsEventLogMapper;
 import ai.toafrica.agrios.service.service.AiAgentService;
-import ai.toafrica.agrios.service.service.ServiceEventLogger;
+import ai.toafrica.agrios.service.service.CsEventLogger;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,13 +53,13 @@ import java.util.Map;
 @Slf4j
 @Tag(name = "91 · Service - Webhook", description = "Inbound from Chatwoot")
 @RestController
-@RequestMapping("/v1/service/webhook")
+@RequestMapping({"/v1/cs/webhook", "/v1/service/webhook"})
 @RequiredArgsConstructor
 public class ChatwootWebhookController {
 
-    private final ServiceEventLogger eventLogger;
-    private final ServiceContactLinkMapper linkMapper;
-    private final ServiceEventLogMapper logMapper;
+    private final CsEventLogger eventLogger;
+    private final CsContactLinkMapper linkMapper;
+    private final CsEventLogMapper logMapper;
     private final ObjectMapper json;
     private final ChatwootProperties props;
     private final AiAgentService aiAgent;
@@ -109,8 +109,8 @@ public class ChatwootWebhookController {
             // Compose an idempotency key so a redelivered webhook only logs once.
             String idemKey = buildIdempotencyKey(event, root);
             if (idemKey != null && logMapper.selectCount(
-                    new LambdaQueryWrapper<ServiceEventLog>()
-                            .eq(ServiceEventLog::getIdempotencyKey, idemKey)
+                    new LambdaQueryWrapper<CsEventLog>()
+                            .eq(CsEventLog::getIdempotencyKey, idemKey)
             ) > 0) {
                 log.info("[Chatwoot webhook] duplicate event {} key={} — skipped", event, idemKey);
                 return R.ok(Map.of("status", "duplicate"));
@@ -120,11 +120,11 @@ public class ChatwootWebhookController {
 
             // Build a single audit row covering every event_type. Body is kept
             // intact so Sprint 41 rule code can re-read whatever it needs.
-            ServiceEventLog logRow = new ServiceEventLog();
+            CsEventLog logRow = new CsEventLog();
             logRow.setEventType("webhook." + event);
             logRow.setDirection("inbound");
-            logRow.setAgriosEntityType(target.entityType);
-            logRow.setAgriosEntityId(target.entityId);
+            logRow.setSubjectType(target.entityType);
+            logRow.setSubjectId(target.entityId);
             logRow.setChatwootAccountId(longOrNull(root, "account", "id"));
             logRow.setChatwootConversationId(extractConversationId(root, event));
             logRow.setChatwootMessageId(extractMessageId(root, event));
@@ -195,13 +195,13 @@ public class ChatwootWebhookController {
     private ResolvedTarget resolveAgriosTarget(JsonNode root) {
         Long contactId = extractContactId(root);
         if (contactId == null) return ResolvedTarget.EMPTY;
-        ServiceContactLink link = linkMapper.selectOne(
-                new LambdaQueryWrapper<ServiceContactLink>()
-                        .eq(ServiceContactLink::getChatwootContactId, contactId)
+        CsContactLink link = linkMapper.selectOne(
+                new LambdaQueryWrapper<CsContactLink>()
+                        .eq(CsContactLink::getChatwootContactId, contactId)
                         .last("LIMIT 1")
         );
         if (link == null) return ResolvedTarget.EMPTY;
-        return new ResolvedTarget(link.getAgriosEntityType(), link.getAgriosEntityId());
+        return new ResolvedTarget(link.getSubjectType(), link.getSubjectId());
     }
 
     /**

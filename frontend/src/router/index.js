@@ -288,6 +288,33 @@ const routes = [
         component: () => import('@/views/service/InboxList.vue'),
         meta: { titleKey: 'service.inboxesTitle' },
       },
+      // ---------- Sprint 48b: CS module 5-submenu restructure ----------
+      // 4 stub pages + 1 real Settings hub. Keep paths under /service/* for
+      // backward-compat with bookmarks; /cs/* aliases added in Sprint 48c.
+      {
+        path: 'service/team',
+        name: 'service-team',
+        component: () => import('@/views/service/TeamList.vue'),
+        meta: { titleKey: 'menu.csTeam' },
+      },
+      {
+        path: 'service/analytics',
+        name: 'service-analytics',
+        component: () => import('@/views/service/Analytics.vue'),
+        meta: { titleKey: 'menu.csAnalytics' },
+      },
+      {
+        path: 'service/complaints',
+        name: 'service-complaints',
+        component: () => import('@/views/service/ComplaintAnalysis.vue'),
+        meta: { titleKey: 'menu.csComplaints' },
+      },
+      {
+        path: 'service/settings',
+        name: 'service-settings',
+        component: () => import('@/views/service/Settings.vue'),
+        meta: { titleKey: 'menu.csSettings' },
+      },
       {
         path: 'system/users',
         name: 'system-users',

@@ -5,7 +5,7 @@ import ai.toafrica.agrios.service.client.ChatwootClient;
 import ai.toafrica.agrios.service.client.LlmClient;
 import ai.toafrica.agrios.service.client.LlmRouter;
 import ai.toafrica.agrios.service.config.ChatwootProperties;
-import ai.toafrica.agrios.service.entity.ServiceContactLink;
+import ai.toafrica.agrios.service.entity.CsContactLink;
 import ai.toafrica.agrios.service.service.ContactSyncService;
 import ai.toafrica.agrios.service.vo.SyncResultVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +30,7 @@ import java.util.Map;
  */
 @Tag(name = "90 · Service - Sync", description = "AgriOS <-> Chatwoot bridge: contact sync + diagnostics")
 @RestController
-@RequestMapping("/v1/service")
+@RequestMapping({"/v1/cs", "/v1/service"})
 @RequiredArgsConstructor
 public class ServiceSyncController {
 
@@ -60,7 +60,7 @@ public class ServiceSyncController {
     @Operation(summary = "Push one customer to Chatwoot (create or update). Idempotent.")
     @PostMapping("/sync-customer/{id}")
     public R<SyncResultVO> syncCustomer(@PathVariable Long id) {
-        ServiceContactLink link = syncService.syncCustomer(id);
+        CsContactLink link = syncService.syncCustomer(id);
         return R.ok(SyncResultVO.from(id, link));
     }
 

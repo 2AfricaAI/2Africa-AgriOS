@@ -63,7 +63,13 @@ export default {
 
   // Sprint 41: AgriOS-native Customer Service workspace
   menu: {
-    customerService: 'Huduma kwa Wateja',
+    // Sprint 48b: CS module restructure (5 sub-menus, 2-char standard).
+    customerService: 'Huduma',
+    csConversations: 'Mazungumzo',
+    csComplaints: 'Malalamiko',
+    csAnalytics: 'Uchanganuzi',
+    csTeam: 'Timu',
+    csSettings: 'Mipangilio',
   },
   service: {
     title: 'Eneo la Huduma kwa Wateja',
@@ -147,6 +153,40 @@ export default {
     comingSoon: 'Inakuja',
     required: 'Inahitajika',
     fldInboxName: 'Jina la sanduku',
+  },
+
+  // Sprint 48b: Moduli ya CS (cross-product CS-Core namespace).
+  cs: {
+    viewSectionViews: 'Mwonekano',
+    viewSectionInboxes: 'Sanduku',
+    viewAll: 'Yote',
+    viewMine: 'Yangu',
+    viewUnassigned: 'Hayajagawiwa',
+    inboxesEmpty: 'Hakuna sanduku bado',
+    openSettings: 'Mipangilio ya Sanduku',
+    teamStubTitle: 'Timu ya Huduma kwa Wateja',
+    teamStubDesc: 'Mwonekano mmoja wa wahudumu, hali ya mtandaoni, mzigo wa kazi na ratiba. Toleo la v3.3.0 bado linadhibiti wahudumu kwa Chatwoot admin.',
+    teamStubCalloutTitle: 'Njia ya sasa',
+    teamStubCalloutBody: 'Ongeza wahudumu kupitia Mipangilio ya CS.',
+    teamStubCalloutLink: 'Fungua Mipangilio ya CS',
+    analyticsStubTitle: 'Uchanganuzi wa CS',
+    analyticsStubDesc: 'Idadi ya tiketi, muda wa jibu la kwanza, muda wa wastani wa ufumbuzi, mchanganyiko wa njia, uwiano wa AI, CSAT.',
+    analyticsStubCalloutTitle: 'Vipimo vimefungwa',
+    analyticsStubCalloutBody: 'Sprint 49 inafafanua viashiria 11 vya msingi. Vinaendelea.',
+    complaintsStubTitle: 'Uchambuzi wa Malalamiko',
+    complaintsStubDesc: 'Tambua malalamiko katika mazungumzo, unganisha na tiketi za QC, onyesha mwenendo na matatizo ya mara kwa mara.',
+    complaintsStubCalloutTitle: 'Mlango wa sasa',
+    complaintsStubCalloutBody: 'Kwa sasa unaweza kusimamia tiketi za malalamiko kupitia QC > Malalamiko ya Wateja.',
+    complaintsStubCalloutLink: 'Nenda Malalamiko ya QC',
+    settingsTitle: 'Mipangilio ya CS',
+    settingsSub: 'Sanidi sanduku, AI Agent, masaa ya kazi, sera ya majibu',
+    settingsTabInboxes: 'Sanduku',
+    settingsTabAi: 'AI Agent',
+    settingsTabHours: 'Masaa ya Kazi',
+    settingsTabPolicy: 'Sera ya Majibu',
+    settingsTabAiSoon: 'Usanidi wa AI Agent unakuja hivi karibuni',
+    settingsTabHoursSoon: 'Masaa ya kazi yanakuja hivi karibuni',
+    settingsTabPolicySoon: 'Sera ya WhatsApp 24h / SLA inakuja hivi karibuni',
   },
 
   // ---------- Input Items (Phase 4) ----------

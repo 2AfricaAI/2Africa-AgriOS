@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
  * for the full doc.
  */
 @Data
-@TableName("service_event_log")
-public class ServiceEventLog {
+@TableName("cs_event_log")
+public class CsEventLog {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -26,8 +26,8 @@ public class ServiceEventLog {
     /** inbound / outbound */
     private String direction;
 
-    private String agriosEntityType;
-    private Long agriosEntityId;
+    private String subjectType;
+    private Long subjectId;
 
     private Long chatwootAccountId;
     private Long chatwootConversationId;

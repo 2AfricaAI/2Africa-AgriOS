@@ -1,0 +1,613 @@
+openapi: 3.1.0
+
+info:
+  title: 2Africa CS-Core API
+  version: 1.0.0-rc.1
+  summary: Horizontal customer-service module shared across the 2Africa product family.
+  description: |
+    The CS-Core API is the read+write surface for the cross-product
+    Customer Service module embedded in AgriOS / RetailOS / FactoryOS /
+    TravelOS / AgriCloud / MarketOS. It is the same wire format whether
+    you call it via `/v1/cs/*` (canonical) or `/v1/service/*` (legacy
+    alias, kept for backward compatibility through v4.x).
+
+    See `docs/cs/README.md` for the architectural overview and
+    `docs/cs/INTEGRATION.md` for how consuming products plug in their
+    own `BusinessContextProvider`.
+
+  contact:
+    name: 2Africa.AI
+    url: https://github.com/2AfricaAI/2Africa-AgriOS
+
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local dev (embedded in AgriOS)
+  - url: http://localhost:4410/api
+    description: Future standalone ServiceOS (see docs/cs/PORTS.md)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Conversations
+  - name: Inboxes
+  - name: Agents
+  - name: Channels
+  - name: Templates
+  - name: AI Agent
+  - name: Health
+
+paths:
+  /v1/cs/conversations:
+    get:
+      tags: [Conversations]
+      summary: List conversations
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, pending, resolved, snoozed], default: open }
+        - name: inboxId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: assigneeType
+          in: query
+          schema: { type: string, enum: [me, unassigned, assigned] }
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+      responses:
+        '200':
+          description: Envelope containing a page of conversation summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeListConversationSummary'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/cs/conversations/{id}:
+    get:
+      tags: [Conversations]
+      summary: Get conversation detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Conversation + messages + business context + WhatsApp policy block.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeConversationDetail'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /v1/cs/conversations/{id}/messages:
+    post:
+      tags: [Conversations]
+      summary: Reply (public outgoing or private internal note)
+      description: |
+        For WhatsApp inboxes, public reply is gated by Sprint 47's
+        zero-cost policy: outside the 24-hour service window after a
+        customer-initiated inbound, public replies fail with code
+        `40901`. Private notes are always allowed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string, description: 'Message body the agent typed.' }
+                privateNote: { type: boolean, default: false }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyOk' }
+        '400':
+          description: |
+            Business error (RFC 7807). Possible codes:
+            - `40901` WhatsApp 24h service window expired (Sprint 47 policy)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /v1/cs/conversations/{id}/status:
+    post:
+      tags: [Conversations]
+      summary: Toggle conversation status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [open, resolved, pending, snoozed] }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyOk' }
+
+  /v1/cs/conversations/{id}/assignee:
+    post:
+      tags: [Conversations]
+      summary: Assign or unassign an agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assigneeId: { type: integer, format: int64, nullable: true, description: 'Chatwoot agent id, or null to unassign.' }
+      responses:
+        '200': { $ref: '#/components/responses/EmptyOk' }
+
+  /v1/cs/inboxes:
+    get:
+      tags: [Inboxes]
+      summary: List inboxes
+      responses:
+        '200':
+          description: Inbox list envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeListInbox'
+
+  /v1/cs/inboxes/setup-email:
+    post:
+      tags: [Channels]
+      summary: Provision an Email inbox (IMAP + SMTP)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailInboxSetup'
+      responses:
+        '200':
+          description: Created inbox.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeInbox'
+
+  /v1/cs/inboxes/setup-whatsapp:
+    post:
+      tags: [Channels]
+      summary: Provision a WhatsApp Cloud inbox (Meta Business API)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WhatsAppInboxSetup'
+      responses:
+        '200':
+          description: Created inbox.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeInbox'
+
+  /v1/cs/inboxes/setup-web-widget:
+    post:
+      tags: [Channels]
+      summary: Provision a Web Widget inbox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebWidgetInboxSetup'
+      responses:
+        '200':
+          description: Created inbox.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeInbox'
+
+  /v1/cs/inboxes/setup-sms:
+    post:
+      tags: [Channels]
+      summary: Provision an SMS inbox (Africa's Talking / Twilio-compatible API channel)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsInboxSetup'
+      responses:
+        '200':
+          description: Created inbox + inbound webhook URL the operator must register with the SMS provider.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeSmsInboxSetupResult'
+
+  /v1/cs/agents:
+    get:
+      tags: [Agents]
+      summary: List agents (Chatwoot agents synced into CS-Core)
+      responses:
+        '200':
+          description: Agent list envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeListAgent'
+
+  /v1/cs/sms-templates:
+    get:
+      tags: [Templates]
+      summary: List SMS templates (Sprint 45)
+      responses:
+        '200':
+          description: Template list envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeListSmsTemplate'
+
+  /v1/cs/sms-templates/render:
+    post:
+      tags: [Templates]
+      summary: Render a template against a conversation's customer context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string }
+                conversationId: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Rendered body envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeRenderedTemplate'
+
+  /v1/cs/ai-agent/diagnose:
+    post:
+      tags: [AI Agent]
+      summary: Generate an AI draft reply (Sprint 40f)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt: { type: string }
+      responses:
+        '200':
+          description: Suggested reply.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeAiDraft'
+
+  /v1/cs/health:
+    get:
+      tags: [Health]
+      summary: Module health
+      security: []
+      responses:
+        '200':
+          description: Health envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeHealth'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Resource not found.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    InternalError:
+      description: Server error.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    EmptyOk:
+      description: Empty OK envelope.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/EnvelopeEmpty' }
+
+  schemas:
+
+    # --- Generic envelope (matches AgriOS R<T>) ---
+    EnvelopeMeta:
+      type: object
+      properties:
+        code: { type: integer, example: 200 }
+        msg: { type: string, example: OK }
+        traceId: { type: string, format: uuid }
+        timestamp: { type: string, format: date-time }
+      required: [code, msg]
+
+    EnvelopeEmpty:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data: { type: 'null' }
+
+    EnvelopeListConversationSummary:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/ConversationSummary' }
+
+    EnvelopeConversationDetail:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/ConversationDetail' }
+
+    EnvelopeListInbox:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/Inbox' }
+
+    EnvelopeInbox:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Inbox' }
+
+    EnvelopeListAgent:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/Agent' }
+
+    EnvelopeListSmsTemplate:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/SmsTemplate' }
+
+    EnvelopeRenderedTemplate:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                rendered: { type: string }
+                code: { type: string }
+                customerId: { type: integer, format: int64, nullable: true }
+
+    EnvelopeAiDraft:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                reply: { type: string, nullable: true }
+                error: { type: string, nullable: true }
+
+    EnvelopeHealth:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                status: { type: string, enum: [up, degraded, down] }
+                chatwoot: { type: string, enum: [up, down] }
+                aiAgent: { type: string, enum: [enabled, disabled, down] }
+
+    EnvelopeSmsInboxSetupResult:
+      allOf:
+        - $ref: '#/components/schemas/EnvelopeMeta'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                inbox: { $ref: '#/components/schemas/Inbox' }
+                inboundWebhookUrl: { type: string, description: 'Register this URL with the SMS provider so they POST inbound SMS into CS-Core.' }
+
+    # --- Domain resources ---
+    ConversationSummary:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        displayId: { type: integer, format: int64 }
+        status: { type: string, enum: [open, pending, resolved, snoozed] }
+        channel: { type: string, description: 'Chatwoot channel_type, e.g. Channel::WebWidget' }
+        inboxId: { type: integer, format: int64 }
+        subjectId: { type: integer, format: int64, nullable: true, description: 'cs_contact_link.subject_id when linked' }
+        subjectType: { type: string, nullable: true, description: 'customer / buyer / traveler / etc.' }
+        contactName: { type: string, nullable: true }
+        contactPhone: { type: string, nullable: true }
+        contactEmail: { type: string, nullable: true, format: email }
+        lastMessagePreview: { type: string, nullable: true }
+        lastActivityAt: { type: integer, format: int64, description: 'Unix epoch seconds' }
+        unreadCount: { type: integer, default: 0 }
+        assigneeId: { type: integer, format: int64, nullable: true }
+
+    ConversationDetail:
+      allOf:
+        - $ref: '#/components/schemas/ConversationSummary'
+        - type: object
+          properties:
+            messages:
+              type: array
+              items: { $ref: '#/components/schemas/Message' }
+            businessContext: { $ref: '#/components/schemas/BusinessContext' }
+            whatsAppPolicy: { $ref: '#/components/schemas/WhatsAppPolicy' }
+
+    Message:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        content: { type: string }
+        messageType: { type: integer, enum: [0, 1], description: '0 = incoming customer, 1 = outgoing agent/bot' }
+        privateNote: { type: boolean }
+        createdAt: { type: integer, format: int64, description: 'Unix epoch seconds' }
+
+    BusinessContext:
+      type: object
+      description: Product-specific aggregation produced by `BusinessContextProvider` (SPI).
+      properties:
+        openOrderCount: { type: integer, default: 0 }
+        overdueArInvoiceCount: { type: integer, default: 0, nullable: true }
+        overdueArAmount: { type: number, nullable: true }
+        openComplaintCount: { type: integer, default: 0, nullable: true }
+        lastOrderDate: { type: string, format: date, nullable: true }
+
+    WhatsAppPolicy:
+      type: object
+      description: Sprint 47 service-window policy snapshot for this conversation.
+      properties:
+        managed: { type: boolean, description: 'True when this inbox is governed by the WhatsApp policy.' }
+        lastInboundAt: { type: integer, format: int64, nullable: true }
+        serviceWindowExpiresAt: { type: integer, format: int64, nullable: true }
+        withinServiceWindow: { type: boolean }
+
+    Inbox:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        channelType: { type: string, description: 'Channel::WebWidget / Channel::Email / Channel::Whatsapp / Channel::Api etc.' }
+        email: { type: string, nullable: true, format: email }
+        phoneNumber: { type: string, nullable: true }
+
+    Agent:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        email: { type: string, format: email, nullable: true }
+        availabilityStatus: { type: string, enum: [online, busy, offline], nullable: true }
+
+    SmsTemplate:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        code: { type: string }
+        name: { type: string }
+        body: { type: string, description: 'Mustache-style template with {{customer.name}} etc.' }
+        channel: { type: string, enum: [sms, whatsapp] }
+        lang: { type: string, enum: [zh, en, sw] }
+
+    EmailInboxSetup:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        imapAddress: { type: string, nullable: true }
+        imapPort: { type: integer, nullable: true }
+        smtpAddress: { type: string, nullable: true }
+        smtpPort: { type: integer, nullable: true }
+        appPassword: { type: string, description: 'Gmail app password preferred over OAuth for the open-box flow.' }
+
+    WhatsAppInboxSetup:
+      type: object
+      required: [name, phoneNumberId, accessToken, businessAccountId]
+      properties:
+        name: { type: string }
+        phoneNumberId: { type: string }
+        accessToken: { type: string }
+        businessAccountId: { type: string }
+        webhookVerifyToken: { type: string, nullable: true }
+
+    WebWidgetInboxSetup:
+      type: object
+      required: [name, websiteUrl]
+      properties:
+        name: { type: string }
+        websiteUrl: { type: string, format: uri }
+        welcomeTitle: { type: string, nullable: true }
+        welcomeTagline: { type: string, nullable: true }
+        widgetColor: { type: string, nullable: true, description: 'Hex like #2BA84A' }
+
+    SmsInboxSetup:
+      type: object
+      required: [name, provider, phoneNumber]
+      properties:
+        name: { type: string }
+        provider: { type: string, enum: [africastalking, twilio] }
+        phoneNumber: { type: string }
+        senderId: { type: string, nullable: true }
+
+    # --- RFC 7807 problem+json ---
+    Problem:
+      type: object
+      description: RFC 7807-style error envelope. CS-Core also returns the legacy AgriOS `R<T>` shape for backward compatibility; new callers should treat 4xx as `problem+json`.
+      properties:
+        type: { type: string, format: uri, default: 'about:blank' }
+        title: { type: string }
+        status: { type: integer, minimum: 100, maximum: 599 }
+        detail: { type: string }
+        instance: { type: string, format: uri, nullable: true }
+        code: { type: integer, description: 'Business code (e.g. 40901 = WhatsApp window expired). Aligns with AgriOS R<T>.code.' }
+        traceId: { type: string, format: uuid }

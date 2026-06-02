@@ -54,7 +54,13 @@ export default {
     purchaseOrders: '采购订单',
     ap: '应付账款',
     fileDemo: '文件上传演示',
-    customerService: '客服中心',
+    // Sprint 48b: CS module restructure (5 sub-menus, 2-char standard).
+    customerService: '客服',
+    csConversations: '对话',
+    csComplaints: '投诉',
+    csAnalytics: '分析',
+    csTeam: '团队',
+    csSettings: '设置',
     system: '系统管理',
     sysUsers: '用户管理',
     sysRoles: '角色列表',
@@ -232,6 +238,46 @@ export default {
     fldWelcomeTagline: '欢迎语',
     fldWidgetColor: '主题色',
     preview: '预览',
+  },
+
+  // Sprint 48b: CS module (cross-product CS-Core namespace).
+  // 5 sub-menus: 对话 / 投诉 / 分析 / 团队 / 设置.
+  cs: {
+    // Sprint 48b A: conversation page rail (views + inboxes)
+    viewSectionViews: '视图',
+    viewSectionInboxes: '收件箱',
+    viewAll: '全部',
+    viewMine: '我的',
+    viewUnassigned: '未分配',
+    inboxesEmpty: '暂无收件箱',
+    openSettings: '收件箱设置',
+    // Team stub
+    teamStubTitle: '客服团队管理',
+    teamStubDesc: '统一查看坐席列表、在线状态、工作量分布与排班。当前 v3.3.0 版本通过 Chatwoot 后台单独管理客服人员；下一版本起此处直接同步。',
+    teamStubCalloutTitle: '现阶段操作路径',
+    teamStubCalloutBody: '在客服设置中添加客服人员到 Chatwoot 账号，下次开放此页面后会自动出现。',
+    teamStubCalloutLink: '去客服设置',
+    // Analytics stub
+    analyticsStubTitle: '客服数据分析',
+    analyticsStubDesc: '工单量、首次响应时间、平均解决时长、渠道分布、AI 自动回复占比、客户满意度。下一版本起填充。',
+    analyticsStubCalloutTitle: '指标设计已锁定',
+    analyticsStubCalloutBody: 'Roadmap v3.3.0 Sprint 49 文档已经定义了 11 个核心指标。开发中。',
+    // Complaints stub
+    complaintsStubTitle: '客诉分析',
+    complaintsStubDesc: '从客服会话中识别投诉性质，关联到质量管理的投诉工单，统计投诉趋势、高频问题、责任批次。',
+    complaintsStubCalloutTitle: '已有的入口',
+    complaintsStubCalloutBody: '当前可以先在质量管理 → 客户投诉中管理投诉工单。',
+    complaintsStubCalloutLink: '去质量投诉',
+    // Settings page (real)
+    settingsTitle: '客服设置',
+    settingsSub: '配置收件箱、AI Agent、营业时间、零费用策略等',
+    settingsTabInboxes: '收件箱',
+    settingsTabAi: 'AI Agent',
+    settingsTabHours: '营业时间',
+    settingsTabPolicy: '回复策略',
+    settingsTabAiSoon: 'AI Agent 配置即将上线（开关、模型、提示词、自动回复阈值）',
+    settingsTabHoursSoon: '营业时间设置即将上线（时段、节假日、超时自动回复）',
+    settingsTabPolicySoon: 'WhatsApp 24h 服务窗口策略 / SLA 配置即将开放在线编辑',
   },
 
   common: {

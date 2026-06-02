@@ -809,13 +809,22 @@ CREATE TABLE `daily_report` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Daily report - lightweight';
 
 -- ============================================================================
--- 9. SERVICE MODULE (Sprint 40 - AgriOS ↔ Chatwoot bridge, minimal)
+-- 9. CS-CORE MODULE (Sprint 40 - 48 - Customer Service horizontal layer)
+--
+-- Originally introduced as the "service module" in Sprint 40 (AgriOS-Chatwoot
+-- bridge). Promoted to a horizontal CS-Core in Sprint 48a so RetailOS /
+-- FactoryOS / TravelOS / AgriCloud / MarketOS can adopt the same schema.
+--
+-- Subject = the consuming-product business entity (customer / buyer / partner
+-- / traveler / etc.) that a Chatwoot contact maps to.
 -- ============================================================================
 
-CREATE TABLE `service_contact_link` (
+CREATE TABLE `cs_contact_link` (
   `id`                       BIGINT       PRIMARY KEY AUTO_INCREMENT,
-  `agrios_entity_type`       VARCHAR(32)  NOT NULL DEFAULT 'customer',
-  `agrios_entity_id`         BIGINT       NOT NULL,
+  `subject_type`             VARCHAR(32)  NOT NULL DEFAULT 'customer'
+                             COMMENT 'customer / supplier / partner / buyer / traveler / worker',
+  `subject_id`               BIGINT       NOT NULL
+                             COMMENT 'id of the row in the consuming product entity table',
   `chatwoot_contact_id`      BIGINT       NOT NULL,
   `chatwoot_account_id`      BIGINT       NOT NULL,
   `last_synced_at`           DATETIME     NULL,
@@ -824,16 +833,17 @@ CREATE TABLE `service_contact_link` (
   `created_at`               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_chatwoot_contact` (`chatwoot_account_id`, `chatwoot_contact_id`),
-  KEY `idx_agrios_entity` (`agrios_entity_type`, `agrios_entity_id`),
+  KEY `idx_subject` (`subject_type`, `subject_id`),
   KEY `idx_sync_status` (`sync_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Service module - AgriOS entity to Chatwoot contact bridge';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  COMMENT='CS-Core: bridges a consuming-product entity to a Chatwoot contact';
 
-CREATE TABLE `service_event_log` (
+CREATE TABLE `cs_event_log` (
   `id`                       BIGINT       PRIMARY KEY AUTO_INCREMENT,
   `event_type`               VARCHAR(64)  NOT NULL,
   `direction`                VARCHAR(16)  NOT NULL,
-  `agrios_entity_type`       VARCHAR(32)  NULL,
-  `agrios_entity_id`         BIGINT       NULL,
+  `subject_type`             VARCHAR(32)  NULL,
+  `subject_id`               BIGINT       NULL,
   `chatwoot_account_id`      BIGINT       NULL,
   `chatwoot_conversation_id` BIGINT       NULL,
   `chatwoot_message_id`      BIGINT       NULL,
@@ -843,7 +853,8 @@ CREATE TABLE `service_event_log` (
   `idempotency_key`          VARCHAR(128) NULL,
   `created_at`               DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_idempotency` (`idempotency_key`),
-  KEY `idx_agrios_entity` (`agrios_entity_type`, `agrios_entity_id`, `created_at`),
+  KEY `idx_subject` (`subject_type`, `subject_id`, `created_at`),
   KEY `idx_chatwoot_conv` (`chatwoot_conversation_id`, `created_at`),
   KEY `idx_event_type` (`event_type`, `created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Service module - cross-system event audit log';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  COMMENT='CS-Core: cross-system event audit log (webhooks, actions, sync jobs)';

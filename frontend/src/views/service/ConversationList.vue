@@ -1,65 +1,79 @@
 <template>
   <div class="conv-page">
-    <!-- ===================== Left: filters ===================== -->
-    <aside class="filters">
-      <h3 class="filters-title">{{ t('service.filters') }}</h3>
+    <!-- ===================== Left: Views + Inboxes (Intercom-style sidebar) ===================== -->
+    <!--
+      Sprint 48b A: redesigned left rail. The old vertical-stack of filters
+      (Status / Assignee / Inbox dropdown) is replaced with a Chatwoot /
+      Intercom / Front-style two-section sidebar:
+        - Saved Views section: All / Mine / Unassigned (one-click presets)
+        - Inboxes section: dynamic list of every Chatwoot inbox (channel
+          icon + name + per-inbox count badge)
+      Status filtering (open / pending / resolved) is now horizontal tabs
+      at the top of the middle pane so it composes with the chosen view.
+    -->
+    <aside class="rail">
+      <section class="rail-section">
+        <h4 class="rail-section-title">{{ t('cs.viewSectionViews') }}</h4>
+        <ul class="rail-list">
+          <li
+            v-for="v in views"
+            :key="v.id"
+            class="rail-item"
+            :class="{ active: currentView === v.id }"
+            @click="setView(v.id)"
+          >
+            <span class="rail-item-icon">{{ v.icon }}</span>
+            <span class="rail-item-name">{{ t(v.labelKey) }}</span>
+          </li>
+        </ul>
+      </section>
 
-      <div class="filter-group">
-        <label class="filter-label">{{ t('service.status') }}</label>
+      <section class="rail-section">
+        <h4 class="rail-section-title">{{ t('cs.viewSectionInboxes') }}</h4>
+        <ul class="rail-list">
+          <li
+            v-for="ib in inboxes"
+            :key="`inbox-${ib.id}`"
+            class="rail-item"
+            :class="{ active: currentView === `inbox-${ib.id}` }"
+            @click="setView(`inbox-${ib.id}`)"
+            :title="humanChannel(ib.channelType)"
+          >
+            <span class="rail-item-icon">{{ channelIcon(ib.channelType) }}</span>
+            <span class="rail-item-name">{{ ib.name }}</span>
+          </li>
+          <li v-if="!inboxes.length" class="rail-empty">
+            {{ t('cs.inboxesEmpty') }}
+          </li>
+        </ul>
+      </section>
+
+      <div class="rail-foot">
+        <el-button text @click="reload">
+          <el-icon><RefreshIcon /></el-icon>
+          {{ t('service.reload') }}
+        </el-button>
+        <el-button text @click="goToSettings">
+          <el-icon><SettingIcon /></el-icon>
+          {{ t('cs.openSettings') }}
+        </el-button>
+      </div>
+    </aside>
+
+    <!-- ===================== Middle: status tabs + conversation list ===================== -->
+    <section class="list-pane">
+      <div class="list-head">
+        <div class="list-head-titles">
+          <h3 class="list-title">{{ currentViewLabel }}</h3>
+          <el-tag v-if="!loading" size="small" type="info" effect="plain">
+            {{ conversations.length }} {{ t('service.conversationsUnit') }}
+          </el-tag>
+        </div>
         <el-radio-group v-model="statusFilter" size="small" @change="reload">
           <el-radio-button label="open">{{ t('service.statusOpen') }}</el-radio-button>
           <el-radio-button label="pending">{{ t('service.statusPending') }}</el-radio-button>
           <el-radio-button label="resolved">{{ t('service.statusResolved') }}</el-radio-button>
         </el-radio-group>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">{{ t('service.assignee') }}</label>
-        <el-radio-group v-model="assigneeFilter" size="small" @change="reload">
-          <el-radio-button label="">{{ t('service.assigneeAll') }}</el-radio-button>
-          <el-radio-button label="me">{{ t('service.assigneeMe') }}</el-radio-button>
-          <el-radio-button label="unassigned">{{ t('service.assigneeUnassigned') }}</el-radio-button>
-        </el-radio-group>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">{{ t('service.inbox') }}</label>
-        <el-select
-          v-model="inboxFilter"
-          size="small"
-          :placeholder="t('service.inboxAll')"
-          clearable
-          style="width: 100%"
-          @change="reload"
-        >
-          <el-option
-            v-for="inbox in inboxes"
-            :key="inbox.id"
-            :label="inbox.name"
-            :value="inbox.id"
-          />
-        </el-select>
-      </div>
-
-      <div class="filters-foot">
-        <el-button text @click="reload">
-          <el-icon><RefreshIcon /></el-icon>
-          {{ t('service.reload') }}
-        </el-button>
-        <el-button text @click="goToInboxes" class="filters-inboxes-btn">
-          <el-icon><SettingIcon /></el-icon>
-          {{ t('service.inboxesTitle') }}
-        </el-button>
-      </div>
-    </aside>
-
-    <!-- ===================== Middle: conversation list ===================== -->
-    <section class="list-pane">
-      <div class="list-head">
-        <h3 class="list-title">{{ t('service.conversations') }}</h3>
-        <el-tag v-if="!loading" size="small" type="info" effect="plain">
-          {{ conversations.length }} {{ t('service.conversationsUnit') }}
-        </el-tag>
       </div>
 
       <el-skeleton v-if="loading" :rows="6" animated />
@@ -130,27 +144,63 @@ const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 
+// ---------------- views ----------------
+// Each view maps to a fixed (assigneeType, inboxId) combination. Inbox views
+// are inserted dynamically below by id. Keep the icons emoji-only so they
+// align with the channel icons that come from `channelIcon()` for the inbox
+// list — gives the whole rail one visual rhythm.
+const views = [
+  { id: 'all',        icon: '📥', labelKey: 'cs.viewAll' },
+  { id: 'mine',       icon: '👤', labelKey: 'cs.viewMine' },
+  { id: 'unassigned', icon: '❓', labelKey: 'cs.viewUnassigned' },
+]
+
+const currentView = ref('all')
 const statusFilter = ref('open')
-const assigneeFilter = ref('')
-const inboxFilter = ref(null)
 const loading = ref(true)
 const conversations = ref([])
 const inboxes = ref([])
 
 const selectedId = computed(() => Number(route.params.id) || null)
 
-// Sprint 41e: simple polling. Every 10 s while the page is visible.
-// Sprint 42+ will replace this with a WebSocket subscription on the
-// Chatwoot ActionCable channel so updates feel instant.
+const currentViewLabel = computed(() => {
+  const built = views.find(v => v.id === currentView.value)
+  if (built) return t(built.labelKey)
+  if (currentView.value?.startsWith('inbox-')) {
+    const id = Number(currentView.value.slice('inbox-'.length))
+    const ib = inboxes.value.find(x => x.id === id)
+    return ib?.name || t('service.conversations')
+  }
+  return t('service.conversations')
+})
+
+// ---------------- API params derived from current view ----------------
+function paramsForView() {
+  const params = { status: statusFilter.value }
+  switch (currentView.value) {
+    case 'all':
+      break
+    case 'mine':
+      params.assigneeType = 'me'
+      break
+    case 'unassigned':
+      params.assigneeType = 'unassigned'
+      break
+    default:
+      if (currentView.value?.startsWith('inbox-')) {
+        params.inboxId = Number(currentView.value.slice('inbox-'.length))
+      }
+  }
+  return params
+}
+
+// ---------------- data flow ----------------
 let pollTimer = null
 
 async function reload() {
   loading.value = true
   try {
-    const params = { status: statusFilter.value }
-    if (assigneeFilter.value) params.assigneeType = assigneeFilter.value
-    if (inboxFilter.value) params.inboxId = inboxFilter.value
-    const data = await listConversations(params)
+    const data = await listConversations(paramsForView())
     conversations.value = Array.isArray(data) ? data : []
   } catch (err) {
     ElMessage.error(err?.message || t('service.loadFailed'))
@@ -164,18 +214,25 @@ async function loadInboxes() {
     const data = await listInboxes()
     inboxes.value = Array.isArray(data) ? data : []
   } catch {
-    // Non-fatal — just leave the inbox filter empty.
+    // Non-fatal — leave the inbox section empty.
   }
+}
+
+// ---------------- interactions ----------------
+function setView(id) {
+  currentView.value = id
+  reload()
 }
 
 function openConversation(conv) {
   router.push({ name: 'service-conversation-detail', params: { id: conv.id } })
 }
 
-function goToInboxes() {
-  router.push({ name: 'service-inboxes' })
+function goToSettings() {
+  router.push({ name: 'service-settings' })
 }
 
+// ---------------- formatters ----------------
 function formatTime(epochSec) {
   if (!epochSec) return ''
   const d = new Date(epochSec * 1000)
@@ -202,15 +259,18 @@ function channelIcon(channel) {
   return '💬'
 }
 
+function humanChannel(c) {
+  if (!c) return '—'
+  return c.replace(/^Channel::/, '')
+}
+
 watch(() => route.params.id, (id) => {
-  if (id) {
-    // Detail page mounted — make sure the list is fresh too.
-    reload()
-  }
+  if (id) reload()
 })
 
 onMounted(async () => {
   await Promise.all([reload(), loadInboxes()])
+  // Sprint 41e polling — replaced by WebSocket in a future sprint.
   pollTimer = setInterval(reload, 10_000)
 })
 
@@ -222,43 +282,88 @@ onBeforeUnmount(() => {
 <style scoped>
 .conv-page {
   display: grid;
-  grid-template-columns: 220px 380px 1fr;
+  grid-template-columns: 240px 400px 1fr;
   gap: 12px;
   height: calc(100vh - 100px);
 }
 
-/* ----- filters ----- */
-.filters {
+/* ============== left rail (views + inboxes) ============== */
+.rail {
   background: #f8faf9;
   border: 1px solid #e6ece9;
   border-radius: 8px;
-  padding: 14px 14px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  overflow-y: auto;
-}
-.filters-title {
-  margin: 0;
-  font-size: 14px;
-  color: #0f3a26;
-  letter-spacing: 0.3px;
-}
-.filter-group {
+  padding: 14px 0 14px 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow-y: auto;
 }
-.filter-label {
+.rail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rail-section-title {
+  margin: 8px 14px 4px;
+  font-size: 11px;
+  color: #8a9690;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+}
+.rail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1c2e25;
+  transition: background 0.12s ease;
+}
+.rail-item:hover {
+  background: #eef4f0;
+}
+.rail-item.active {
+  background: #e9f3ed;
+  border-left: 3px solid #0f3a26;
+  padding-left: 11px;
+  font-weight: 600;
+  color: #0f3a26;
+}
+.rail-item-icon {
+  width: 22px;
+  text-align: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.rail-item-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rail-empty {
+  padding: 6px 14px;
   font-size: 12px;
-  color: #5b6b62;
-  font-weight: 500;
+  color: #8a9690;
+  font-style: italic;
 }
-.filters-foot {
+.rail-foot {
   margin-top: auto;
+  padding: 8px 12px;
+  border-top: 1px solid #eef2f0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-/* ----- list ----- */
+/* ============== middle list pane ============== */
 .list-pane {
   background: #fff;
   border: 1px solid #e6ece9;
@@ -269,10 +374,16 @@ onBeforeUnmount(() => {
 }
 .list-head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 10px;
   padding: 12px 14px;
   border-bottom: 1px solid #eef2f0;
+}
+.list-head-titles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
 }
 .list-title {
   margin: 0;
@@ -295,17 +406,13 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: background 0.12s ease;
 }
-.conv-row:hover {
-  background: #f6faf8;
-}
+.conv-row:hover { background: #f6faf8; }
 .conv-row.active {
   background: #e9f3ed;
   border-left: 3px solid #0f3a26;
   padding-left: 11px;
 }
-.conv-row.unread .conv-row-name {
-  font-weight: 600;
-}
+.conv-row.unread .conv-row-name { font-weight: 600; }
 .conv-row-avatar {
   flex: 0 0 36px;
   display: flex;
@@ -370,7 +477,7 @@ onBeforeUnmount(() => {
   background: #0f3a26;
 }
 
-/* ----- detail ----- */
+/* ============== right detail pane ============== */
 .detail-pane {
   background: #fff;
   border: 1px solid #e6ece9;

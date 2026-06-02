@@ -7,8 +7,8 @@ import ai.toafrica.agrios.service.client.ChatwootClient;
 import ai.toafrica.agrios.service.client.dto.ChatwootContact;
 import ai.toafrica.agrios.service.client.dto.ChatwootContactRequest;
 import ai.toafrica.agrios.service.config.ChatwootProperties;
-import ai.toafrica.agrios.service.entity.ServiceContactLink;
-import ai.toafrica.agrios.service.mapper.ServiceContactLinkMapper;
+import ai.toafrica.agrios.service.entity.CsContactLink;
+import ai.toafrica.agrios.service.mapper.CsContactLinkMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +41,8 @@ public class ContactSyncService {
     private final ChatwootProperties props;
     private final ChatwootClient chatwoot;
     private final CustomerMapper customerMapper;
-    private final ServiceContactLinkMapper linkMapper;
-    private final ServiceEventLogger eventLogger;
+    private final CsContactLinkMapper linkMapper;
+    private final CsEventLogger eventLogger;
 
     /** AgriOS entity_type written into the link table. */
     private static final String ENTITY_TYPE_CUSTOMER = "customer";
@@ -54,7 +54,7 @@ public class ContactSyncService {
      * @throws IllegalStateException if Chatwoot integration is disabled (no API token)
      */
     @Transactional
-    public ServiceContactLink syncCustomer(Long customerId) {
+    public CsContactLink syncCustomer(Long customerId) {
         if (!props.isEnabled()) {
             throw new IllegalStateException("Chatwoot integration disabled — set agrios.chatwoot.api-token");
         }
@@ -64,7 +64,7 @@ public class ContactSyncService {
             throw new BusinessException("Customer not found: " + customerId);
         }
 
-        ServiceContactLink link = findExistingLink(customer.getId());
+        CsContactLink link = findExistingLink(customer.getId());
 
         try {
             ChatwootContact remote = (link != null)
@@ -121,10 +121,10 @@ public class ContactSyncService {
     // Helpers
     // -----------------------------------------------------------------------
 
-    private ServiceContactLink findExistingLink(Long customerId) {
-        LambdaQueryWrapper<ServiceContactLink> q = new LambdaQueryWrapper<ServiceContactLink>()
-                .eq(ServiceContactLink::getAgriosEntityType, ENTITY_TYPE_CUSTOMER)
-                .eq(ServiceContactLink::getAgriosEntityId, customerId);
+    private CsContactLink findExistingLink(Long customerId) {
+        LambdaQueryWrapper<CsContactLink> q = new LambdaQueryWrapper<CsContactLink>()
+                .eq(CsContactLink::getSubjectType, ENTITY_TYPE_CUSTOMER)
+                .eq(CsContactLink::getSubjectId, customerId);
         return linkMapper.selectOne(q);
     }
 
@@ -132,7 +132,7 @@ public class ContactSyncService {
      * Push existing-link case: PUT to Chatwoot. If the remote row was deleted
      * out from under us, fall back to the create-or-adopt path.
      */
-    private ChatwootContact updateInChatwoot(ServiceContactLink link, Customer customer) {
+    private ChatwootContact updateInChatwoot(CsContactLink link, Customer customer) {
         try {
             return chatwoot.updateContact(link.getChatwootContactId(), buildRequest(customer));
         } catch (Exception e) {
@@ -196,12 +196,12 @@ public class ContactSyncService {
         return s;
     }
 
-    private ServiceContactLink upsertLink(ServiceContactLink existing, Customer customer,
+    private CsContactLink upsertLink(CsContactLink existing, Customer customer,
                                           ChatwootContact remote, String status, String error) {
         if (existing == null) {
-            ServiceContactLink row = new ServiceContactLink();
-            row.setAgriosEntityType(ENTITY_TYPE_CUSTOMER);
-            row.setAgriosEntityId(customer.getId());
+            CsContactLink row = new CsContactLink();
+            row.setSubjectType(ENTITY_TYPE_CUSTOMER);
+            row.setSubjectId(customer.getId());
             row.setChatwootContactId(remote != null ? remote.getId() : 0L);
             row.setChatwootAccountId(props.getAccountId());
             row.setLastSyncedAt(remote != null ? LocalDateTime.now() : null);

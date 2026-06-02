@@ -3,8 +3,13 @@
     <!-- 左侧栏 -->
     <el-aside :width="collapse ? '56px' : '220px'" class="aside">
       <div class="brand" :class="{ 'brand-collapsed': collapse }">
+        <!--
+          Sprint 48b: logo alt + visual brand is the parent company
+          "2Africa.AI". The product codename "AgriOS" lives in source
+          code / package names only (codename strategy, see TRADEMARK.md).
+        -->
         <img v-if="collapse" src="/logo-mark.svg" class="logo-mark" alt="2A" />
-        <img v-else src="/logo.svg" class="logo-full" alt="2Africa AgriOS" />
+        <img v-else src="/logo.svg" class="logo-full" alt="2Africa.AI" />
       </div>
 
       <el-menu
@@ -98,13 +103,21 @@
           <el-menu-item index="/operations/action-board">{{ t('menu.actionBoard') }}</el-menu-item>
         </el-sub-menu>
 
-        <!-- Sprint 40e: Customer Service - Chatwoot embedded.
-             Visible to every STAFF user; CUSTOMER / WORKER user types are
-             routed away from AppLayout entirely so we don't need extra gates. -->
-        <el-menu-item index="/service">
-          <el-icon><ServiceIcon /></el-icon>
-          <template #title>{{ t('menu.customerService') }}</template>
-        </el-menu-item>
+        <!--
+          Sprint 48b: CS module restructured into 5 sub-menus
+          (对话/投诉/分析/团队/设置). Visible to every STAFF user.
+        -->
+        <el-sub-menu index="cs">
+          <template #title>
+            <el-icon><ServiceIcon /></el-icon>
+            <span>{{ t('menu.customerService') }}</span>
+          </template>
+          <el-menu-item index="/service">{{ t('menu.csConversations') }}</el-menu-item>
+          <el-menu-item index="/service/complaints">{{ t('menu.csComplaints') }}</el-menu-item>
+          <el-menu-item index="/service/analytics">{{ t('menu.csAnalytics') }}</el-menu-item>
+          <el-menu-item index="/service/team">{{ t('menu.csTeam') }}</el-menu-item>
+          <el-menu-item index="/service/settings">{{ t('menu.csSettings') }}</el-menu-item>
+        </el-sub-menu>
 
         <el-sub-menu v-if="canFinance" index="finance">
           <template #title>

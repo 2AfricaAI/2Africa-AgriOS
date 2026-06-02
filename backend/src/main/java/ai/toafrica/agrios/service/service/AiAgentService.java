@@ -43,7 +43,7 @@ public class AiAgentService {
     private final ChatwootProperties props;
     private final ChatwootClient chatwoot;
     private final LlmRouter llm;
-    private final ServiceEventLogger eventLogger;
+    private final CsEventLogger eventLogger;
 
     /**
      * Handle a {@code message_created} webhook payload. Called from the
