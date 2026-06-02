@@ -157,6 +157,25 @@ export default {
 
   // Sprint 48b: Moduli ya CS (cross-product CS-Core namespace).
   cs: {
+    // Sprint 49: Analytics dashboard
+    analyticsTitle: 'Uchanganuzi wa CS',
+    analyticsSub: 'Idadi / Njia / Hali zinakusanywa moja kwa moja, cache ya dakika 5',
+    analyticsRange7: 'Siku 7 zilizopita',
+    analyticsRange30: 'Siku 30 zilizopita',
+    analyticsRange90: 'Siku 90 zilizopita',
+    analyticsLoadFailed: 'Imeshindwa kupakia uchanganuzi',
+    analyticsNoData: 'Hakuna data',
+    analyticsFootnote: 'Data inavutwa moja kwa moja kutoka Chatwoot na kukusanywa na seva.',
+    kpiTotal: 'Jumla ya tiketi',
+    kpiOpen: 'Wazi',
+    kpiPending: 'Yanasubiri',
+    kpiResolved: 'Yamesuluhishwa',
+    kpiWindow: 'Dirisha la siku {d}',
+    kpiSnapshot: 'Picha ya sasa',
+    chartDailyTitle: 'Idadi ya kila siku',
+    chartDailySub: 'Imepangwa kwa tarehe ya kuunda',
+    chartChannelTitle: 'Mchanganyiko wa Njia',
+    chartChannelSub: 'Sehemu ya jumla ndani ya dirisha',
     viewSectionViews: 'Mwonekano',
     viewSectionInboxes: 'Sanduku',
     viewAll: 'Yote',

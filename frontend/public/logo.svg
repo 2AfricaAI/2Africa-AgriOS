@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Sprint 48b: visible brand simplified to "2Africa.AI" (the house mark).
-  The product codename "AgriOS" no longer appears in the UI per the
-  codename strategy in TRADEMARK.md (Apache 2.0 §3 trademark boundary +
-  agrios.org / Advance Insight conflict mitigation).
+  Brand strategy: compound mark "2Africa.AI AgriOS" — house mark
+  (2Africa.AI) + product mark (AgriOS) shown together so the product
+  is always anchored to the parent brand. See TRADEMARK.md for the
+  legal framing relative to agrios.org / Advance Insight BV.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 140" fill="none">
-  <text x="360" y="105" text-anchor="middle"
+  <text x="360" y="95" text-anchor="middle"
         font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
-        font-weight="800" font-size="100" letter-spacing="-1">
-    <tspan fill="#1677ff">2</tspan><tspan fill="#2BA84A">Africa</tspan><tspan fill="#1677ff">.AI</tspan>
+        font-weight="800" font-size="72" letter-spacing="-1">
+    <tspan fill="#1677ff">2</tspan><tspan fill="#2BA84A">Africa</tspan><tspan fill="#1677ff">.AI</tspan><tspan dx="22" fill="#2BA84A">Agri</tspan><tspan fill="#1677ff">OS</tspan>
   </text>
 </svg>

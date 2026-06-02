@@ -97,3 +97,17 @@ export function listSmsTemplates() {
 export function renderSmsTemplate(code, conversationId) {
   return request.post('/v1/service/sms-templates/render', { code, conversationId })
 }
+
+// -----------------------------------------------------------------------
+// Sprint 49: CS Analytics overview (filling the Analytics stub)
+// -----------------------------------------------------------------------
+
+/**
+ * Returns the dashboard overview snapshot: KPI counters + by-channel +
+ * by-status + daily time series. Cached server-side for ~5 min.
+ *
+ * @param {number} days  window in days (1..365), defaults to 30
+ */
+export function getAnalyticsOverview(days = 30) {
+  return request.get('/v1/cs/analytics/overview', { params: { days } })
+}

@@ -243,6 +243,25 @@ export default {
 
   // Sprint 48b: CS module (cross-product CS-Core namespace).
   cs: {
+    // Sprint 49: Analytics dashboard
+    analyticsTitle: 'CS Analytics',
+    analyticsSub: 'Volume / channel / status aggregated in real-time, 5-min cache',
+    analyticsRange7: 'Last 7 days',
+    analyticsRange30: 'Last 30 days',
+    analyticsRange90: 'Last 90 days',
+    analyticsLoadFailed: 'Failed to load analytics',
+    analyticsNoData: 'No data',
+    analyticsFootnote: 'Data is pulled live from Chatwoot and aggregated server-side. Adequate at single-farm scale; will switch to a nightly pre-aggregated table at higher volume.',
+    kpiTotal: 'Total tickets',
+    kpiOpen: 'Open',
+    kpiPending: 'Pending',
+    kpiResolved: 'Resolved',
+    kpiWindow: 'Last {d}-day window',
+    kpiSnapshot: 'Current snapshot',
+    chartDailyTitle: 'Daily ticket volume',
+    chartDailySub: 'Grouped by creation date',
+    chartChannelTitle: 'Channel mix',
+    chartChannelSub: 'Share of total within window',
     viewSectionViews: 'Views',
     viewSectionInboxes: 'Inboxes',
     viewAll: 'All',

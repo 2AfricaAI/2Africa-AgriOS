@@ -4,12 +4,13 @@
     <el-aside :width="collapse ? '56px' : '220px'" class="aside">
       <div class="brand" :class="{ 'brand-collapsed': collapse }">
         <!--
-          Sprint 48b: logo alt + visual brand is the parent company
-          "2Africa.AI". The product codename "AgriOS" lives in source
-          code / package names only (codename strategy, see TRADEMARK.md).
+          Brand strategy: compound mark "2Africa.AI AgriOS" — house mark
+          (2Africa.AI) + product mark (AgriOS) shown together. See
+          TRADEMARK.md for the legal framing (descriptive product name
+          + dominant house mark + agrios.org disclaimer).
         -->
         <img v-if="collapse" src="/logo-mark.svg" class="logo-mark" alt="2A" />
-        <img v-else src="/logo.svg" class="logo-full" alt="2Africa.AI" />
+        <img v-else src="/logo.svg" class="logo-full" alt="2Africa.AI AgriOS" />
       </div>
 
       <el-menu

@@ -243,6 +243,25 @@ export default {
   // Sprint 48b: CS module (cross-product CS-Core namespace).
   // 5 sub-menus: 对话 / 投诉 / 分析 / 团队 / 设置.
   cs: {
+    // Sprint 49: Analytics dashboard (filling 48b stub)
+    analyticsTitle: '客服数据分析',
+    analyticsSub: '工单量 / 渠道 / 状态 实时聚合, 5 分钟缓存',
+    analyticsRange7: '近 7 天',
+    analyticsRange30: '近 30 天',
+    analyticsRange90: '近 90 天',
+    analyticsLoadFailed: '分析数据加载失败',
+    analyticsNoData: '暂无数据',
+    analyticsFootnote: '数据基于 Chatwoot 实时拉取并聚合。一个农场规模下足够准确; 数据量增大后会切换到夜间预聚合表。',
+    kpiTotal: '总工单',
+    kpiOpen: '进行中',
+    kpiPending: '待处理',
+    kpiResolved: '已解决',
+    kpiWindow: '近 {d} 天窗口',
+    kpiSnapshot: '当前快照',
+    chartDailyTitle: '每日工单量',
+    chartDailySub: '按创建日聚合',
+    chartChannelTitle: '渠道分布',
+    chartChannelSub: '窗口内总量占比',
     // Sprint 48b A: conversation page rail (views + inboxes)
     viewSectionViews: '视图',
     viewSectionInboxes: '收件箱',
