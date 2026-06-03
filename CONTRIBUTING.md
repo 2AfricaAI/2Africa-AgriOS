@@ -73,7 +73,7 @@ the change under the project's Apache 2.0 license.
 ## Reporting security vulnerabilities
 
 Please **do not** open a public issue for security problems. Email
-`security@2africa.ai` — see [SECURITY.md](./SECURITY.md) for details.
+`go@2africa.ai` — see [SECURITY.md](./SECURITY.md) for details.
 
 ## Style guide
 
@@ -118,6 +118,6 @@ sign-off confirms this. No CLA required.
 
 - GitHub Issues: feature requests, bug reports
 - GitHub Discussions: open-ended questions, architecture proposals
-- Email: `community@2africa.ai`
+- Email: `go@2africa.ai`
 
 Welcome to AgriOS. We're glad you're here.
