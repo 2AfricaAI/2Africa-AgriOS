@@ -56,6 +56,29 @@
           size="small"
           @click="changeStatus('open')"
         >{{ t('service.reopen') }}</el-button>
+        <!-- Sprint 50d: copy a CSAT survey link to the clipboard so the
+             agent can paste it into their next reply. v-perm gates by
+             cs:csat:send. -->
+        <el-button
+          v-perm="'cs:csat:send'"
+          size="small"
+          type="primary"
+          plain
+          :loading="generatingCsat"
+          :icon="StarIcon"
+          @click="copyCsatLink"
+        >{{ t('service.csatSendBtn') }}</el-button>
+        <!-- Sprint 49.5: SUPER_ADMIN hard-delete. v-perm hides it for
+             everyone else; backend also rejects with 403. -->
+        <el-button
+          v-perm="'cs:conversation:delete'"
+          size="small"
+          type="danger"
+          plain
+          :loading="deleting"
+          :icon="DeleteIcon"
+          @click="confirmDelete"
+        >{{ t('service.deleteConversation') }}</el-button>
       </div>
     </header>
 
@@ -193,14 +216,16 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   MagicStick as MagicStickIcon,
   Document as DocumentIcon,
   Clock as ClockIcon,
   Warning as WarningIcon,
+  Delete as DeleteIcon,
+  Star as StarIcon,
 } from '@element-plus/icons-vue'
 import {
   getConversation,
@@ -209,10 +234,13 @@ import {
   aiAgentDiagnose,
   listSmsTemplates,
   renderSmsTemplate,
+  deleteConversation,
+  generateCsatLink,
 } from '@/api/service'
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 
 const conv = ref(null)
 const replyText = ref('')
@@ -346,6 +374,71 @@ async function changeStatus(status) {
     await load()
   } catch (err) {
     ElMessage.error(err?.message || t('service.statusFailed'))
+  }
+}
+
+// Sprint 50d — generate a CSAT survey link and copy it to clipboard so
+// the agent can paste it into their next reply. Idempotent on backend
+// (same conversation returns the same un-submitted token within TTL).
+const generatingCsat = ref(false)
+async function copyCsatLink() {
+  if (!conv.value) return
+  generatingCsat.value = true
+  try {
+    const data = await generateCsatLink(route.params.id)
+    if (!data?.url) throw new Error('No URL returned')
+    try {
+      await navigator.clipboard.writeText(data.url)
+      ElMessage.success(t('service.csatLinkCopied'))
+    } catch {
+      // Fallback for non-secure contexts (no Clipboard API). Show the
+      // URL inline so the agent can copy it manually.
+      ElMessage({
+        message: t('service.csatLinkManual', { url: data.url }),
+        type: 'success',
+        duration: 6000,
+        dangerouslyUseHTMLString: false,
+      })
+    }
+  } catch (err) {
+    ElMessage.error(err?.message || t('service.csatLinkFailed'))
+  } finally {
+    generatingCsat.value = false
+  }
+}
+
+// Sprint 49.5 — destructive single-conversation delete.
+// Two-step confirm: a modal first, then the actual API call. After a
+// successful delete we navigate back to the conversation list rather
+// than leaving the page on a now-dead conversation id.
+const deleting = ref(false)
+async function confirmDelete() {
+  if (!conv.value) return
+  const display = conv.value.customer?.name
+    || `#${conv.value.displayId || conv.value.id}`
+  try {
+    await ElMessageBox.confirm(
+      t('service.deleteConfirmMsg', { name: display }),
+      t('service.deleteConfirmTitle'),
+      {
+        confirmButtonText: t('service.deleteConfirmYes'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+        confirmButtonClass: 'el-button--danger',
+      },
+    )
+  } catch {
+    return        // user cancelled
+  }
+  deleting.value = true
+  try {
+    await deleteConversation(route.params.id)
+    ElMessage.success(t('service.deleteSuccess'))
+    router.push({ name: 'customer-service' })
+  } catch (err) {
+    ElMessage.error(err?.message || t('service.deleteFailed'))
+  } finally {
+    deleting.value = false
   }
 }
 

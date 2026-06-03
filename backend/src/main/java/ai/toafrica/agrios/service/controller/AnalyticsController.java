@@ -2,6 +2,7 @@ package ai.toafrica.agrios.service.controller;
 
 import ai.toafrica.agrios.common.R;
 import ai.toafrica.agrios.service.service.AnalyticsService;
+import ai.toafrica.agrios.service.vo.AgentLeaderboardVO;
 import ai.toafrica.agrios.service.vo.AnalyticsOverviewVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,5 +36,18 @@ public class AnalyticsController {
             @RequestParam(required = false, defaultValue = "30") Integer days
     ) {
         return R.ok(analyticsService.overview(days == null ? 30 : days));
+    }
+
+    /**
+     * Sprint 50c -- per-agent SLA leaderboard. One row per agent with
+     * assignment / resolution counts plus personal FRT + TTR. Sorted
+     * by resolvedCount desc by default (frontend can re-sort).
+     */
+    @Operation(summary = "Per-agent SLA leaderboard")
+    @GetMapping("/agents")
+    public R<AgentLeaderboardVO> agentLeaderboard(
+            @RequestParam(required = false, defaultValue = "30") Integer days
+    ) {
+        return R.ok(analyticsService.agentLeaderboard(days == null ? 30 : days));
     }
 }

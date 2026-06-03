@@ -61,7 +61,9 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/v1/public/**",          // Sprint 25: public trace endpoint (QR scan)
                     "/v1/service/health",     // Sprint 40c: service-module connectivity probe
-                    "/v1/service/webhook/**"  // Sprint 40d + 43: Chatwoot + Africa's Talking webhooks
+                    "/v1/service/webhook/**", // Sprint 40d + 43: Chatwoot + Africa's Talking webhooks
+                    "/v1/cs/csat/public/**",  // Sprint 50d: customer-facing CSAT survey
+                    "/v1/service/csat/public/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

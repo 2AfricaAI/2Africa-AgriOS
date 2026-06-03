@@ -6,6 +6,38 @@ export default {
   brand: '2Africa AgriOS',
   brandFull: '2Africa AgriOS by 2Africa.AI',
 
+  // ---------- Lebo za kawaida za kuchagua tarehe ----------
+  date: {
+    rangeSep: 'hadi',
+    start: 'Tarehe ya kuanza',
+    end: 'Tarehe ya mwisho',
+  },
+
+  // ---------- Sprint 50d: ukurasa wa umma wa CSAT ----------
+  csat: {
+    title: 'Ulipenda huduma yetu?',
+    subtitle: 'Maoni yako yanatusaidia kukutumikia vyema. Inachukua sekunde 10.',
+    pickAStar: 'Bonyeza nyota kukadiria',
+    rateN: 'Kadiria {n} kati ya 5',
+    ratingLabel: {
+      1: 'Hairidhishi kabisa',
+      2: 'Hairidhishi',
+      3: 'Wastani',
+      4: 'Inaridhisha',
+      5: 'Inaridhisha sana',
+    },
+    commentOptional: 'Kuna kitu kingine? (si lazima)',
+    commentPlaceholder: 'Nini kilikuwa kizuri, au nini kingeweza kuwa bora?',
+    submit: 'Tuma',
+    submitting: 'Inatuma…',
+    submitFailed: 'Haikuweza kutuma. Tafadhali jaribu tena.',
+    thanksTitle: 'Asante!',
+    thanksBody: 'Tumepokea ukadiriaji wako wa nyota {n}. Timu itasoma maoni yako kwa makini.',
+    errorTitle: 'Utafiti huu haupatikani',
+    errorGeneric: 'Kiungo kinaweza kuwa kimekwisha au kimetumiwa tayari.',
+    footer: '2Africa.AI AgriOS · Inaendeshwa na Customer Service',
+  },
+
   // ---------- Auth / Login ----------
   auth: {
     login: 'Ingia',
@@ -98,6 +130,18 @@ export default {
     // detail page
     markResolved: 'Tia alama imetatuliwa',
     reopen: 'Fungua tena',
+    // Sprint 49.5 — futa kabisa (SUPER_ADMIN tu)
+    deleteConversation: 'Futa',
+    deleteConfirmTitle: 'Futa mazungumzo haya?',
+    deleteConfirmMsg: 'Karibu kufuta kabisa mazungumzo na {name}. Ujumbe wote na viambatisho vitatolewa kutoka Chatwoot na haviwezi kurejeshwa. Endelea?',
+    deleteConfirmYes: 'Futa milele',
+    deleteSuccess: 'Mazungumzo yamefutwa',
+    deleteFailed: 'Kufuta kumeshindikana',
+    // Sprint 50d -- tuma kiungo cha CSAT
+    csatSendBtn: 'Tuma CSAT',
+    csatLinkCopied: 'Kiungo cha utafiti kimenakiliwa. Bandika kwenye jibu lako linalofuata.',
+    csatLinkManual: 'Kiungo cha utafiti tayari (haikuweza kuandika kwenye ubao): {url}',
+    csatLinkFailed: 'Imeshindwa kutengeneza kiungo cha utafiti',
     creditLevel: 'Kiwango cha mkopo',
     paymentTerms: 'Masharti ya malipo',
     openOrders: 'Maagizo wazi',
@@ -170,6 +214,24 @@ export default {
     kpiOpen: 'Wazi',
     kpiPending: 'Yanasubiri',
     kpiResolved: 'Yamesuluhishwa',
+    kpiFrt: 'Wastani wa jibu la kwanza',
+    kpiFrtSample: 'Sampuli: mazungumzo {n}',
+    kpiFrtEmpty: 'Hakuna majibu ya wakala katika dirisha',
+    kpiTtr: 'Wastani wa muda wa kusuluhisha',
+    kpiTtrSample: 'Sampuli: yaliyosuluhishwa {n}',
+    kpiTtrEmpty: 'Hakuna tikiti zilizosuluhishwa katika dirisha',
+    leaderboardTitle: 'Ubao wa wakala',
+    leaderboardSub: 'SLA kwa kila wakala katika dirisha lililochaguliwa',
+    leaderboardEmpty: 'Hakuna shughuli za wakala katika dirisha',
+    lbAgent: 'Wakala',
+    lbAssigned: 'Imegawiwa',
+    lbResolved: 'Imesuluhishwa',
+    lbFrt: 'Wastani FRT',
+    lbTtr: 'Wastani TTR',
+    lbUnassigned: 'haijagawiwa',
+    kpiCsat: 'Wastani CSAT',
+    kpiCsatSample: 'Sampuli: maoni {n}',
+    kpiCsatEmpty: 'Hakuna maoni ya CSAT katika dirisha',
     kpiWindow: 'Dirisha la siku {d}',
     kpiSnapshot: 'Picha ya sasa',
     chartDailyTitle: 'Idadi ya kila siku',

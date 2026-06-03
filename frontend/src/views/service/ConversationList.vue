@@ -264,9 +264,11 @@ function humanChannel(c) {
   return c.replace(/^Channel::/, '')
 }
 
-watch(() => route.params.id, (id) => {
-  if (id) reload()
-})
+// Refresh whenever the selected id changes. We trigger on BOTH directions
+// (open a conversation, or come back to the list) so that a Sprint 49.5
+// hard-delete navigated-back from the detail view immediately drops the
+// row from the visible list — without waiting 10s for the next poll tick.
+watch(() => route.params.id, () => reload())
 
 onMounted(async () => {
   await Promise.all([reload(), loadInboxes()])

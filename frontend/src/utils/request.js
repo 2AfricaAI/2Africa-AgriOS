@@ -63,6 +63,15 @@ request.interceptors.response.use(
     }
 
     if (status === 401 || status === 403) {
+      // Sprint 50d -- skip the auto-redirect for public pages (CSAT
+      // survey etc.). Those pages handle their own error display and
+      // a hard bounce to /login would be a terrible UX for a customer
+      // following a survey link from email.
+      const currentMeta = router.currentRoute.value.meta || {}
+      if (currentMeta.public) {
+        // surface the body message to the caller; no toast, no redirect
+        return Promise.reject(error)
+      }
       // token 失效 / 权限不足
       const auth = useAuthStore()
       auth.clear()

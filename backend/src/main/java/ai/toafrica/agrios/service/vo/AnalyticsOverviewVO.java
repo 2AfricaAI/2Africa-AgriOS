@@ -43,6 +43,83 @@ public class AnalyticsOverviewVO {
     /** One bucket per day in the window, oldest first. */
     private List<TimeSeriesPoint> dailyConversations;
 
+    // ---------- Sprint 50a: First Response Time (FRT) ----------
+    /**
+     * First Response Time metrics across all conversations in the window
+     * that have BOTH a customer-side inbound AND at least one agent reply
+     * after it. Conversations without an agent reply yet are excluded.
+     */
+    private FrtMetrics frtMetrics;
+
+    // ---------- Sprint 50b: Time-To-Resolution (TTR) ----------
+    /**
+     * Time-To-Resolution metrics across conversations that were both
+     * CREATED and RESOLVED inside the window. TTR is computed as
+     * lastActivityAt - createdAt -- approximate but cheap (no extra
+     * fetches). A future refinement will read the explicit "resolved"
+     * activity timestamp from the message stream.
+     */
+    private TtrMetrics ttrMetrics;
+
+    // ---------- Sprint 50d: CSAT (Customer Satisfaction) ----------
+    /**
+     * CSAT summary across responses SUBMITTED inside the window. Counts
+     * only submitted ratings -- unanswered survey invitations are
+     * excluded so the metric reflects actual customer voice and not
+     * delivery rate. Null fields mean "no submissions yet".
+     */
+    private CsatMetrics csatMetrics;
+
+    @Data
+    @Builder
+    public static class FrtMetrics {
+        /** Average first-response time in seconds. */
+        private Long avgSec;
+        /** Median (P50) first-response time in seconds. */
+        private Long p50Sec;
+        /** P90 first-response time in seconds. */
+        private Long p90Sec;
+        /** Number of conversations that contributed to the metric. */
+        private Integer sampleSize;
+    }
+
+    /**
+     * Sprint 50d -- CSAT roll-up for the dashboard card. Numbers come
+     * straight from {@code cs_csat_response} where
+     * {@code rating IS NOT NULL AND submitted_at &gt;= cutoff}.
+     */
+    @Data
+    @Builder
+    public static class CsatMetrics {
+        /** Submitted responses in the window. */
+        private Integer sampleSize;
+        /** Mean rating across the sample, rounded to 1 dp. Null if sample=0. */
+        private Double avgRating;
+        /** % of responses with rating &gt;= 4. Null if sample=0. */
+        private Integer thumbsUpPct;
+        /** Raw count behind the % (handy when sample is small). */
+        private Integer thumbsUpCount;
+    }
+
+    /**
+     * Shape mirrors FrtMetrics so the frontend can reuse the same KPI
+     * card template. Kept as a sibling type (rather than a shared
+     * "DurationMetrics") so we have room to add TTR-specific fields
+     * later (e.g. reopen count, SLA-tier breakdown).
+     */
+    @Data
+    @Builder
+    public static class TtrMetrics {
+        /** Average time-to-resolution in seconds. */
+        private Long avgSec;
+        /** Median (P50) time-to-resolution in seconds. */
+        private Long p50Sec;
+        /** P90 time-to-resolution in seconds. */
+        private Long p90Sec;
+        /** Number of resolved conversations that contributed. */
+        private Integer sampleSize;
+    }
+
     @Data
     @Builder
     public static class DistributionSlice {

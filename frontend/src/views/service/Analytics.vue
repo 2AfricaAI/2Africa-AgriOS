@@ -44,6 +44,54 @@
         <div class="kpi-value">{{ formatN(overview.resolvedConversations) }}</div>
         <div class="kpi-foot">{{ t('cs.kpiWindow', { d: overview.windowDays || windowDays }) }}</div>
       </div>
+      <!-- Sprint 50a: First Response Time -->
+      <div class="kpi-card kpi-frt">
+        <div class="kpi-label">{{ t('cs.kpiFrt') }}</div>
+        <div class="kpi-value">{{ formatDuration(overview.frtMetrics?.avgSec) }}</div>
+        <div class="kpi-foot">
+          <template v-if="(overview.frtMetrics?.sampleSize || 0) > 0">
+            P50 {{ formatDuration(overview.frtMetrics.p50Sec) }} · P90 {{ formatDuration(overview.frtMetrics.p90Sec) }}
+            <br />{{ t('cs.kpiFrtSample', { n: overview.frtMetrics.sampleSize }) }}
+          </template>
+          <template v-else>
+            {{ t('cs.kpiFrtEmpty') }}
+          </template>
+        </div>
+      </div>
+      <!-- Sprint 50b: Time-To-Resolution -->
+      <div class="kpi-card kpi-ttr">
+        <div class="kpi-label">{{ t('cs.kpiTtr') }}</div>
+        <div class="kpi-value">{{ formatDuration(overview.ttrMetrics?.avgSec) }}</div>
+        <div class="kpi-foot">
+          <template v-if="(overview.ttrMetrics?.sampleSize || 0) > 0">
+            P50 {{ formatDuration(overview.ttrMetrics.p50Sec) }} · P90 {{ formatDuration(overview.ttrMetrics.p90Sec) }}
+            <br />{{ t('cs.kpiTtrSample', { n: overview.ttrMetrics.sampleSize }) }}
+          </template>
+          <template v-else>
+            {{ t('cs.kpiTtrEmpty') }}
+          </template>
+        </div>
+      </div>
+      <!-- Sprint 50d: CSAT -->
+      <div class="kpi-card kpi-csat">
+        <div class="kpi-label">{{ t('cs.kpiCsat') }}</div>
+        <div class="kpi-value">
+          <template v-if="(overview.csatMetrics?.sampleSize || 0) > 0">
+            {{ overview.csatMetrics.avgRating?.toFixed(1) }}
+            <span class="kpi-csat-out">/ 5</span>
+          </template>
+          <template v-else>—</template>
+        </div>
+        <div class="kpi-foot">
+          <template v-if="(overview.csatMetrics?.sampleSize || 0) > 0">
+            👍 {{ overview.csatMetrics.thumbsUpPct }}% ({{ overview.csatMetrics.thumbsUpCount }}/{{ overview.csatMetrics.sampleSize }})
+            <br />{{ t('cs.kpiCsatSample', { n: overview.csatMetrics.sampleSize }) }}
+          </template>
+          <template v-else>
+            {{ t('cs.kpiCsatEmpty') }}
+          </template>
+        </div>
+      </div>
     </section>
 
     <!-- Charts row -->
@@ -62,6 +110,67 @@
         </div>
         <v-chart class="chart" :option="channelOption" autoresize />
       </div>
+    </section>
+
+    <!-- Sprint 50c: Agent leaderboard -->
+    <section class="leaderboard-card">
+      <div class="chart-head">
+        <h3 class="chart-title">{{ t('cs.leaderboardTitle') }}</h3>
+        <span class="chart-sub">{{ t('cs.leaderboardSub') }}</span>
+      </div>
+      <el-table
+        v-if="leaderboardRows.length > 0"
+        :data="leaderboardRows"
+        size="small"
+        stripe
+        :default-sort="{ prop: 'resolvedCount', order: 'descending' }"
+        class="leaderboard-table"
+      >
+        <el-table-column prop="agentName" :label="t('cs.lbAgent')" min-width="180">
+          <template #default="{ row }">
+            <div class="lb-agent">
+              <el-avatar
+                v-if="row.thumbnail"
+                :src="row.thumbnail"
+                :size="24"
+              />
+              <el-avatar v-else :size="24">
+                {{ initials(row.agentName) }}
+              </el-avatar>
+              <span class="lb-agent-name">{{ row.agentName }}</span>
+              <el-tag v-if="row.role === 'administrator'" size="small" type="warning" effect="plain">
+                admin
+              </el-tag>
+              <el-tag v-else-if="!row.agentId" size="small" type="info" effect="plain">
+                {{ t('cs.lbUnassigned') }}
+              </el-tag>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="assignedCount" :label="t('cs.lbAssigned')" width="110" sortable align="right" />
+        <el-table-column prop="resolvedCount" :label="t('cs.lbResolved')" width="110" sortable align="right" />
+        <el-table-column prop="frtAvgSec" :label="t('cs.lbFrt')" width="130" sortable align="right">
+          <template #default="{ row }">
+            {{ formatDuration(row.frtAvgSec) }}
+            <span class="lb-sample" v-if="row.frtSampleSize">
+              · n={{ row.frtSampleSize }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="ttrAvgSec" :label="t('cs.lbTtr')" width="130" sortable align="right">
+          <template #default="{ row }">
+            {{ formatDuration(row.ttrAvgSec) }}
+            <span class="lb-sample" v-if="row.ttrSampleSize">
+              · n={{ row.ttrSampleSize }}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-empty
+        v-else
+        :description="t('cs.leaderboardEmpty')"
+        :image-size="60"
+      />
     </section>
 
     <!-- Footer note -->
@@ -86,7 +195,7 @@ import {
 } from 'echarts/components'
 import VChart from 'vue-echarts'
 
-import { getAnalyticsOverview } from '@/api/service'
+import { getAnalyticsOverview, getAgentLeaderboard } from '@/api/service'
 
 use([
   CanvasRenderer,
@@ -113,11 +222,19 @@ const overview = ref({
 })
 const loading = ref(false)
 
+// Sprint 50c — per-agent SLA leaderboard. Loaded in parallel with
+// the overview snapshot so the page paints in a single tick.
+const leaderboardRows = ref([])
+
 async function load() {
   loading.value = true
   try {
-    const data = await getAnalyticsOverview(windowDays.value)
-    overview.value = data || overview.value
+    const [overviewData, leaderboardData] = await Promise.all([
+      getAnalyticsOverview(windowDays.value),
+      getAgentLeaderboard(windowDays.value),
+    ])
+    overview.value = overviewData || overview.value
+    leaderboardRows.value = leaderboardData?.rows || []
   } catch (err) {
     ElMessage.error(err?.message || t('cs.analyticsLoadFailed'))
   } finally {
@@ -125,9 +242,35 @@ async function load() {
   }
 }
 
+function initials(name) {
+  if (!name) return '?'
+  const parts = String(name).trim().split(/\s+/).slice(0, 2)
+  return parts.map(p => p[0] || '').join('').toUpperCase() || '?'
+}
+
 function formatN(n) {
   if (n === null || n === undefined) return '—'
   return Number(n).toLocaleString('en-GB')
+}
+
+/**
+ * Format seconds as a short human-readable duration:
+ *   45s / 12m / 1h 5m / 2d 3h
+ * Returns "—" for null/undefined/negative.
+ */
+function formatDuration(sec) {
+  if (sec === null || sec === undefined || sec < 0) return '—'
+  const n = Number(sec)
+  if (n < 60)       return `${n}s`
+  if (n < 3600)     return `${Math.round(n / 60)}m`
+  if (n < 86400) {
+    const h = Math.floor(n / 3600)
+    const m = Math.round((n % 3600) / 60)
+    return m > 0 ? `${h}h ${m}m` : `${h}h`
+  }
+  const d = Math.floor(n / 86400)
+  const h = Math.round((n % 86400) / 3600)
+  return h > 0 ? `${d}d ${h}h` : `${d}d`
 }
 
 // ECharts options -- recompute when data changes via computed()
@@ -262,6 +405,36 @@ onMounted(load)
 .kpi-open     { border-top-color: #1677ff; }
 .kpi-pending  { border-top-color: #b35a00; }
 .kpi-resolved { border-top-color: #27774d; }
+.kpi-frt      { border-top-color: #7a3e8f; }   /* purple = response time */
+.kpi-ttr      { border-top-color: #c45a4d; }   /* terracotta = resolution time */
+.kpi-csat     { border-top-color: #f5b400; }   /* gold star = customer voice */
+.kpi-csat-out { color: #8a9690; font-size: 16px; margin-left: 2px; }
+
+/* ------ Sprint 50c: leaderboard ------ */
+.leaderboard-card {
+  background: #fff;
+  border: 1px solid #e6ece9;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+.leaderboard-table {
+  margin-top: 8px;
+}
+.lb-agent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lb-agent-name {
+  color: #1c2e25;
+  font-weight: 500;
+}
+.lb-sample {
+  color: #8a9690;
+  font-size: 11px;
+  margin-left: 4px;
+}
 .kpi-label {
   font-size: 12px;
   color: #5b6b62;

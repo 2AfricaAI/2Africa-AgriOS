@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -230,6 +231,26 @@ public class ConversationController {
     @PostMapping("/conversations/{id}/assignee")
     public R<Void> assign(@PathVariable Long id, @RequestBody AssignBody body) {
         chatwoot.assignAgent(id, body.getAssigneeId());
+        return R.ok();
+    }
+
+    /**
+     * Sprint 49.5 -- destructive single-conversation delete. Restricted to
+     * SUPER_ADMIN via the {@code cs:conversation:delete} permission so the
+     * roster of regular agents cannot accidentally wipe a customer history.
+     *
+     * <p>Implementation simply forwards the call to Chatwoot, which cascades
+     * delete to messages + attachments + conversation_participants in its
+     * own DB. CS-Core's {@code cs_contact_link} row is untouched (other
+     * conversations from the same contact may still exist).</p>
+     */
+    @Operation(summary = "Delete a single conversation (SUPER_ADMIN only)")
+    @DeleteMapping("/conversations/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasAuthority('cs:conversation:delete')")
+    public R<Void> delete(@PathVariable Long id) {
+        log.warn("[cs] DELETE conversation#{} by SUPER_ADMIN", id);
+        chatwoot.deleteConversation(id);
         return R.ok();
     }
 

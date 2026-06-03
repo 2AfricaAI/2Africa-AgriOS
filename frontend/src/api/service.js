@@ -38,6 +38,15 @@ export function assignConversation(id, assigneeId) {
   return request.post(`/v1/service/conversations/${id}/assignee`, { assigneeId })
 }
 
+/**
+ * Sprint 49.5 — hard-delete a single conversation (SUPER_ADMIN only).
+ * Backend enforces `cs:conversation:delete` permission; this client call
+ * will 403 for anyone else, so the UI guards with `v-perm` first.
+ */
+export function deleteConversation(id) {
+  return request.delete(`/v1/service/conversations/${id}`)
+}
+
 // -----------------------------------------------------------------------
 // Inboxes & Agents (UI dropdowns)
 // -----------------------------------------------------------------------
@@ -110,4 +119,26 @@ export function renderSmsTemplate(code, conversationId) {
  */
 export function getAnalyticsOverview(days = 30) {
   return request.get('/v1/cs/analytics/overview', { params: { days } })
+}
+
+/**
+ * Sprint 50c — per-agent SLA leaderboard.
+ * Returns one row per agent (plus an "Unassigned" pseudo-row).
+ *
+ * @param {number} days  window in days (1..365), defaults to 30
+ */
+export function getAgentLeaderboard(days = 30) {
+  return request.get('/v1/cs/analytics/agents', { params: { days } })
+}
+
+// -----------------------------------------------------------------------
+// Sprint 50d: CSAT (Customer Satisfaction) survey
+// -----------------------------------------------------------------------
+
+/**
+ * Agent-side — generate (or reuse, if a fresh one already exists) a
+ * survey link for the given conversation. Requires `cs:csat:send`.
+ */
+export function generateCsatLink(conversationId) {
+  return request.post('/v1/cs/csat/link', { conversationId })
 }

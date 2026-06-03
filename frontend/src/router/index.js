@@ -12,6 +12,13 @@ const routes = [
     component: () => import('@/views/Login.vue'),
     meta: { public: true, titleKey: 'auth.login' },
   },
+  // Sprint 50d -- public CSAT survey page. Outside auth, token-validated.
+  {
+    path: '/csat/:token',
+    name: 'csat-survey',
+    component: () => import('@/views/public/CsatSurvey.vue'),
+    meta: { public: true, titleKey: 'csat.title' },
+  },
   // 所有受保护路由都套在 AppLayout 下
   {
     path: '/',

@@ -6,6 +6,38 @@ export default {
   brand: '2Africa AgriOS',
   brandFull: '2Africa AgriOS by 2Africa.AI',
 
+  // ---------- Date-range picker shared labels ----------
+  date: {
+    rangeSep: 'to',
+    start: 'Start date',
+    end: 'End date',
+  },
+
+  // ---------- Sprint 50d: public CSAT survey page ----------
+  csat: {
+    title: 'How was your service?',
+    subtitle: 'Your feedback helps us serve you better. It takes 10 seconds.',
+    pickAStar: 'Tap a star to rate',
+    rateN: 'Rate {n} out of 5',
+    ratingLabel: {
+      1: 'Very unhappy',
+      2: 'Unhappy',
+      3: 'Neutral',
+      4: 'Happy',
+      5: 'Very happy',
+    },
+    commentOptional: 'Anything else? (optional)',
+    commentPlaceholder: 'What went well, or what could be better?',
+    submit: 'Submit',
+    submitting: 'Sending…',
+    submitFailed: 'Could not submit. Please try again.',
+    thanksTitle: 'Thank you!',
+    thanksBody: 'We received your {n}-star rating. The team will read your note carefully.',
+    errorTitle: 'This survey is not available',
+    errorGeneric: 'The link may have expired or already been used.',
+    footer: '2Africa.AI AgriOS · Powered by Customer Service',
+  },
+
   // ---------- Top-level navigation / menu ----------
   menu: {
     home: 'Home',
@@ -97,6 +129,18 @@ export default {
     // detail page - header
     markResolved: 'Mark resolved',
     reopen: 'Reopen',
+    // Sprint 49.5 — SUPER_ADMIN destructive delete
+    deleteConversation: 'Delete',
+    deleteConfirmTitle: 'Delete this conversation?',
+    deleteConfirmMsg: 'You are about to permanently delete the conversation with {name}. All messages and attachments will be removed from Chatwoot and cannot be recovered. Continue?',
+    deleteConfirmYes: 'Delete forever',
+    deleteSuccess: 'Conversation deleted',
+    deleteFailed: 'Delete failed',
+    // Sprint 50d -- CSAT survey link from CSR composer
+    csatSendBtn: 'Send CSAT',
+    csatLinkCopied: 'Survey link copied to clipboard. Paste it into your next reply.',
+    csatLinkManual: 'Survey link ready (copy could not write to clipboard): {url}',
+    csatLinkFailed: 'Could not generate survey link',
     creditLevel: 'Credit level',
     paymentTerms: 'Payment terms',
     openOrders: 'Open orders',
@@ -256,6 +300,24 @@ export default {
     kpiOpen: 'Open',
     kpiPending: 'Pending',
     kpiResolved: 'Resolved',
+    kpiFrt: 'Avg first response',
+    kpiFrtSample: 'Sample: {n} conversations',
+    kpiFrtEmpty: 'No agent replies in window',
+    kpiTtr: 'Avg time to resolution',
+    kpiTtrSample: 'Sample: {n} resolved',
+    kpiTtrEmpty: 'No resolved tickets in window',
+    leaderboardTitle: 'Agent leaderboard',
+    leaderboardSub: 'SLA per agent across the selected window',
+    leaderboardEmpty: 'No agent activity in window',
+    lbAgent: 'Agent',
+    lbAssigned: 'Assigned',
+    lbResolved: 'Resolved',
+    lbFrt: 'Avg FRT',
+    lbTtr: 'Avg TTR',
+    lbUnassigned: 'unassigned',
+    kpiCsat: 'Avg CSAT',
+    kpiCsatSample: 'Sample: {n} responses',
+    kpiCsatEmpty: 'No CSAT responses in window',
     kpiWindow: 'Last {d}-day window',
     kpiSnapshot: 'Current snapshot',
     chartDailyTitle: 'Daily ticket volume',

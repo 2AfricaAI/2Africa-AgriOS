@@ -315,6 +315,17 @@ public class ChatwootClient {
         }
     }
 
+    /**
+     * Sprint 49.5 -- hard-delete a Chatwoot conversation and all its
+     * messages. Restricted to SUPER_ADMIN at the controller layer.
+     *
+     * <p>{@code DELETE /api/v1/accounts/{id}/conversations/{convId}}</p>
+     */
+    public void deleteConversation(Long conversationId) {
+        ensureEnabled();
+        execute(baseAccountUrl() + "/conversations/" + conversationId, Method.DELETE, null);
+    }
+
     /** {@code DELETE /api/v1/accounts/{id}/inboxes/{inboxId}} */
     public void deleteInbox(Long inboxId) {
         ensureEnabled();
