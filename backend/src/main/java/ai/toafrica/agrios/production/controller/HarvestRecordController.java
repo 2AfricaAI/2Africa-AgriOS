@@ -3,6 +3,7 @@ package ai.toafrica.agrios.production.controller;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
+import ai.toafrica.agrios.framework.datascope.DataScope;
 import ai.toafrica.agrios.production.dto.HarvestRecordForm;
 import ai.toafrica.agrios.production.service.HarvestRecordService;
 import ai.toafrica.agrios.production.vo.HarvestRecordVO;
@@ -33,6 +34,7 @@ public class HarvestRecordController {
     private final HarvestRecordService harvestService;
 
     @Operation(summary = "Harvest record list")
+    @DataScope(table = "harvest_record", resource = "harvest")
     @GetMapping
     public R<PageResult<HarvestRecordVO>> list(
             @RequestParam(required = false) Long plotId,

@@ -13,6 +13,40 @@ export default {
     end: 'End date',
   },
 
+  // ---------- Sprint 51: Org tree management ----------
+  org: {
+    treeTitle: 'Organization Tree',
+    newRoot: 'New Root',
+    filterPlaceholder: 'Filter by name or code',
+    showInactive: 'Show inactive',
+    selectHint: 'Select a node to view details',
+    inactive: 'inactive',
+    addChild: 'Add Child',
+    deactivate: 'Deactivate',
+    activate: 'Activate',
+    deleteConfirm: 'Delete node "{name}"? Active children are not allowed.',
+    membersTitle: 'Members',
+    addMember: 'Add Member',
+    noMembers: 'No active members on this node',
+    closeMember: 'End',
+    tagsTitle: 'Tags',
+    attachTag: 'Attach tag',
+    dlgCreateTitle: 'New Node',
+    dlgMemberTitle: 'Assign Member',
+    loadFailed: 'Failed to load org data',
+    auxFailed: 'Failed to load node members or tags',
+    f: {
+      parent: 'Parent', parentPh: 'Choose a parent node',
+      type: 'Type', code: 'Code', codePh: 'e.g. FARM-EAST',
+      name: 'Name', location: 'Location', locationPh: 'e.g. Isinya, Kajiado',
+      costCenter: 'Cost Center', manager: 'Manager', managerPh: 'Choose primary manager',
+      sortNo: 'Sort No.', description: 'Description',
+      user: 'User', userPh: 'Choose a user',
+      position: 'Position', from: 'Effective From',
+      primary: 'Primary', manager_chk: 'Co-Manager',
+    },
+  },
+
   // ---------- Sprint 50d: public CSAT survey page ----------
   csat: {
     title: 'How was your service?',
@@ -98,6 +132,7 @@ export default {
     system: 'System',
     sysUsers: 'Users',
     sysRoles: 'Roles',
+    sysOrg: 'Organization',
   },
 
   // Sprint 41: AgriOS-native Customer Service workspace.

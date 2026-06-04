@@ -3,6 +3,7 @@ package ai.toafrica.agrios.sales.controller;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
+import ai.toafrica.agrios.framework.datascope.DataScope;
 import ai.toafrica.agrios.sales.dto.SalesOrderForm;
 import ai.toafrica.agrios.sales.service.SalesOrderService;
 import ai.toafrica.agrios.sales.vo.SalesOrderDetailVO;
@@ -27,6 +28,7 @@ public class SalesOrderController {
     private final SalesOrderService orderService;
 
     @Operation(summary = "List orders (paginated)")
+    @DataScope(table = "sales_order", resource = "sales_order")
     @GetMapping
     public R<PageResult<SalesOrderVO>> list(
             @RequestParam(required = false) Long customerId,

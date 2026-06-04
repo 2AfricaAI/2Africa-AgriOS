@@ -12,6 +12,40 @@ export default {
     end: '结束日期',
   },
 
+  // ---------- Sprint 51: 组织架构管理 ----------
+  org: {
+    treeTitle: '组织树',
+    newRoot: '新建根节点',
+    filterPlaceholder: '按名称或编码过滤',
+    showInactive: '显示已停用',
+    selectHint: '请在左侧选择一个节点查看详情',
+    inactive: '已停用',
+    addChild: '新建子节点',
+    deactivate: '停用',
+    activate: '启用',
+    deleteConfirm: '确定要删除节点「{name}」吗？该节点不能有活跃子节点。',
+    membersTitle: '成员',
+    addMember: '新增成员',
+    noMembers: '该节点暂无成员',
+    closeMember: '结束',
+    tagsTitle: '标签',
+    attachTag: '挂载标签',
+    dlgCreateTitle: '新建节点',
+    dlgMemberTitle: '分配成员',
+    loadFailed: '加载组织数据失败',
+    auxFailed: '加载节点成员或标签失败',
+    f: {
+      parent: '父节点', parentPh: '选择父节点',
+      type: '类型', code: '编码', codePh: '如 FARM-EAST',
+      name: '名称', location: '位置', locationPh: '如 Isinya, Kajiado',
+      costCenter: '成本中心', manager: '主管', managerPh: '选择主管',
+      sortNo: '排序号', description: '描述',
+      user: '用户', userPh: '选择用户',
+      position: '岗位', from: '生效日期',
+      primary: '主属节点', manager_chk: '协管员',
+    },
+  },
+
   // ---------- Sprint 50d: 客户公开 CSAT 调查页 ----------
   csat: {
     title: '您对本次服务满意吗？',
@@ -96,6 +130,7 @@ export default {
     system: '系统管理',
     sysUsers: '用户管理',
     sysRoles: '角色列表',
+    sysOrg: '组织架构',
   },
 
   // Sprint 41: AgriOS-native Customer Service workspace.

@@ -153,6 +153,8 @@
           </template>
           <el-menu-item v-if="can('system:user:list')" index="/system/users">{{ t('menu.sysUsers') }}</el-menu-item>
           <el-menu-item v-if="can('system:role:list')" index="/system/roles">{{ t('menu.sysRoles') }}</el-menu-item>
+          <!-- Sprint 51 -- Organization tree (reuse system:role:list gate) -->
+          <el-menu-item v-if="can('system:role:list')" index="/system/org">{{ t('menu.sysOrg') }}</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>

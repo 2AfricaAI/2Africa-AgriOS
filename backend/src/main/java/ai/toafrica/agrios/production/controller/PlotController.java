@@ -3,6 +3,7 @@ package ai.toafrica.agrios.production.controller;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
+import ai.toafrica.agrios.framework.datascope.DataScope;
 import ai.toafrica.agrios.framework.importer.ImportResult;
 import ai.toafrica.agrios.framework.importer.ImportRunner;
 import ai.toafrica.agrios.production.dto.PlotDTO;
@@ -34,6 +35,7 @@ public class PlotController {
 
     @Operation(summary = "Plot list (paginated)")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_LEADER') or hasAuthority('ROLE_PACKHOUSE') or hasAuthority('ROLE_SALES')")
+    @DataScope(table = "plot", resource = "plot")
     @GetMapping
     public R<PageResult<PlotMapper.PlotVO>> list(PlotMapper.PlotQueryVO q, PageQuery pq) {
         return R.ok(plotService.page(q, pq));

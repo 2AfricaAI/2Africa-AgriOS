@@ -13,6 +13,40 @@ export default {
     end: 'Tarehe ya mwisho',
   },
 
+  // ---------- Sprint 51: Org tree management ----------
+  org: {
+    treeTitle: 'Mti wa Shirika',
+    newRoot: 'Mzizi mpya',
+    filterPlaceholder: 'Chuja kwa jina au msimbo',
+    showInactive: 'Onyesha zilizosimama',
+    selectHint: 'Chagua node kuona maelezo',
+    inactive: 'imesimama',
+    addChild: 'Ongeza Mtoto',
+    deactivate: 'Simamisha',
+    activate: 'Anzisha',
+    deleteConfirm: 'Futa node "{name}"? Lazima isiwe na watoto hai.',
+    membersTitle: 'Wanachama',
+    addMember: 'Ongeza Mwanachama',
+    noMembers: 'Hakuna wanachama wenye dahili',
+    closeMember: 'Maliza',
+    tagsTitle: 'Lebo',
+    attachTag: 'Ambatisha lebo',
+    dlgCreateTitle: 'Node Mpya',
+    dlgMemberTitle: 'Gawia Mwanachama',
+    loadFailed: 'Imeshindwa kupakia data ya shirika',
+    auxFailed: 'Imeshindwa kupakia wanachama au lebo',
+    f: {
+      parent: 'Mzazi', parentPh: 'Chagua mzazi',
+      type: 'Aina', code: 'Msimbo', codePh: 'mfano FARM-EAST',
+      name: 'Jina', location: 'Mahali', locationPh: 'mfano Isinya, Kajiado',
+      costCenter: 'Kituo cha gharama', manager: 'Meneja', managerPh: 'Chagua meneja mkuu',
+      sortNo: 'Nambari ya mpangilio', description: 'Maelezo',
+      user: 'Mtumiaji', userPh: 'Chagua mtumiaji',
+      position: 'Wadhifa', from: 'Tarehe ya kuanza',
+      primary: 'Msingi', manager_chk: 'Mratibu',
+    },
+  },
+
   // ---------- Sprint 50d: ukurasa wa umma wa CSAT ----------
   csat: {
     title: 'Ulipenda huduma yetu?',
@@ -102,6 +136,8 @@ export default {
     csAnalytics: 'Uchanganuzi',
     csTeam: 'Timu',
     csSettings: 'Mipangilio',
+    // Sprint 51 -- Organization tree
+    sysOrg: 'Shirika',
   },
   service: {
     title: 'Eneo la Huduma kwa Wateja',

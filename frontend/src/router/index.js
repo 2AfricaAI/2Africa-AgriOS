@@ -334,6 +334,13 @@ const routes = [
         component: () => import('@/views/system/RoleList.vue'),
         meta: { titleKey: 'menu.sysRoles' },
       },
+      // Sprint 51 -- Organization tree management
+      {
+        path: 'system/org',
+        name: 'system-org',
+        component: () => import('@/views/org/OrgTreePage.vue'),
+        meta: { titleKey: 'menu.sysOrg' },
+      },
     ],
   },
   // ---------- Mobile (PWA) ----------

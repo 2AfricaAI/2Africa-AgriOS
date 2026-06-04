@@ -3,6 +3,7 @@ package ai.toafrica.agrios.sales.controller;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
+import ai.toafrica.agrios.framework.datascope.DataScope;
 import ai.toafrica.agrios.framework.importer.ImportResult;
 import ai.toafrica.agrios.framework.importer.ImportRunner;
 import ai.toafrica.agrios.sales.dto.CustomerForm;
@@ -33,6 +34,7 @@ public class CustomerController {
     private final CustomerImportTemplate customerImportTemplate;
 
     @Operation(summary = "List customers (paginated)")
+    @DataScope(table = "customer", resource = "customer")
     @GetMapping
     public R<PageResult<Customer>> list(
             @Parameter(description = "Fuzzy match name / code / contact / phone")

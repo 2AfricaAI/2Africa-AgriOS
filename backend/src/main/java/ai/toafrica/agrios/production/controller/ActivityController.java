@@ -3,6 +3,7 @@ package ai.toafrica.agrios.production.controller;
 import ai.toafrica.agrios.common.PageQuery;
 import ai.toafrica.agrios.common.PageResult;
 import ai.toafrica.agrios.common.R;
+import ai.toafrica.agrios.framework.datascope.DataScope;
 import ai.toafrica.agrios.production.dto.ActivityForm;
 import ai.toafrica.agrios.production.service.ActivityService;
 import ai.toafrica.agrios.production.vo.ActivityVO;
@@ -35,6 +36,7 @@ public class ActivityController {
     private final ActivityService activityService;
 
     @Operation(summary = "Activity list (paginated + filtered)")
+    @DataScope(table = "activity", resource = "activity")
     @GetMapping
     public R<PageResult<ActivityVO>> list(
             @Parameter(description = "Filter by plot id") @RequestParam(required = false) Long plotId,

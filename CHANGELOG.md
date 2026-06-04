@@ -8,10 +8,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 Roadmap targets:
-- v3.5: ORG model (single tree + tags) + Workflow engine + HR + Admin + Legal/Compliance
-        (see `docs/PRD-HR-ADMIN-LEGAL-WORKFLOW-v0.1.md` and `docs/PRD-ORG-v0.1.md`)
+- v3.5: Workflow engine + HR + Admin + Legal/Compliance
+        (see `docs/PRD-HR-ADMIN-LEGAL-WORKFLOW-v0.2.md`)
 - v3.6: Worker mobile v2 (my today / week / month views)
 - v3.7: OpenAPI client (AgriOS to AgriCloud federation)
+
+## [3.5.0-rc1] - 2026-06-05
+
+Sprint 51 -- Organization tree + DataScope subsystem.
+Implementation of PRD-ORG-v0.2 (all 8 decisions locked). Foundation
+for HR / Admin / Legal modules in Sprint 52+.
+
+### Added -- ORG schema (migration 050)
+
+- 5 new tables: `org_node`, `org_tag`, `org_node_tag`, `org_user`,
+  `data_access_audit`
+- 8-type node enum: GROUP / FARM / PACKHOUSE / **PROCESSING** /
+  WAREHOUSE / DEPT / TEAM / PROJECT (with DB CHECK constraint)
+- `location` field for geo-aware compliance / tax / insurance
+- `effective_from / effective_to` on `org_user` -- foundation for
+  cross-farm payroll attribution (decision #4)
+- `node_id` column added to 15 high-frequency business tables
+  (plot, harvest_record, activity, customer, sales_order, ...). All
+  NULLable, no DEFAULT, no index -- zero-impact migration per
+  decision #7.
+- Initial Albert's Meadows tree seeded (12 nodes):
+  GROUP / HQ (Karen Office, Nairobi) + Finance / Legal / Sales /
+  FARM Albert's Farm (Isinya, Kajiado) + Farm General Management /
+  HR & Admin / Vegetable & Fruit Cultivation / Mushroom Cultivation /
+  Input Warehouse / Packhouse with cold storage
+- 5 future-proof tags pre-seeded: SEASON.Q2/Q3, GLOBAL_GAP,
+  KEBS_FOOD_SAFETY, PCPB_A
+- Kang created as Albert's Farm manager: `kang.manager` /
+  `Welcome@123456` (must change on first login), bound to MANAGER role
+
+### Added -- ORG Java module
+
+- 5 entities + 5 mappers (OrgNode/Tag/NodeTag/User/DataAccessAudit)
+- `OrgNodeService` -- 250 lines with all 8 decisions enforced at
+  service layer (physical-cannot-delete, type enum, parent rules,
+  cycle prevention, ancestors auto-build, etc.)
+- `OrgUserService` -- decision #4 closes prior primary automatically
+  when reassigning
+- `OrgTagService` -- category whitelist enforced
+- 3 REST controllers, 20 endpoints under `/v1/org/*`
+
+### Added -- DataScope subsystem (`@DataScope`)
+
+- `@DataScope(table, column, ...)` annotation on controller methods
+- ThreadLocal context stack with auto-cleanup
+- `DataScopeService` with Redis-cached subtree id resolution
+- `DataScopeInnerInterceptor` (MyBatis-Plus) with 3 strategies:
+  - scope=group + <=1000 ids -- `WHERE col IN (...)`
+  - scope=group + >1000 ids  -- fallback EXISTS subquery against
+    `org_node.ancestors`
+  - scope=self -- `WHERE created_by = ?`
+  - scope=all -- no rewrite (audited instead)
+- `DataAccessAuditAspect` (`@Async`) records every read by a
+  data_scope=all user into `data_access_audit` (decision #5)
+- Safety: default `agrios.datascope.enabled=false` (decision #7)
+  -- annotations exist but the interceptor short-circuits, so all
+  v3.4.0 surface continues to behave identically. Production deploy
+  flips the flag after grey-out validation.
+- Lazy supplier injection breaks the
+  `interceptor -> service -> mapper -> sqlSessionFactory` cycle
+
+### Added -- @DataScope wired on 5 high-traffic controllers
+
+- PlotController.list (`table=plot`)
+- HarvestRecordController.list (`table=harvest_record`)
+- ActivityController.list (`table=activity`)
+- CustomerController.list (`table=customer`)
+- SalesOrderController.list (`table=sales_order`)
+
+All annotations dormant under `enabled=false` -- no behaviour
+change. To activate in production, set `DATASCOPE_ENABLED=true`.
+
+### Added -- frontend org tree management UI
+
+- `/system/org` route under the system menu
+- `OrgTreePage.vue` -- 3-column layout (tree / detail / members + tags)
+- el-tree with type chips, filter, active toggle
+- Create-node dialog with type-aware parent picker
+- Member assign dialog (primary + co-manager + effective_from)
+- Tag attach / detach inline UI
+- Physical node delete button hidden (UI mirrors backend decision #3)
+- i18n in en / zh / sw
+
+### Migrations
+
+- `050_org_model.sql` -- 5 new tables + 12-node tree + Kang account +
+  15 ALTER + day-1 backfill
+- `050_org_model_rollback.sql` -- full reverse script
+
+### Verified
+
+- Migration applies clean on Albert's Farm pilot DB (<10k rows total)
+- Backend boot OK with `datascope.enabled=false`
+- All 12 nodes / 7 ids in Albert's Farm subtree / Kang primary=10
+- Physical-node delete rejected with business error
+- CS analytics + CSAT + digest endpoints unchanged from v3.4.0
+- `data_access_audit` empty (audit dormant with flag off)
 
 ## [3.4.0] - 2026-06-04
 

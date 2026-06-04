@@ -64,6 +64,15 @@ agrios:
   cors:
     allowed-origins: "*"
 
+  # Sprint 51 -- @DataScope subsystem
+  # Default OFF in dev so all existing pages keep working unchanged.
+  # Flip to true when grey-out validation passes (Day 5).
+  datascope:
+    enabled: ${DATASCOPE_ENABLED:false}
+    cache-ttl-seconds: ${DATASCOPE_CACHE_TTL:3600}
+    max-in-list: ${DATASCOPE_MAX_IN:1000}
+    audit-enabled: ${DATASCOPE_AUDIT:true}
+
   # Sprint 50e -- weekly CS digest email
   digest:
     enabled: ${DIGEST_ENABLED:true}
