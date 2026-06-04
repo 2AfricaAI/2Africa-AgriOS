@@ -8,10 +8,131 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 Roadmap targets:
-- v3.2: M-Pesa Daraja real integration, Africa's Talking SMS integration
-- v3.3: Onboarding wizard, Kenya demo data one-click load
-- v3.4: Worker mobile v2 (my today / week / month views)
-- v3.5: OpenAPI client (AgriOS to AgriCloud federation)
+- v3.5: ORG model (single tree + tags) + Workflow engine + HR + Admin + Legal/Compliance
+        (see `docs/PRD-HR-ADMIN-LEGAL-WORKFLOW-v0.1.md` and `docs/PRD-ORG-v0.1.md`)
+- v3.6: Worker mobile v2 (my today / week / month views)
+- v3.7: OpenAPI client (AgriOS to AgriCloud federation)
+
+## [3.4.0] - 2026-06-04
+
+CS Analytics + CSAT + Weekly Digest + SUPER_ADMIN delete-conversation hotfix.
+Covers Sprint 49.5 + Sprint 50 (a/b/c/d/e/f) + a small i18n hotfix.
+
+### Added — CS Analytics SLA metrics (Sprint 50a, 50b)
+
+- **First Response Time (FRT)** in `GET /v1/cs/analytics/overview`.
+  Per-conversation: first inbound message (customer) to first non-private
+  outbound (agent or AI bot). Aggregated as avg / P50 / P90 with nearest-rank
+  percentiles; negative deltas are discarded as clock-skew defence.
+- **Time-To-Resolution (TTR)**. MVP definition `lastActivityAt - createdAt`
+  for resolved conversations in the window. Approximation is documented;
+  proper fix needs exposing `message_type=2` activity rows on `ChatMessage`,
+  deferred.
+- A 5th purple KPI card (FRT) and a 6th terracotta KPI card (TTR) on the
+  Analytics dashboard, with avg as the headline value and P50/P90 + sample
+  size beneath. New `formatDuration()` renders `45s / 12m / 1h 5m / 2d 3h`.
+
+### Added — Per-agent SLA leaderboard (Sprint 50c)
+
+- New endpoint `GET /v1/cs/analytics/agents?days=30`.
+- Groups windowed conversations by `assigneeId`, computes per-agent FRT +
+  TTR + assigned/resolved counts, sorts by `resolvedCount desc` with the
+  synthetic "Unassigned" row forced to the bottom.
+- Frontend renders a sortable Element Plus table beneath the charts.
+- Separate `leaderboardCache` with 5-min TTL keyed on window days.
+
+### Added — CSAT customer satisfaction survey (Sprint 50d)
+
+- New table `cs_csat_response` (`migrations/049_cs_csat.sql`) — 24-char
+  base32 token (~117 bits entropy), TTL 30 days, single-use semantics.
+- `CsatService`:
+  - `generateLink(conv, user)` is idempotent within TTL (same conversation
+    in TTL returns the same token, no garbage rows on repeat clicks).
+  - `loadByToken` handles expiry + already-submitted with business errors.
+  - `submit(token, rating, comment)` writes once, throws on second attempt.
+  - `computeSummary(days)` rolls up avg rating + thumbs-up % for the dashboard.
+- `CsatController`:
+  - `POST /v1/cs/csat/link` (auth + `cs:csat:send` permission).
+  - `GET/POST /v1/cs/csat/public/{token}` — **no JWT**, customer-facing.
+- Public survey page at `/csat/:token` (route `meta.public=true`), outside
+  the auth wall. 5-star picker + optional comment, three states
+  (probe / ready / thanks / error), all branded with the 2Africa.AI AgriOS
+  logo. `request.js` interceptor skips the `/login` bounce for public routes.
+- "Send CSAT" button in `ConversationDetail.vue` (v-perm-gated) copies the
+  link to clipboard for the agent to paste into their next reply.
+- Dashboard gains a 7th gold KPI card showing avg rating + thumbs-up %.
+- Permission `cs:csat:send` seeded to SUPER_ADMIN / MANAGER / LEADER /
+  PACKHOUSE / SALES (WORKER intentionally excluded).
+
+### Added — Weekly digest email (Sprint 50e)
+
+- New `WeeklyDigestService` runs on Spring cron
+  (`@Scheduled(cron = "${agrios.digest.cron:0 0 6 ? * MON}")` — Monday 06:00
+  server time by default).
+- Builds a self-contained HTML body from `overview(7) + agentLeaderboard(7)`,
+  inline CSS (most email clients strip external CSS), three-locale support
+  (en / zh / sw) via an inline `record I18n` (no Thymeleaf dependency).
+- New endpoints:
+  - `GET /v1/cs/analytics/digest/preview` returns the rendered HTML for
+    eyeballing without sending.
+  - `POST /v1/cs/analytics/digest/send-now` (SUPER_ADMIN) fires an immediate
+    send. Useful for testing and "weekly digest, but today".
+- Configuration under `agrios.digest.*` (recipients, cc, from, cron, window,
+  subject prefix, locale) + standard `spring.mail.*` for SMTP. Defaults
+  target Gmail submission port with STARTTLS — works with a Gmail App
+  Password without any custom mail server.
+- Gated on `agrios.digest.enabled=true` so a deploy without SMTP creds does
+  not crash at startup; scheduled tick logs and skips when no recipients.
+
+### Added — SUPER_ADMIN delete conversation (Sprint 49.5 hotfix)
+
+- New permission `cs:conversation:delete`
+  (`migrations/048_cs_delete_perm.sql`) bound to SUPER_ADMIN only.
+- `ConversationController.delete()` with
+  `@PreAuthorize("hasAuthority('cs:conversation:delete')")` forwards the
+  delete to Chatwoot's REST DELETE. Audit `WARN` log line on every call.
+- Frontend: red Delete button guarded by `v-perm` on the conversation
+  header, two-step `ElMessageBox.confirm` with customer name interpolated.
+  On success the parent list refreshes immediately (no 10s poll wait).
+
+### Fixed — date-range picker i18n keys (hotfix)
+
+- `date.rangeSep / date.start / date.end` were used by four production
+  pages (ActivityList / BatchList / HarvestList / PlantingPlanList) but
+  the keys never existed; under the `zh` locale the raw keys leaked into
+  the header. Added the three keys to each of `en / zh / sw`.
+
+### New endpoints summary
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| GET | `/v1/cs/analytics/overview?days=N` | JWT | Now includes `frtMetrics`, `ttrMetrics`, `csatMetrics` |
+| GET | `/v1/cs/analytics/agents?days=N` | JWT | Per-agent SLA leaderboard |
+| POST | `/v1/cs/csat/link` | JWT + `cs:csat:send` | Generate / reuse survey link |
+| GET | `/v1/cs/csat/public/{token}` | public | Probe survey, no JWT |
+| POST | `/v1/cs/csat/public/{token}` | public | Submit rating + comment |
+| DELETE | `/v1/service/conversations/{id}` | JWT + `cs:conversation:delete` | Hard delete (SUPER_ADMIN) |
+| GET | `/v1/cs/analytics/digest/preview` | JWT | Preview digest HTML |
+| POST | `/v1/cs/analytics/digest/send-now` | JWT + SUPER_ADMIN | Trigger digest send |
+
+### Migrations
+
+- `048_cs_delete_perm.sql` — `cs:conversation:delete` permission seed
+- `049_cs_csat.sql` — `cs_csat_response` table + `cs:csat:send` permission seed
+
+### Verified
+
+- Sprint 50a/b/c: overview + leaderboard endpoints return populated
+  metrics on real Chatwoot data (13 open conversations, FRT n=3, leaderboard
+  with Unassigned row)
+- Sprint 50d: link generation idempotent, public probe + submit work without
+  JWT, second submit on same token correctly rejected, expired token
+  correctly rejected
+- Sprint 50e: build clean, `digest/preview` returns rendered HTML, Gmail
+  STARTTLS path configurable via env
+- Sprint 49.5: SUPER_ADMIN deletes 200, non-SUPER_ADMIN deletes 403, list
+  view refreshes immediately on return from detail page
+- i18n: zh locale no longer leaks raw `date.rangeSep` key on production pages
 
 ## [3.1.0] - 2026-06-01
 
