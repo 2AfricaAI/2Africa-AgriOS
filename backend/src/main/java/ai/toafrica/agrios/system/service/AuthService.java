@@ -55,16 +55,17 @@ public class AuthService {
         redis.delete(failKey);
 
         Set<String> roles = userMapper.findRoleCodesByUserId(user.getId());
-        // Sprint 35: SUPER_ADMIN bypasses perm checks — load every menu perm so the
-        // JWT token carries them and every hasAuthority('xxx:yyy:zzz') @PreAuthorize
-        // check naturally passes.  No code-level bypass is needed elsewhere.
+        // Hotfix v3.4.1: perms are NO LONGER baked into the JWT. They live in
+        // Redis (auth:perms:<uid>) and are loaded by JwtAuthFilter on each
+        // request. We still compute them once here so the LoginVO (sent back
+        // to the browser for menu rendering) carries them, and so the Redis
+        // cache is warm immediately after login.
         Set<String> perms = roles.contains("SUPER_ADMIN")
                 ? userMapper.findAllMenuPerms()
                 : userMapper.findPermsByUserId(user.getId());
         String dataScope = userMapper.findMaxDataScope(user.getId());
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("perms", perms);
         claims.put("roles", roles);
         claims.put("scope", dataScope == null ? "self" : dataScope);
         // Sprint 37: stash user-type + linked customer in the JWT so SecurityUtil

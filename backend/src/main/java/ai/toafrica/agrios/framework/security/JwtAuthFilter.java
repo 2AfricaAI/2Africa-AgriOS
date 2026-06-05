@@ -36,6 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final StringRedisTemplate redis;
+    private final PermissionCacheService permCache;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
@@ -57,14 +58,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Long uid = Long.valueOf(c.getSubject());
             String uname = c.get("uname", String.class);
             String dataScope = (String) c.getOrDefault("scope", "self");
-            Object permsObj = c.get("perms");
-            Set<String> perms = permsObj instanceof List<?> lst
-                    ? lst.stream().map(Object::toString).collect(java.util.stream.Collectors.toSet())
-                    : Collections.emptySet();
             Object rolesObj = c.get("roles");
             Set<String> roles = rolesObj instanceof List<?> lst
                     ? lst.stream().map(Object::toString).collect(java.util.stream.Collectors.toSet())
                     : Collections.emptySet();
+            // Hotfix v3.4.1: perms are no longer in the JWT -- resolved from
+            // Redis cache (1h TTL, DB miss-fill). Back-compat: if the token
+            // still has the legacy `perms` claim (e.g. old session that has
+            // not refreshed), prefer it to avoid forcing immediate re-login.
+            Set<String> perms;
+            Object permsObj = c.get("perms");
+            if (permsObj instanceof List<?> lst && !lst.isEmpty()) {
+                perms = lst.stream().map(Object::toString).collect(java.util.stream.Collectors.toSet());
+            } else {
+                perms = permCache.permsFor(uid, roles);
+            }
 
             String userType = (String) c.getOrDefault("utype", "STAFF");
             Long linkedCustomerId = c.get("lcid") == null ? null

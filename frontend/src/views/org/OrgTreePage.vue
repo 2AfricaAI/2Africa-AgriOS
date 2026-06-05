@@ -376,12 +376,15 @@ async function reload() {
       getOrgTree(includeInactive.value),
       listOrgNodes(includeInactive.value),
       listOrgTags(null, false),
-      listUsers({ pageSize: 200 }),
+      listUsers({ size: 200 }),
     ])
     treeData.value = treeResp || []
     allNodes.value = flatResp || []
     tagsAll.value = tagsResp || []
-    const users = usersResp?.rows || usersResp || []
+    // PageResult shape from backend: { list, total, page, size }
+    const users = Array.isArray(usersResp)
+      ? usersResp
+      : (usersResp?.list || usersResp?.rows || usersResp?.records || [])
     userOptions.value = users
     userIndex.value = Object.fromEntries(users.map(u => [u.id, u]))
   } catch (err) {

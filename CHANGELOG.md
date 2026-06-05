@@ -13,6 +13,79 @@ Roadmap targets:
 - v3.6: Worker mobile v2 (my today / week / month views)
 - v3.7: OpenAPI client (AgriOS to AgriCloud federation)
 
+## [3.5.0-rc2] - 2026-06-05
+
+Sprint 52 backend (Workflow engine) + JWT slim-token hotfix.
+**Development paused at this tag.** See `docs/STATE-AT-PAUSE-2026-06-05.md`
+to resume.
+
+### Added -- Workflow engine backend (Sprint 52 Day 1-4)
+
+- **migration 051** — 5 new tables: `wf_definition / wf_instance / wf_step /
+  wf_audit / wf_delegation`. 3 built-in templates seeded:
+  - `hr.leave_request` (1 step, manager approves, 48h SLA)
+  - `admin.expense` (1 step + CFO when amount > 50,000 KES)
+  - `finance.payment_out` (3 tiers, Finance Manager → CFO > 100k → SUPER_ADMIN > 1M)
+- DB triggers make `wf_audit` UPDATE/DELETE-proof at the database level
+  (decision §0 "audit unchangeable" enforced even against DBAs).
+- 5 permissions seeded: `wf:def:manage` (SUPER_ADMIN), `wf:instance:list`
+  (everyone), `wf:instance:approve` (MANAGER+), `wf:instance:withdraw`
+  (everyone), `wf:instance:delegate` (MANAGER+).
+- **Java layer**: 5 entities, 5 mappers, `WorkflowSchema` JSON DSL with
+  snake_case Jackson naming, `WorkflowSchemaParser` with validation,
+  `WorkflowEngine` (submit / advance / resolveAssignee with delegation /
+  evaluateCondition minimal grammar), `WorkflowAuditService` (auto IP/UA),
+  `WorkflowDelegationService` (module-scoped delegation resolution),
+  `WorkflowStepService` (5 actions: approve / reject / returnTo /
+  delegate / withdraw, with authorization checks), `WorkflowController`
+  (8 REST endpoints under `/v1/wf/*`), `WorkflowSlaScheduler`
+  (`@Scheduled(cron = "0 */5 * * * *")` SLA breach detection + escalation).
+
+### Added -- JWT slim-token hotfix
+
+- New `PermissionCacheService` -- moves the perm string list OUT of the
+  JWT body and into Redis (`auth:perms:<uid>`, 1h TTL).
+- `AuthService.login` no longer writes the `perms` claim into the JWT.
+- `JwtAuthFilter` reads `perms` from cache on every request, with DB
+  miss-fill. Legacy tokens that still carry the `perms` claim continue
+  to work until they expire (back-compat path).
+- **Effect: access token size 3300 chars → 312 chars (10.6× smaller)**.
+- Risk avoided: nginx / cloud LB `large_client_header_buffers` overflow
+  once HR sprint adds another 30+ perms.
+
+### Fixed -- OrgTreePage `users.map is not a function`
+
+- `listUsers` returns `{ list, total, page, size }`, not `{ rows }`.
+  `OrgTreePage.vue` was assuming the wrong key; fixed by defensive
+  unwrap that tries `list / rows / records` and falls back to array.
+- Page-size parameter corrected from `pageSize: 200` to `size: 200`
+  (matches the `PageQuery` Spring binding).
+
+### Deferred (Day 5 of Sprint 52) -- when HR resumes
+
+- Frontend "my pending" badge in business module navs
+- Inline approve / reject buttons on business detail pages
+- `verify-sprint52.ps1` E2E script
+- Workflow delegation management UI (user-facing self-service)
+- SLA breach → Chatwoot / SMS notification hook
+
+### Added -- AgriCloud handover documentation
+
+- `docs/2AfricaAI-AgriCloud-Handover-v0.1.md` — official handover package
+  to the 2Africa.AI AgriCloud product line. Covers asset inventory,
+  reusability tier list (A/B/C grade), AgriCloud-VPC deployment plan
+  (4.5 days, single-tenant), AgriCloud-SAAS multi-tenant refactor path
+  (8-10 weeks), tech debt register, and decision log.
+
+### Notes
+
+- v3.5.0-rc2 is the final commit before development pause. v3.5.0 (final)
+  ships once Sprint 53-61 complete the HR / Admin / Legal modules.
+- All decisions and roadmap snapshot recorded in
+  `docs/STATE-AT-PAUSE-2026-06-05.md`.
+- AgriCloud product line receives the handover package -- see
+  `docs/2AfricaAI-AgriCloud-Handover-v0.1.md`.
+
 ## [3.5.0-rc1] - 2026-06-05
 
 Sprint 51 -- Organization tree + DataScope subsystem.
